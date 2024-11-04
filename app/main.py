@@ -43,6 +43,11 @@ async def request_rate_limiter(request: Request, call_next):
     if check_ip_whilelist(client_ip) == False:
         # ip是否在白名单，在则跳过限速检查
         check_rate_limiter = await rate_limit(client_ip)
+        if check_rate_limiter is None:
+            return JSONResponse(
+                status_code=500,
+                content={"dateil": "Internal server error"}
+            )
         if check_rate_limiter:
             return JSONResponse(
                 status_code=429,

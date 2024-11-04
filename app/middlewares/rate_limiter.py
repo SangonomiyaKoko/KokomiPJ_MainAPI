@@ -1,5 +1,11 @@
+import uuid
+import traceback
+
+from aioredis.exceptions import RedisError
+
 from .redis import RedisConnection
 from app.utils import TimeFormat
+from app.log import write_error_info
 
 async def rate_limit(host: str, limit: int = 20, window = 10) -> bool:
     '''判断当前ip请求是否到达限速
@@ -14,19 +20,40 @@ async def rate_limit(host: str, limit: int = 20, window = 10) -> bool:
     返回:
         bool值，是否到达限速.
     '''
-    redis = RedisConnection.get_connection()
-    # 基于当前时间生成固定窗口
-    current_time = int(TimeFormat.get_current_timestamp() / window) * window 
-    window_key = f"rate_limit:{host}:{current_time}"
-    
-    # 增加当前窗口的计数
-    current_count = await redis.incr(window_key)
+    try:
+        redis = RedisConnection.get_connection()
+        # 基于当前时间生成固定窗口
+        current_time = int(TimeFormat.get_current_timestamp() / window) * window 
+        window_key = f"rate_limit:{host}:{current_time}"
+        
+        # 增加当前窗口的计数
+        current_count = await redis.incr(window_key)
 
-    # 设置key的过期时间，加上5s的冗余
-    if current_count == 1:
-        await redis.expire(window_key, window + 5)
+        # 设置key的过期时间，加上5s的冗余
+        if current_count == 1:
+            await redis.expire(window_key, window + 5)
 
-    if current_count > limit:
-        return True
-    else:
-        return False
+        if current_count > limit:
+            return True
+        else:
+            return False
+    except RedisError as e:
+        error_id = str(uuid.uuid4())
+        write_error_info(
+            error_id = error_id,
+            error_type = 'Redis',
+            error_name = str(type(e).__name__),
+            error_file = __file__,
+            error_info = f'\n{traceback.format_exc()}'
+        )
+        return None
+    except Exception as e:
+        error_id = str(uuid.uuid4())
+        write_error_info(
+            error_id = error_id,
+            error_type = 'Program',
+            error_name = str(type(e).__name__),
+            error_file = __file__,
+            error_info = f'\n{traceback.format_exc()}'
+        )
+        return None
