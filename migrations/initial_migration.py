@@ -7,7 +7,7 @@ from aiomysql.pool import Pool
 from aiomysql.connection import Connection
 from aiomysql.cursors import Cursor
 
-from config import MYSQL_HOST, MYSQL_PASSWORD, MYSQL_PORT, MYSQL_USERNAME
+from migrations.mysql_config import MYSQL_HOST, MYSQL_PASSWORD, MYSQL_PORT, MYSQL_USERNAME
 
 create_sql = '''
 CREATE TABLE region (
