@@ -39,7 +39,12 @@
    - 格式化日志
 
 10. `httpx`
+
     - 负责接口的网络请求
+
+11. `dbutils`
+
+    - 负责 Celery 的数据库同步任务
 
 dbutils
 
@@ -127,11 +132,15 @@ kokomi_api_project/
 
 ## 启动步骤
 
+> 关于怎么配置虚拟环境这里就不展开
+
 一. 进入虚拟环境
 
 ```bash
 .venv/Scripts/activate
 ```
+
+或者
 
 ```bash
 activate
