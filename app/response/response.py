@@ -26,6 +26,7 @@ class JSONResponse:
     API_1010_IllegalRegion = {'status': 'ok','code': 1010,'message': 'IllegalRegion','data' : None}
     API_1011_IllegalUserName = {'status': 'ok','code': 1011,'message': 'IllegalUserName','data' : None}
     API_1012_IllegalClanTag = {'status': 'ok','code': 1012,'message': 'IllegalClanTag','data' : None}
+    API_1013_ACisInvalid = {'status': 'ok','code': 1013,'message': 'ACisInvalid','data' : None}
 
     @staticmethod
     def get_success_response(

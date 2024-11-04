@@ -48,3 +48,4 @@
 | 1010 | IllegalRegion             | 输入的 Region 参数不合法                 |
 | 1011 | IllegalUserName           | 输入的 username 参数长度要在 3-25 个字符 |
 | 1012 | IllegalClanTag            | 输入的 clantag 参数长度要在 2-5 个字符   |
+| 1013 | ACisInvalid               | 输入的 ac 参数无效                       |

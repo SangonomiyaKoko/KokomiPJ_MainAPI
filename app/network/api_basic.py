@@ -122,8 +122,7 @@ class BasicAPI:
         self,
         account_id: int,
         region_id: int,
-        use_ac: bool = False,
-        ac: str = None
+        ac_value: str = None
     ) -> list:
         '''获取用户基础信息
 
@@ -138,7 +137,7 @@ class BasicAPI:
         '''
         api_url = BaseUrl.get_vortex_base_url(region_id)
         urls = [
-            f'{api_url}/api/accounts/{account_id}/' + (f'?ac={ac}' if use_ac else '')
+            f'{api_url}/api/accounts/{account_id}/' + (f'?ac={ac_value}' if ac_value else '')
         ]
         tasks = []
         responses = []
@@ -153,8 +152,7 @@ class BasicAPI:
         self,
         account_id: int,
         region_id: int,
-        use_ac: bool = False,
-        ac: str = None
+        ac_value: str = None
     ) -> list:
         '''获取用户基础信息和工会信息
 
@@ -170,7 +168,7 @@ class BasicAPI:
         '''
         api_url = BaseUrl.get_vortex_base_url(region_id)
         urls = [
-            f'{api_url}/api/accounts/{account_id}/' + (f'?ac={ac}' if use_ac else ''),
+            f'{api_url}/api/accounts/{account_id}/' + (f'?ac={ac_value}' if ac_value else ''),
             f'{api_url}/api/accounts/{account_id}/clans/'
         ]
         tasks = []

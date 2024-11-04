@@ -11,7 +11,7 @@ from app.core import EnvConfig, api_logger
 from app.db import MysqlConnection
 from app.middlewares import RedisConnection, rate_limit, check_ip_whilelist, check_ip_blacklist
 
-from app.routers import platform_router
+from app.routers import platform_router, robot_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -74,6 +74,12 @@ app.include_router(
     platform_router, 
     prefix="/p", 
     tags=['Platform Interface']
+)
+
+app.include_router(
+    robot_router, 
+    prefix="/r", 
+    tags=['Robot Interface']
 )
  
 async def _shutdown(self):
