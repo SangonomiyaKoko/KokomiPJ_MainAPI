@@ -1,0 +1,166 @@
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     2b9789cb-878f-4cd8-9809-d7496219f51d
+>Error Type:   Program
+>Error Name:   TypeError
+>Error File:   F:\Kokomi_PJ_Api\app\models\user.py
+>Error Time:   2024-11-02 13:53:29
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\models\user.py", line 245, in update_user_clan
+    await cur.execute(
+  File "F:\Kokomi_PJ_Api\.venv\lib\site-packages\aiomysql\cursors.py", line 237, in execute
+    query = query % self._escape_args(args, conn)
+TypeError: not enough arguments for format string
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     6bf31a64-e86e-4666-b049-a799b5c858aa
+>Error Type:   MySQL
+>Error Name:   ERROR_1054
+>Error File:   F:\Kokomi_PJ_Api\app\models\user.py
+>Error Time:   2024-11-02 13:55:28
+>Error Info: 
+Unknown column 'new_values.clan_id' in 'field list'
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     e4b79c87-698b-4e8d-a8a8-cc6a52f7cdf0
+>Error Type:   Program
+>Error Name:   UnboundLocalError
+>Error File:   F:\Kokomi_PJ_Api\app\models\user.py
+>Error Time:   2024-11-02 14:17:19
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\models\user.py", line 380, in check_user_info
+    params.append(current_timestamp, account_id)
+UnboundLocalError: local variable 'current_timestamp' referenced before assignment
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     98e33947-e689-45de-8869-6c195a6b109a
+>Error Type:   Program
+>Error Name:   TypeError
+>Error File:   F:\Kokomi_PJ_Api\app\models\user.py
+>Error Time:   2024-11-02 14:17:57
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\models\user.py", line 381, in check_user_info
+    params.append(current_timestamp, account_id)
+TypeError: list.append() takes exactly one argument (2 given)
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     b74a14fe-8553-4fe0-86f9-e51a05f89ff4
+>Error Type:   Program
+>Error Name:   TypeError
+>Error File:   F:\Kokomi_PJ_Api\app\models\user.py
+>Error Time:   2024-11-02 14:21:32
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\models\user.py", line 381, in check_user_info
+    params.append(current_timestamp, account_id)
+TypeError: list.append() takes exactly one argument (2 given)
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     29c0a2ba-73e4-4bd1-a5ca-1297fb1407ef
+>Error Type:   Network
+>Error Name:   ConnectTimeout
+>Error File:   F:\Kokomi_PJ_Api\app\network\api_basic.py
+>Error Time:   2024-11-02 19:01:16
+>Error Info: 
+ErrorURL: http://vortex.worldofwarships.asia/api/accounts/2023619512/
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     07efaf33-f05f-476b-9e17-000c01fee857
+>Error Type:   Program
+>Error Name:   TypeError
+>Error File:   F:\Kokomi_PJ_Api\app\network\api_basic.py
+>Error Time:   2024-11-02 19:10:23
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\network\api_basic.py", line 31, in fetch_data
+    data = res['search_autocomplete_result']
+TypeError: 'Response' object is not subscriptable
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     e874dc8d-e857-4651-89a1-c642d04a2799
+>Error Type:   Program
+>Error Name:   Exception
+>Error File:   F:\Kokomi_PJ_Api\app\middlewares\celery.py
+>Error Time:   2024-11-02 21:52:37
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\middlewares\celery.py", line 50, in task_check_user_basic
+    result = asyncio.run(
+  File "C:\Users\MaoYu\AppData\Local\Programs\Python\Python310\lib\asyncio\runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "C:\Users\MaoYu\AppData\Local\Programs\Python\Python310\lib\asyncio\base_events.py", line 641, in run_until_complete
+    return future.result()
+  File "F:\Kokomi_PJ_Api\app\models\user.py", line 97, in check_user_basic
+    conn: Connection = await MysqlConnection.get_connection()
+  File "F:\Kokomi_PJ_Api\app\db\mysql.py", line 65, in get_connection
+    raise Exception("The MySQL connection is not initialized.")
+Exception: The MySQL connection is not initialized.
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     ab7fb880-004a-40c7-9894-5d9ec4822416
+>Error Type:   Program
+>Error Name:   AttributeError
+>Error File:   F:\Kokomi_PJ_Api\app\middlewares\celery.py
+>Error Time:   2024-11-02 21:56:35
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\middlewares\celery.py", line 50, in task_check_user_basic
+    result = asyncio.run(
+  File "C:\Users\MaoYu\AppData\Local\Programs\Python\Python310\lib\asyncio\runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "C:\Users\MaoYu\AppData\Local\Programs\Python\Python310\lib\asyncio\base_events.py", line 641, in run_until_complete
+    return future.result()
+  File "F:\Kokomi_PJ_Api\app\models\user.py", line 97, in check_user_basic
+    conn: Connection = await MysqlConnection.get_connection()
+  File "F:\Kokomi_PJ_Api\app\db\mysql.py", line 66, in get_connection
+    return await self.__pool.acquire()
+AttributeError: 'NoneType' object has no attribute 'acquire'
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     8303410c-40e4-4a58-a9c2-053d9d71a773
+>Error Type:   MySQL
+>Error Name:   ERROR_1064
+>Error File:   F:\Kokomi_PJ_Api\app\models\user.py
+>Error Time:   2024-11-02 21:57:23
+>Error Info: 
+You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'SET update_time = 1730555843 FROM user_basic WHERE region_id = 1 and account_id ' at line 1
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     4a191c05-8d37-4b7e-88d4-2d3b73efa721
+>Error Type:   Program
+>Error Name:   AttributeError
+>Error File:   F:\Kokomi_PJ_Api\app\middlewares\celery.py
+>Error Time:   2024-11-02 23:06:54
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\middlewares\celery.py", line 65, in task_check_user_basic
+    result = asyncio.run(
+  File "C:\Users\MaoYu\AppData\Local\Programs\Python\Python310\lib\asyncio\runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "C:\Users\MaoYu\AppData\Local\Programs\Python\Python310\lib\asyncio\base_events.py", line 641, in run_until_complete
+    return future.result()
+  File "F:\Kokomi_PJ_Api\app\middlewares\background_task.py", line 24, in check_user_basic
+    conn: Connection = await mysql_pool.acquire()
+AttributeError: 'NoneType' object has no attribute 'acquire'
+
+-------------------------------------------------------------------------------------------------------------

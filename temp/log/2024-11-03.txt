@@ -1,0 +1,322 @@
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     a5dbc3b0-3d69-45a9-a886-db4ddcc6cf71
+>Error Type:   Program
+>Error Name:   KeyError
+>Error File:   F:\Kokomi_PJ_Api\app\middlewares\background_task.py
+>Error Time:   2024-11-03 00:07:55
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\middlewares\background_task.py", line 50, in check_user_basic
+    if user[0] != nickname:
+KeyError: 0
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     100223fb-b482-4d49-acbb-770eaa037083
+>Error Type:   Program
+>Error Name:   ValueError
+>Error File:   F:\Kokomi_PJ_Api\app\middlewares\celery.py
+>Error Time:   2024-11-03 00:07:55
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\middlewares\celery.py", line 45, in task_check_user_basic
+    result = asyncio.run(
+  File "C:\Users\MaoYu\AppData\Local\Programs\Python\Python310\lib\asyncio\runners.py", line 37, in run
+    raise ValueError("a coroutine was expected, got {!r}".format(main))
+ValueError: a coroutine was expected, got {'status': 'error', 'code': 5000, 'message': 'ProgramError', 'data': {'error_id': 'a5dbc3b0-3d69-45a9-a886-db4ddcc6cf71'}}
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     29406805-3dee-4acf-a6f9-e70bba76ed30
+>Error Type:   Program
+>Error Name:   KeyError
+>Error File:   F:\Kokomi_PJ_Api\app\middlewares\background_task.py
+>Error Time:   2024-11-03 00:09:01
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\middlewares\background_task.py", line 50, in check_user_basic
+    if user[0] != nickname:
+KeyError: 0
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     67c68963-1447-43a1-b33c-db40fa2e59e2
+>Error Type:   Program
+>Error Name:   KeyError
+>Error File:   F:\Kokomi_PJ_Api\app\middlewares\background_task.py
+>Error Time:   2024-11-03 00:15:50
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\middlewares\background_task.py", line 49, in check_user_basic
+    if user[0] != nickname:
+KeyError: 0
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     729004a5-de2e-4296-b412-2e93aeb66ad0
+>Error Type:   Program
+>Error Name:   ProgrammingError
+>Error File:   F:\Kokomi_PJ_Api\app\middlewares\background_task.py
+>Error Time:   2024-11-03 00:17:44
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\middlewares\background_task.py", line 55, in check_user_basic
+    else:
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\dbutils\steady_db.py", line 605, in tough_method
+    result = method(*args, **kwargs)  # try to execute
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 563, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 825, in _read_query_result
+    result.read()
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 1199, in read
+    first_packet = self.connection._read_packet()
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 775, in _read_packet
+    packet.raise_for_error()
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.ProgrammingError: (1064, "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'SET update_time = 1730564264 FROM user_basic WHERE region_id = 1 and account_id ' at line 1")
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     973894a2-7845-4c68-a57e-1cbfbf37582c
+>Error Type:   Program
+>Error Name:   ProgrammingError
+>Error File:   F:\Kokomi_PJ_Api\app\middlewares\background_task.py
+>Error Time:   2024-11-03 00:21:14
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\middlewares\background_task.py", line 55, in check_user_basic
+    else:
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\dbutils\steady_db.py", line 605, in tough_method
+    result = method(*args, **kwargs)  # try to execute
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 563, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 825, in _read_query_result
+    result.read()
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 1199, in read
+    first_packet = self.connection._read_packet()
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 775, in _read_packet
+    packet.raise_for_error()
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.ProgrammingError: (1064, "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'SET update_time = 1730564474 FROM user_basic WHERE region_id = 1 and account_id ' at line 1")
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     e4a9a898-3103-4510-bc23-94d71a126d55
+>Error Type:   Program
+>Error Name:   TypeError
+>Error File:   F:\Kokomi_PJ_Api\app\middlewares\background_task.py
+>Error Time:   2024-11-03 11:31:07
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\middlewares\background_task.py", line 49, in check_user_basic
+    if user['username'] != nickname:
+TypeError: 'NoneType' object is not subscriptable
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     f3346282-13d8-44e1-98b2-ff85030a7d47
+>Error Type:   Program
+>Error Name:   TypeError
+>Error File:   F:\Kokomi_PJ_Api\app\middlewares\background_task.py
+>Error Time:   2024-11-03 11:45:27
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\middlewares\background_task.py", line 35, in check_user_basic
+    cur.execute(
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\dbutils\steady_db.py", line 605, in tough_method
+    result = method(*args, **kwargs)  # try to execute
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\cursors.py", line 151, in execute
+    query = self.mogrify(query, args)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\cursors.py", line 129, in mogrify
+    query = query % self._escape_args(args, conn)
+TypeError: not all arguments converted during string formatting
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     6694f2ed-cb30-478c-aa09-a8e03c9eb322
+>Error Type:   Program
+>Error Name:   OperationalError
+>Error File:   F:\Kokomi_PJ_Api\app\middlewares\background_task.py
+>Error Time:   2024-11-03 12:08:41
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\middlewares\background_task.py", line 109, in check_clan_tag_and_league
+    cur.execute(
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\dbutils\steady_db.py", line 680, in tough_method
+    raise error  # re-raise the original error again
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\dbutils\steady_db.py", line 605, in tough_method
+    result = method(*args, **kwargs)  # try to execute
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 563, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 825, in _read_query_result
+    result.read()
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 1199, in read
+    first_packet = self.connection._read_packet()
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 775, in _read_packet
+    packet.raise_for_error()
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'clan_id' in 'field list'")
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     999c652a-cded-45ca-8830-a875a73e9cad
+>Error Type:   Program
+>Error Name:   OperationalError
+>Error File:   F:\Kokomi_PJ_Api\app\middlewares\background_task.py
+>Error Time:   2024-11-03 12:08:41
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\middlewares\background_task.py", line 109, in check_clan_tag_and_league
+    cur.execute(
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\dbutils\steady_db.py", line 680, in tough_method
+    raise error  # re-raise the original error again
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\dbutils\steady_db.py", line 605, in tough_method
+    result = method(*args, **kwargs)  # try to execute
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 563, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 825, in _read_query_result
+    result.read()
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 1199, in read
+    first_packet = self.connection._read_packet()
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 775, in _read_packet
+    packet.raise_for_error()
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'clan_id' in 'field list'")
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     3a3cd112-2fd0-4338-bb5a-0fb78278338e
+>Error Type:   Program
+>Error Name:   OperationalError
+>Error File:   F:\Kokomi_PJ_Api\app\middlewares\background_task.py
+>Error Time:   2024-11-03 12:08:42
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\middlewares\background_task.py", line 109, in check_clan_tag_and_league
+    cur.execute(
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\dbutils\steady_db.py", line 680, in tough_method
+    raise error  # re-raise the original error again
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\dbutils\steady_db.py", line 605, in tough_method
+    result = method(*args, **kwargs)  # try to execute
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 563, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 825, in _read_query_result
+    result.read()
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 1199, in read
+    first_packet = self.connection._read_packet()
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 775, in _read_packet
+    packet.raise_for_error()
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'clan_id' in 'field list'")
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     b0d2efac-8f1c-4e69-bf53-cba3cde48be9
+>Error Type:   Program
+>Error Name:   OperationalError
+>Error File:   F:\Kokomi_PJ_Api\app\middlewares\background_task.py
+>Error Time:   2024-11-03 12:08:43
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\middlewares\background_task.py", line 109, in check_clan_tag_and_league
+    cur.execute(
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\dbutils\steady_db.py", line 680, in tough_method
+    raise error  # re-raise the original error again
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\dbutils\steady_db.py", line 605, in tough_method
+    result = method(*args, **kwargs)  # try to execute
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 563, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 825, in _read_query_result
+    result.read()
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 1199, in read
+    first_packet = self.connection._read_packet()
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\connections.py", line 775, in _read_packet
+    packet.raise_for_error()
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\pymysql\err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.OperationalError: (1054, "Unknown column 'clan_id' in 'field list'")
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     c0ba1c5e-f567-4293-a6ea-c6501bbc23c7
+>Error Type:   Program
+>Error Name:   TypeError
+>Error File:   F:\Kokomi_PJ_Api\app\apis\platform\search.py
+>Error Time:   2024-11-03 19:22:39
+>Error Info: 
+Traceback (most recent call last):
+  File "F:\Kokomi_PJ_Api\app\apis\platform\search.py", line 12, in search_user
+    result = await BasicAPI.get_user_search(region_id, nickname, limit, check)
+  File "F:\Kokomi_PJ_Api\app\network\api_basic.py", line 254, in get_user_search
+    task_check_user_basic.delay(delay_list)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\celery\app\task.py", line 444, in delay
+    return self.apply_async(args, kwargs)
+  File "f:\Kokomi_PJ_Api\.venv\lib\site-packages\celery\app\task.py", line 559, in apply_async
+    check_arguments(*(args or ()), **(kwargs or {}))
+TypeError: task_check_user_basic() missing 2 required positional arguments: 'region_id' and 'nickname'
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+>Platform:     API
+>Error ID:     0f073179-41b9-4329-b01c-caae2c4eb21d
+>Error Type:   Network
+>Error Name:   ConnectTimeout
+>Error File:   F:\Kokomi_PJ_Api\app\network\api_other.py
+>Error Time:   2024-11-03 23:28:46
+>Error Info: 
+ErrorURL: http://vortex.worldofwarships.com/api/encyclopedia/en/vehicles/
+-------------------------------------------------------------------------------------------------------------
