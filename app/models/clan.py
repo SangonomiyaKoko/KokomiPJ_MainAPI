@@ -42,18 +42,19 @@ class ClanModel:
             )
             clan = await cur.fetchone()
             if clan is None:
+                await conn.begin()
                 # 用户不存在，插入新用户
                 tag = 'N/A'
                 await cur.execute(
-                    "INSERT INTO clan_basic (clan_id, region_id, tag) VALUES (%s, %s, %s);",
+                    "INSERT IGNORE INTO clan_basic (clan_id, region_id, tag) VALUES (%s, %s, %s);",
                     [clan_id, region_id, tag]
                 )
                 await cur.execute(
-                    "INSERT INTO clan_info (clan_id) VALUES (%s);", 
+                    "INSERT IGNORE INTO clan_info (clan_id) VALUES (%s);", 
                     [clan_id]
                 )
                 await cur.execute(
-                    "INSERT INTO user_cache (clan_id) VALUES (%s);", 
+                    "INSERT IGNORE INTO user_cache (clan_id) VALUES (%s);", 
                     [clan_id]
                 )
                 await conn.commit()
@@ -90,57 +91,57 @@ class ClanModel:
             await MysqlConnection.release_connection(conn)
             
 
-    async def update_clan_tag_and_league(
-        clan_id: int,
-        region_id: int,
-        tag: str,
-        league: int
-    ) -> dict:
-        '''更新表中工会名称
+    # async def update_clan_tag_and_league(
+    #     clan_id: int,
+    #     region_id: int,
+    #     tag: str,
+    #     league: int
+    # ) -> dict:
+    #     '''更新表中工会名称
 
-        更新clan_basic中工会名称（用于后台任务更新）
+    #     更新clan_basic中工会名称（用于后台任务更新）
 
-        注：调用前需先确保数据不为空
+    #     注：调用前需先确保数据不为空
 
-        参数：
-            clan_id: 工会id
-            region_id: 服务器id
-            tag: 用户名称
-            league: 工会段位
+    #     参数：
+    #         clan_id: 工会id
+    #         region_id: 服务器id
+    #         tag: 用户名称
+    #         league: 工会段位
 
-        返回：
-            None
-        '''
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
-        try:
-            await cur.execute(
-                "UPDATE clan_basic SET tag = %s, league = %s WHERE region_id = %s and clan_id = %s", 
-                [tag, league, region_id, clan_id]
-            )
-            await conn.commit()
-            return JSONResponse.API_1000_Success
-        except MySQLError as e:
-            await conn.rollback()
-            error_id = str(uuid.uuid4())
-            write_error_info(
-                error_id = error_id,
-                error_type = 'MySQL',
-                error_name = f'ERROR_{e.args[0]}',
-                error_file = __file__,
-                error_info = f'\n{str(e.args[1])}'
-            )
-            return JSONResponse.get_error_response(3000,'DatabaseError',error_id)
-        except Exception as e:
-            error_id = str(uuid.uuid4())
-            write_error_info(
-                error_id = error_id,
-                error_type = 'Program',
-                error_name = str(type(e).__name__),
-                error_file = __file__,
-                error_info = f'\n{traceback.format_exc()}'
-            )
-            return JSONResponse.get_error_response(5000,'ProgramError',error_id)
-        finally:
-            await cur.close()
-            await MysqlConnection.release_connection(conn)
+    #     返回：
+    #         None
+    #     '''
+    #     conn: Connection = await MysqlConnection.get_connection()
+    #     cur: Cursor = await conn.cursor()
+    #     try:
+    #         await cur.execute(
+    #             "UPDATE clan_basic SET tag = %s, league = %s WHERE region_id = %s and clan_id = %s", 
+    #             [tag, league, region_id, clan_id]
+    #         )
+    #         await conn.commit()
+    #         return JSONResponse.API_1000_Success
+    #     except MySQLError as e:
+    #         await conn.rollback()
+    #         error_id = str(uuid.uuid4())
+    #         write_error_info(
+    #             error_id = error_id,
+    #             error_type = 'MySQL',
+    #             error_name = f'ERROR_{e.args[0]}',
+    #             error_file = __file__,
+    #             error_info = f'\n{str(e.args[1])}'
+    #         )
+    #         return JSONResponse.get_error_response(3000,'DatabaseError',error_id)
+    #     except Exception as e:
+    #         error_id = str(uuid.uuid4())
+    #         write_error_info(
+    #             error_id = error_id,
+    #             error_type = 'Program',
+    #             error_name = str(type(e).__name__),
+    #             error_file = __file__,
+    #             error_info = f'\n{traceback.format_exc()}'
+    #         )
+    #         return JSONResponse.get_error_response(5000,'ProgramError',error_id)
+    #     finally:
+    #         await cur.close()
+    #         await MysqlConnection.release_connection(conn)

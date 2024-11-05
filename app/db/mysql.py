@@ -23,7 +23,8 @@ class MysqlConnection:
                 port=config.MYSQL_PORT, 
                 user=config.MYSQL_USERNAME, 
                 password=config.MYSQL_PASSWORD, 
-                db='kokomi'
+                db='kokomi',
+                pool_recycle=3600
             )
             api_logger.info('MySQL connection initialization is complete')
         except Exception as e:

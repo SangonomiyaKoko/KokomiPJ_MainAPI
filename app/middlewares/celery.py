@@ -1,12 +1,11 @@
 import uuid
-import time
 import traceback
 import pymysql
 from dbutils.pooled_db import PooledDB
 from celery import Celery, signals
 from celery.app.base import logger
 
-from .background_task import check_user_basic, check_clan_tag_and_league
+from .background_task import check_user_basic, check_clan_tag_and_league, update_user_clan, check_user_info
 from app.core import EnvConfig
 from app.log import write_error_info
 from app.response import JSONResponse
@@ -67,6 +66,38 @@ def task_check_user_basic(users: list):
 def task_check_clan_basic(clans: list):
     try:
         result = check_clan_tag_and_league(pool,clans)
+        return result
+    except Exception as e:
+        error_id = str(uuid.uuid4())
+        write_error_info(
+            error_id = error_id,
+            error_type = 'Program',
+            error_name = str(type(e).__name__),
+            error_file = __file__,
+            error_info = f'\n{traceback.format_exc()}'
+        )
+        return JSONResponse.get_error_response(5000,'ProgramError',error_id)
+    
+@celery_app.task
+def task_update_user_clan(user_clans: list):
+    try:
+        result = update_user_clan(pool,user_clans)
+        return result
+    except Exception as e:
+        error_id = str(uuid.uuid4())
+        write_error_info(
+            error_id = error_id,
+            error_type = 'Program',
+            error_name = str(type(e).__name__),
+            error_file = __file__,
+            error_info = f'\n{traceback.format_exc()}'
+        )
+        return JSONResponse.get_error_response(5000,'ProgramError',error_id)
+    
+@celery_app.task
+def task_check_user_info(users: list):
+    try:
+        result = check_user_info(pool,users)
         return result
     except Exception as e:
         error_id = str(uuid.uuid4())

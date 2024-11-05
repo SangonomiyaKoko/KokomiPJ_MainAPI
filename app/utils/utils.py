@@ -6,7 +6,7 @@ class UtilityFunctions:
     def check_clan_vaild(updated_at: int):
         "检查工会缓存的更新时间是否有效"
         current_timestamp = TimeFormat.get_current_timestamp()
-        if current_timestamp - updated_at > 3*24*60*60:
+        if (current_timestamp - updated_at) > 3 * 24 * 60 * 60:
             return False
         else:
             return True
