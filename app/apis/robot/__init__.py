@@ -1,5 +1,5 @@
-from .data_request import data_me
+from .interaction import wws_me
 
 __all__ = [
-    'data_me'
+    'wws_me'
 ]

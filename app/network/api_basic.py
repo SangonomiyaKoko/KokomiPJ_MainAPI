@@ -129,8 +129,7 @@ class BasicAPI:
         参数：
             account_id： 用户id
             region_id； 用户服务器id
-            use_ac: 是否使用ac查询数据
-            ac； ac值
+            ac_value: 是否使用ac查询数据
 
         返回：
             用户基础数据
@@ -159,8 +158,7 @@ class BasicAPI:
         参数：
             account_id： 用户id
             region_id； 用户服务器id
-            use_ac: 是否使用ac查询数据
-            ac； ac值
+            ac_value: 是否使用ac查询数据
 
         返回：
             用户基础数据
