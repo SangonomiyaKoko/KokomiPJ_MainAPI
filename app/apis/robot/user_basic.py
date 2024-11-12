@@ -4,7 +4,6 @@ from app.models import UserModel, ClanModel
 from app.utils import UtilityFunctions
 from app.network import BasicAPI
 from app.response import JSONResponse
-
 from app.middlewares.celery import task_check_user_basic, task_check_clan_basic, task_update_user_clan, task_check_user_info
 
 async def get_user_name_and_clan(

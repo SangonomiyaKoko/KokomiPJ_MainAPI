@@ -3,16 +3,20 @@
 
 import asyncio
 
+from fastapi.exceptions import RequestValidationError
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 
 from app.core import EnvConfig, api_logger
 from app.db import MysqlConnection
-from app.middlewares import RedisConnection, rate_limit, check_ip_whilelist, check_ip_blacklist
+from app.response import JSONResponse as API_JSONResponse
+from app.middlewares import RedisConnection, IPAccessListManager, rate_limit
 
-from app.routers import platform_router, robot_router
+from app.routers import platform_router, robot_router, recent_1_router
 
+
+# 应用程序的生命周期
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 从环境中加载配置
@@ -31,16 +35,25 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# 捕获 RequestValidationError 异常
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    # 返回自定义的 JSON 错误响应
+    return JSONResponse(
+        content=API_JSONResponse.API_7000_InvalidParameter
+    )
+
+# 请求中间件
 @app.middleware("http")
 async def request_rate_limiter(request: Request, call_next):
     client_ip = request.client.host
-    if check_ip_blacklist(client_ip):
+    if IPAccessListManager.is_blacklisted(client_ip):
         # ip是否在黑名单
         return JSONResponse(
             status_code=403,
             content={"detail": "Forbidden"}
         )
-    if check_ip_whilelist(client_ip) == False:
+    if not IPAccessListManager.is_whitelisted(client_ip):
         # ip是否在白名单，在则跳过限速检查
         check_rate_limiter = await rate_limit(client_ip)
         if check_rate_limiter is None:
@@ -70,6 +83,7 @@ async def root():
     return {'status':'ok','messgae':'Hello! Welcome to Kokomi Interface.'}
 
 
+# 在主路由中注册子路由
 app.include_router(
     platform_router, 
     prefix="/p", 
@@ -81,7 +95,14 @@ app.include_router(
     prefix="/r", 
     tags=['Robot Interface']
 )
- 
+
+app.include_router(
+    recent_1_router,
+    prefix='/r1',
+    tags=['Recent Interface']
+)
+
+# 重写shutdown函数，避免某些协程bug
 async def _shutdown(self):
     await origin_shutdown(self)
     wait_second = 3

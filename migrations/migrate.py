@@ -1,4 +1,3 @@
-# TODO: 数据库迁移脚本
 
 import asyncio
 
@@ -7,7 +6,11 @@ from aiomysql.pool import Pool
 from aiomysql.connection import Connection
 from aiomysql.cursors import Cursor
 
-from migrations.mysql_config import MYSQL_HOST, MYSQL_PASSWORD, MYSQL_PORT, MYSQL_USERNAME
+from config import MYSQL_HOST, MYSQL_PASSWORD, MYSQL_PORT, MYSQL_USERNAME
+
+"""
+数据库创建脚本，不涉及任何的数据
+"""
 
 create_sql = '''
 CREATE TABLE region (
@@ -22,7 +25,7 @@ INSERT INTO region
 VALUES
     (1, "asia"), (2, "eu"), (3, "na"), (4, "ru"), (5, "cn");
 
-CREATE TABLE IF NOT EXISTS user_basic (
+CREATE TABLE user_basic (
     -- 相关id
     id               INT          AUTO_INCREMENT,
     account_id       BIGINT       NOT NULL UNIQUE,    -- 1-11位的非连续数字
@@ -38,7 +41,7 @@ CREATE TABLE IF NOT EXISTS user_basic (
     UNIQUE INDEX idx_rid_aid (region_id, account_id) -- 索引
 );
 
-CREATE TABLE IF NOT EXISTS user_info (
+CREATE TABLE user_info (
     -- 相关id
     id               INT          AUTO_INCREMENT,
     account_id       BIGINT       NOT NULL,     -- 1-11位的非连续数字
@@ -59,7 +62,7 @@ CREATE TABLE IF NOT EXISTS user_info (
     FOREIGN KEY (account_id) REFERENCES user_basic(account_id) ON DELETE CASCADE -- 外键
 );
 
-CREATE TABLE IF NOT EXISTS user_cache (
+CREATE TABLE user_cache (
     -- 相关id
     id               INT          AUTO_INCREMENT,
     account_id       BIGINT       NOT NULL,     -- 1-11位的非连续数字
@@ -76,7 +79,7 @@ CREATE TABLE IF NOT EXISTS user_cache (
     FOREIGN KEY (account_id) REFERENCES user_basic(account_id) ON DELETE CASCADE -- 外键
 );
 
-CREATE TABLE IF NOT EXISTS clan_basic (
+CREATE TABLE clan_basic (
     -- 相关id
     id               INT          AUTO_INCREMENT,
     clan_id          BIGINT       NOT NULL UNIQUE,     -- 11位的非连续数字
@@ -93,7 +96,7 @@ CREATE TABLE IF NOT EXISTS clan_basic (
     UNIQUE INDEX idx_rid_cid (region_id, clan_id) -- 索引
 );
 
-CREATE TABLE IF NOT EXISTS clan_info (
+CREATE TABLE clan_info (
     -- 相关id
     id               INT          AUTO_INCREMENT,
     clan_id          BIGINT       NOT NULL,     -- 11位的非连续数字
@@ -115,7 +118,7 @@ CREATE TABLE IF NOT EXISTS clan_info (
     FOREIGN KEY (clan_id) REFERENCES clan_basic(clan_id) ON DELETE CASCADE -- 外键
 );
 
-CREATE TABLE IF NOT EXISTS clan_cache (
+CREATE TABLE clan_cache (
     -- 相关id
     id               INT          AUTO_INCREMENT,
     clan_id          BIGINT       NOT NULL,     -- 11位的非连续数字
@@ -134,7 +137,7 @@ CREATE TABLE IF NOT EXISTS clan_cache (
     FOREIGN KEY (clan_id) REFERENCES clan_basic(clan_id) ON DELETE CASCADE -- 外键
 );
 
-CREATE TABLE IF NOT EXISTS user_clan (
+CREATE TABLE user_clan (
     id               INT          AUTO_INCREMENT,
     account_id       BIGINT       NOT NULL,     -- 1-11位的非连续数字
     clan_id          BIGINT       DEFAULT NULL,     -- 11位的非连续数字
@@ -147,6 +150,39 @@ CREATE TABLE IF NOT EXISTS user_clan (
     UNIQUE INDEX idx_aid (account_id), -- 唯一索引
     
     INDEX idx_cid (clan_id) -- 非唯一索引
+);
+
+CREATE TABLE recent (
+    -- 相关id
+    account_id       BIGINT       NOT NULL,
+    region_id        TINYINT      NOT NULL,
+    -- 用户配置
+    recent_class     INT          DEFAULT 30,     -- 最多保留多少天的数据
+    last_query_time  INT          DEFAULT 0,      -- 该功能上次查询的时间
+    last_write_time  INT          DEFAULT 0,      -- 数据库上次写入时间
+    last_update_time INT          DEFAULT 0,      -- 数据库上次更新时间
+    -- 记录数据创建的时间和更新时间
+    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (region_id, account_id) -- 主键
+);
+
+CREATE TABLE recents (
+    -- 相关id
+    account_id       BIGINT       NOT NULL,
+    region_id        TINYINT      NOT NULL,
+    -- 用户配置
+    proxy            TINYINT      DEFAULT 0,      -- 表示Recents代理服务器地址
+    recents_class    TINYINT      DEFAULT 0,      -- 表示是否为特殊用户
+    last_query_time  INT          DEFAULT 0,      -- 该功能上次查询的时间
+    last_write_time  INT          DEFAULT 0,      -- 数据库上次写入时间
+    last_update_time INT          DEFAULT 0,      -- 数据库上次更新时间
+    -- 记录数据创建的时间和更新时间
+    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (region_id, account_id) -- 主键
 );
 '''
 

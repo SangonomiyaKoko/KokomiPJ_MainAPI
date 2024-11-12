@@ -1,8 +1,10 @@
-class PR_Algorithm:
+class Rating_Algorithm:
+    # 评分算法
     def get_pr_by_sid_and_region(
         sid: str,
         region: str,
-        battle_type: str,
+        algo_type: str,
+        match_type: str,
         ship_data: list
     ):
         '''
@@ -15,9 +17,10 @@ class PR_Algorithm:
             'n_damage_dealt': -1,
             'n_frags': -1
         }
-        # battles_count = ship_data[0]
-        # if battles_count <= 0:
-        #     return result
+        if algo_type == 'pr':
+            battles_count = ship_data[0]
+            if battles_count <= 0:
+                return result
         # # 获取服务器数据
         # ship_data_class = Ship_Data()
         # server_data = ship_data_class.get_data_by_sid_and_region(

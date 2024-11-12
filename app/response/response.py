@@ -13,6 +13,7 @@ class JSONResponse:
     API_4000_RedisError = {'status': 'ok','code': 4000,'message': 'RedisError','data': None}
     API_5000_ProgramError = {'status': 'ok','code': 5000,'message': 'ProgramError','data': None}
     API_6000_VersionError = {'status': 'ok','code': 6000,'message': 'VersionError','data': None}
+    API_7000_InvalidParameter = {'status': 'ok','code': 7000,'message': 'InvalidParameter','data': None}
 
     API_1001_UserNotExist = {'status': 'ok','code': 1001,'message': 'UserNotExist','data' : None}
     API_1002_ClanNotExist = {'status': 'ok','code': 1002,'message': 'ClanNotExist','data' : None}
@@ -27,6 +28,11 @@ class JSONResponse:
     API_1011_IllegalUserName = {'status': 'ok','code': 1011,'message': 'IllegalUserName','data' : None}
     API_1012_IllegalClanTag = {'status': 'ok','code': 1012,'message': 'IllegalClanTag','data' : None}
     API_1013_ACisInvalid = {'status': 'ok','code': 1013,'message': 'ACisInvalid','data' : None}
+    API_1014_EnableRecentFailed = {'status': 'ok','code': 1014,'message': 'EnableRecentFailed','data' : None}
+    API_1015_EnableRecentsFailed = {'status': 'ok','code': 1015,'message': 'EnableRecentsFailed','data' : None}
+    API_1016_UserInBlacklist = {'status': 'ok','code': 1016,'message': 'UserInBlacklist','data': None}
+    API_1017_ClanInBlacklist = {'status': 'ok','code': 1017,'message': 'ClanInBlacklist','data': None}
+
 
     @staticmethod
     def get_success_response(

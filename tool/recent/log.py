@@ -4,7 +4,7 @@ from logging.handlers import RotatingFileHandler
 
 import colorlog
 
-from config import CLIENT_NAME, LOG_PATH
+from config import CLIENT_NAME, LOG_PATH, LOG_LEVEL
 
 
 # 日志格式
@@ -32,6 +32,11 @@ default_formats = {
     'log_format': '%(asctime)s [%(levelname)s] %(name)s | %(message)s'
 }
 
+if LOG_LEVEL == 'debug':
+    set_log_level = logging.DEBUG
+else:
+    set_log_level = logging.INFO
+
 
 class HandleLog:
     """
@@ -44,7 +49,7 @@ class HandleLog:
         self.__all_log_path = os.path.join(LOG_PATH, 'recent-log' + "-all" + ".log")  # 收集所有日志信息文件
         self.__error_log_path = os.path.join(LOG_PATH, 'recent-log' + "-error" + ".log")  # 收集错误日志信息文件
         self.__logger = logging.getLogger(CLIENT_NAME)  # 创建日志记录器
-        self.__logger.setLevel(logging.DEBUG)  # 设置默认日志记录器记录级别
+        self.__logger.setLevel(set_log_level)  # 设置日志记录器记录级别
 
     @staticmethod
     def __init_logger_handler(log_path):

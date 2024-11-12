@@ -96,9 +96,7 @@ class UtilityFunctions:
         # 从接口获取的颜色id转换为league数字
         return ClanColor.CLAN_COLOR_INDEX.get(color, 5)
     
-    def get_active_level(
-        user_info: dict
-    ):
+    def get_active_level(user_info: dict):
         "获取active_level"
         # 具体对应关系的表格
         # | is_plblic | total_battles | last_battle_time | active_level | decs    |

@@ -2,8 +2,8 @@ from typing import Optional
 
 from fastapi import APIRouter
 
-from .schemas import RegionList, LanguageList
-from app.apis.platform import Search, Update
+from .schemas import RegionList, LanguageList, UserInfoModel, UserBasicModel
+from app.apis.platform import Search, Update, GameUser
 from app.utils import UtilityFunctions
 from app.response import JSONResponse
 from app.middlewares import record_api_call
@@ -84,6 +84,7 @@ async def searchClan(
     # 返回结果
     return result
 
+
 @router.get("/search/ship/")
 async def searchShip(
     region: RegionList,
@@ -116,6 +117,7 @@ async def searchShip(
     # 返回结果
     return result
 
+
 @router.put("/update/ship-name/")
 async def updateShipName(
     region: RegionList,
@@ -138,3 +140,27 @@ async def updateShipName(
     # 返回结果
     return result
 
+
+@router.post("/game/user/basic/")
+async def post_user_info(user_basic: UserBasicModel):
+    result = await GameUser.check_user_basic_data(user_basic)
+    await record_api_call(result['status'])
+    # 返回结果
+    return result
+
+
+@router.get("/game/user/info/")
+async def get_user_info(account_id: int):
+    result = await GameUser.get_user_info_data(account_id)
+    print(result)
+    await record_api_call(result['status'])
+    # 返回结果
+    return result
+
+
+@router.post("/game/user/info/")
+async def post_user_info(user_info: UserInfoModel):
+    result = await GameUser.check_user_info_data(user_info)
+    await record_api_call(result['status'])
+    # 返回结果
+    return result

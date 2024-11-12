@@ -18,17 +18,18 @@
 
 > 获取到数据中 code 及 message 的含义
 
-| Code | Message       | 描述                                         |
-| ---- | ------------- | -------------------------------------------- |
-| 1000 | Success       | 成功获取数据                                 |
-| 2000 | NetworkError  | 网络错误                                     |
-| 2001 | NetworkError  | 连接超时，请检查网络连接或目标服务器是否可用 |
-| 2002 | NetworkError  | 读取超时，服务器没有在规定时间内响应         |
-| 2003 | NetworkError  | 请求超时                                     |
-| 3000 | DatabaseError | 数据库错误                                   |
-| 4000 | RedisError    | 缓存错误                                     |
-| 5000 | ProgramError  | 程序错误                                     |
-| 6000 | VersionError  | 当前接口版本不可用                           |
+| Code | Message          | 描述                                         |
+| ---- | ---------------- | -------------------------------------------- |
+| 1000 | Success          | 成功获取数据                                 |
+| 2000 | NetworkError     | 网络错误                                     |
+| 2001 | NetworkError     | 连接超时，请检查网络连接或目标服务器是否可用 |
+| 2002 | NetworkError     | 读取超时，服务器没有在规定时间内响应         |
+| 2003 | NetworkError     | 请求超时                                     |
+| 3000 | DatabaseError    | 数据库错误                                   |
+| 4000 | RedisError       | 缓存错误                                     |
+| 5000 | ProgramError     | 程序错误                                     |
+| 6000 | VersionError     | 当前接口版本不可用                           |
+| 7000 | InvalidParameter | 输入的参数有误                               |
 
 ## Return Code 2
 
@@ -49,3 +50,7 @@
 | 1011 | IllegalUserName           | 输入的 username 参数长度要在 3-25 个字符 |
 | 1012 | IllegalClanTag            | 输入的 clantag 参数长度要在 2-5 个字符   |
 | 1013 | ACisInvalid               | 输入的 ac 参数无效                       |
+| 1014 | EnableRecentFailed        | 启用 Recent 功能失败，因为账号不活跃     |
+| 1015 | EnableRecentsFailed       | 启用 Recents 功能失败，因为账号不活跃    |
+| 1016 | UserInBlacklist           | 用户在黑名单内                           |
+| 1017 | ClanInBlacklist           | 工会在黑名单内                           |

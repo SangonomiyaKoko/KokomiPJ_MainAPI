@@ -1,7 +1,11 @@
-from app.models.user import UserModel
-from app.models.clan import ClanModel
+from .user import UserModel
+from .clan import ClanModel
+from .recent import RecentUserModel
+from .ac import UserAccessToken
 
 __all__ = [
     'UserModel',
-    'ClanModel'
+    'ClanModel',
+    'RecentUserModel',
+    'UserAccessToken'
 ]
