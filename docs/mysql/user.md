@@ -36,7 +36,7 @@ CREATE TABLE user_info (
     id               INT          AUTO_INCREMENT,
     account_id       BIGINT       NOT NULL,     -- 1-11位的非连续数字
     -- 关于用户活跃的信息，用于recent/recents/用户排行榜功能
-    is_active        TINYINT      DEFAULT -1,    -- 用于标记用户的有效性，-1表示新增，0表示无效，1表示有效
+    is_active        TINYINT      DEFAULT -1,   -- 用于标记用户的有效性，-1表示新增，0表示无效，1表示有效
     active_level     TINYINT      DEFAULT 0,    -- 人为设置的用户活跃的等级
     is_public        TINYINT      DEFAULT 0,    -- 用户是否隐藏战绩，0表示隐藏，1表示公开
     total_battles    INT          DEFAULT 0,    -- 用户总场次
