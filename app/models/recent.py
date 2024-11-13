@@ -8,6 +8,7 @@ from aiomysql.cursors import Cursor
 from app.db import MysqlConnection
 from app.log import write_error_info
 from app.response import JSONResponse
+from app.utils import TimeFormat
 
 class RecentUserModel:
     async def get_recent_user_by_rid(region_id: int):
@@ -61,9 +62,10 @@ class RecentUserModel:
             user = await cur.fetchone()
             if user is None:
                 # 用户不存在，插入新用户
+                current_timestamp = TimeFormat.get_current_timestamp()
                 await cur.execute(
-                    "INSERT IGNORE INTO recent (account_id, region_id, recent_class) VALUES (%s, %s, %s);",
-                    [account_id, region_id, recent_class]
+                    "INSERT IGNORE INTO recent (account_id, region_id, recent_class, last_query_time) VALUES (%s, %s, %s, %s);",
+                    [account_id, region_id, recent_class, current_timestamp]
                 )
                 await conn.commit()
             else:
@@ -144,15 +146,16 @@ class RecentUserModel:
             account_id = user_recent['account_id']
             region_id = user_recent['region_id']
             await cur.execute(
-                "SELECT recent_class, last_query_time, last_write_time, last_update_time FROM recent WHERE region_id = %s and account_id = %s;", 
+                "SELECT recent_class, last_query_time, last_update_time FROM recent WHERE region_id = %s and account_id = %s;", 
                 [region_id, account_id]
             )
             user = await cur.fetchone()
             sql_str = ''
             params = []
             i = 0
-            for user_recent_key in ['recent_class', 'last_query_time', 'last_write_time', 'last_update_time']:
+            for user_recent_key in ['recent_class', 'last_query_time', 'last_update_time']:
                 if user_recent.get(user_recent_key) == None:
+                    i += 1
                     continue
                 if user[i] != user_recent.get(user_recent_key):
                     sql_str += f'{user_recent_key} = %s, '
@@ -160,7 +163,7 @@ class RecentUserModel:
                 i += 1
             params = params + [region_id, account_id]
             await cur.execute(
-                f"UPDATE recent SET {sql_str},updated_at = CURRENT_TIMESTAMP WHERE region_id = %s and account_id = %s;",
+                f"UPDATE recent SET {sql_str}updated_at = CURRENT_TIMESTAMP WHERE region_id = %s and account_id = %s;",
                 params
             )
             await conn.commit()
@@ -197,7 +200,7 @@ class RecentUserModel:
         cur: Cursor = await conn.cursor()
         try:
             await cur.execute(
-                "SELECT recent_class, last_query_time, last_write_time, last_update_time FROM recent "
+                "SELECT recent_class, last_query_time, last_update_time FROM recent "
                 "WHERE region_id = %s and account_id = %s;",
                 [region_id, account_id]
             )
@@ -206,8 +209,7 @@ class RecentUserModel:
                 data = {
                     'recent_class': user[0],
                     'last_query_time': user[1],
-                    'last_write_time': user[2],
-                    'last_update_time': user[3]
+                    'last_update_time': user[2]
                 }
             else:
                 data = None

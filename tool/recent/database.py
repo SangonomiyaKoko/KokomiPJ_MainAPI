@@ -1,15 +1,13 @@
 import os
 import time
-import pymysql
 import sqlite3
 from sqlite3 import Connection
-from dbutils.pooled_db import PooledDB
 from datetime import datetime, timezone, timedelta
 
 import brotli
 
-from .config import MASTER_DB_PATH, REGION_UTC_LIST
-from .network import Recent_Network
+from config import MASTER_DB_PATH, REGION_UTC_LIST
+from network import Recent_Network
 
 
 class Recent_DB:
@@ -21,10 +19,11 @@ class Recent_DB:
         "获取数据库连接"
         connection = sqlite3.connect(db_path)
         return connection
-
-    def create_user_db(self,db_path: str):
+    
+    @classmethod
+    def create_user_db(self, db_path: str):
         "创建数据库"
-        conn: Connection = self.get_recent_db_path(db_path)
+        conn: Connection = self.get_db_connection(db_path)
         cursor = conn.cursor()
         table_create_query = f'''
         CREATE TABLE user_info (
@@ -81,7 +80,7 @@ class Recent_DB:
             cursor.execute(query)
             del_num += 1
         for del_table in del_table_list:
-            query = f"DELETE FROM {del_table}"
+            query = f"DROP TABLE {del_table}"
             cursor.execute(query)
         conn.commit()
         cursor.close()
@@ -155,6 +154,7 @@ class Recent_DB:
                 data = index
         return [date_1_data,data]
 
+    @classmethod
     def insert_database(
         self,
         db_path: str,
@@ -182,6 +182,7 @@ class Recent_DB:
             ?, ?, ?, ?, ?, ?
         )'''
         cursor.execute(insert_or_replace_query, insert_data)
+        conn.commit()
         if ship_info_data != None:
             table_create_query = f'''
             CREATE TABLE IF NOT EXISTS {table_name} (

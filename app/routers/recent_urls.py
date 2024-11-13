@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from .schemas import RegionList, UserRecentModel
 from app.utils import UtilityFunctions
 from app.response import JSONResponse
-from app.apis.recent import Recent
+from app.apis.recent import RecentBasic
 
 router = APIRouter()
 
@@ -20,7 +20,7 @@ async def enableFeature(
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
         return JSONResponse.API_1003_IllegalAccoutIDorRegionID
     # 请求数据
-    result = await Recent.add_recent(account_id,region_id,recent_class)
+    result = await RecentBasic.add_recent(account_id,region_id,recent_class)
     return result
 
 @router.delete("/features/disable/")
@@ -35,7 +35,7 @@ async def disableFeature(
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
         return JSONResponse.API_1003_IllegalAccoutIDorRegionID
     # 请求数据
-    result = await Recent.del_recent(account_id,region_id)
+    result = await RecentBasic.del_recent(account_id,region_id)
     return result
 
 @router.get("/features/users/overview/")
@@ -52,7 +52,7 @@ async def enabledFeatureUsers(
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
     # 请求数据
-    result = await Recent.get_recent(region_id)
+    result = await RecentBasic.get_recent(region_id)
     return result
 
 @router.get("/features/user/")
@@ -67,7 +67,7 @@ async def getUserFeatureData(
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
         return JSONResponse.API_1003_IllegalAccoutIDorRegionID
     # 请求数据
-    result = await Recent.get_user_recent(account_id,region_id)
+    result = await RecentBasic.get_user_recent(account_id,region_id)
     return result   
 
 @router.post("/features/user/")
@@ -78,5 +78,5 @@ async def postUserFeatureDatae(
     if UtilityFunctions.check_aid_and_rid(user_recent.account_id, user_recent.region_id) == False:
         return JSONResponse.API_1003_IllegalAccoutIDorRegionID
     # 请求数据
-    result = await Recent.update_recent(user_recent)
+    result = await RecentBasic.update_recent(user_recent.model_dump())
     return result

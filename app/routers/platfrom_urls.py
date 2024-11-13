@@ -143,7 +143,7 @@ async def updateShipName(
 
 @router.post("/game/user/basic/")
 async def post_user_info(user_basic: UserBasicModel):
-    result = await GameUser.check_user_basic_data(user_basic)
+    result = await GameUser.check_user_basic_data(user_basic.model_dump())
     await record_api_call(result['status'])
     # 返回结果
     return result
@@ -152,7 +152,6 @@ async def post_user_info(user_basic: UserBasicModel):
 @router.get("/game/user/info/")
 async def get_user_info(account_id: int):
     result = await GameUser.get_user_info_data(account_id)
-    print(result)
     await record_api_call(result['status'])
     # 返回结果
     return result
@@ -160,7 +159,7 @@ async def get_user_info(account_id: int):
 
 @router.post("/game/user/info/")
 async def post_user_info(user_info: UserInfoModel):
-    result = await GameUser.check_user_info_data(user_info)
+    result = await GameUser.check_user_info_data(user_info.model_dump())
     await record_api_call(result['status'])
     # 返回结果
     return result

@@ -10,7 +10,7 @@ from app.utils import UtilityFunctions, TimeFormat
 from app.middlewares.celery import task_check_user_basic, task_check_user_info
 
 
-class Recent:
+class RecentBasic:
     async def get_recent(region_id: int):
         try:
             data = {
@@ -58,6 +58,7 @@ class Recent:
         finally:
             gc.collect()
 
+    @classmethod
     async def update_recent(self, user_recent: dict):
         try:
             result = await RecentUserModel.update_recent_user(user_recent)

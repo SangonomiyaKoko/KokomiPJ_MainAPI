@@ -278,23 +278,25 @@ class UserModel:
         cur: Cursor = await conn.cursor()
         try:
             account_id = user_info['account_id']
-            cur.execute(
+            await cur.execute(
                 "SELECT is_active, active_level, is_public, total_battles, last_battle_time FROM user_info WHERE account_id = %s;", 
                 [account_id]
             )
-            user = cur.fetchone()
+            user = await cur.fetchone()
             sql_str = ''
             params = []
+            i = 0
             for field in ['is_active', 'active_level', 'is_public', 'total_battles', 'last_battle_time']:
-                if user_info[field] != user[field]:
+                if user_info[field] != user[i]:
                     sql_str += f'{field} = %s, '
                     params.append(user_info[field])
+                i += 1
             params = params + [account_id]
-            cur.execute(
+            await cur.execute(
                 f"UPDATE user_info SET {sql_str}updated_at = CURRENT_TIMESTAMP WHERE account_id = %s;", 
                 params
             )
-            conn.commit()
+            await conn.commit()
             return JSONResponse.API_1000_Success
         except MySQLError as e:
             await conn.rollback()

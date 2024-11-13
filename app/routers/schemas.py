@@ -33,7 +33,6 @@ class UserRecentModel(BaseModel):
     region_id: int = Field(..., description='服务器id')
     recent_class: Optional[int] = Field(None, description='需要更新的字段')
     last_query_time: Optional[int] = Field(None, description='需要更新的字段')
-    last_write_time: Optional[int] = Field(None, description='需要更新的字段')
     last_update_time: Optional[int] = Field(None, description='需要更新的字段')
 
 

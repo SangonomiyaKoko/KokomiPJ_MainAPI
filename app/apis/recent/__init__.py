@@ -1,5 +1,5 @@
-from .recent import Recent
+from .recent_basic import RecentBasic
 
 __all__ = [
-    'Recent'
+    'RecentBasic'
 ]

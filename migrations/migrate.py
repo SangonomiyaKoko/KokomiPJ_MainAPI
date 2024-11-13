@@ -158,8 +158,7 @@ CREATE TABLE recent (
     region_id        TINYINT      NOT NULL,
     -- 用户配置
     recent_class     INT          DEFAULT 30,     -- 最多保留多少天的数据
-    last_query_time  INT          DEFAULT 0,      -- 该功能上次查询的时间
-    last_write_time  INT          DEFAULT 0,      -- 数据库上次写入时间
+    last_query_time  INT          DEFAULT CURRENT_TIMESTAMP, -- 该功能上次查询的时间
     last_update_time INT          DEFAULT 0,      -- 数据库上次更新时间
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,

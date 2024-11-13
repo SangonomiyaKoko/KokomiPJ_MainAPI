@@ -5,7 +5,7 @@ import asyncio
 from log import log as recent_logger
 from config import CLIENT_TYPE, SALVE_REGION
 from network import Recent_Network
-# from update import Recent_Update
+from update import Recent_Update
 
 
 
@@ -17,28 +17,17 @@ class ContinuousUserUpdater:
         start_time = int(time.time())
         # 更新用户
         for region_id in SALVE_REGION:
-            # request_result = await Recent_Network.get_recent_users_by_rid(region_id)
-            request_result = {
-                "status": "ok",
-                "code": 1000,
-                "message": "Success",
-                "data": {
-                    "users": [
-                    2023619512
-                    ],
-                    "access": {}
-                }
-                }
+            request_result = await Recent_Network.get_recent_users_by_rid(region_id)
             if request_result['code'] != 1000:
                 recent_logger.error(f"获取RecentUser时发生错误，Error: {request_result.get('message')}")
+                continue
             for account_id in request_result['data']['users']:
                 if account_id in request_result['data']['access']:
                     ac_value = request_result['data']['access'][account_id]
                 else:
                     ac_value = None
-                # await Recent_Update.main(account_id,region_id,ac_value)
-                recent_logger.debug(f'更新用户 {region_id} | {account_id}')
-                await asyncio.sleep(2)
+                recent_logger.debug(f'{region_id} - {account_id} | 开始更新')
+                await Recent_Update.main(account_id,region_id,ac_value)
         end_time = int(time.time())
         # 避免测试时候的循环bug
         if end_time - start_time <= 50:

@@ -26,7 +26,7 @@ class GameUser:
 
     async def check_user_info_data(user_info: dict) -> dict:
         try:
-            result = UserModel.check_user_info(user_info)
+            result = await UserModel.check_user_info(user_info)
             return result
         except Exception as e:
             error_id = str(uuid.uuid4())
@@ -43,7 +43,7 @@ class GameUser:
 
     async def check_user_basic_data(user_basic: dict) -> dict:
         try:
-            result = UserModel.check_user_basic(user_basic)
+            result = await UserModel.check_user_basic(user_basic)
             return result
         except Exception as e:
             error_id = str(uuid.uuid4())

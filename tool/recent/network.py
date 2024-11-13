@@ -74,7 +74,7 @@ class Recent_Network:
                 if method == 'get':
                     res = await client.get(url, timeout=5)
                 elif method == 'post':
-                    res = await client.post(url, data=data, timeout=5)
+                    res = await client.post(url, json=data, timeout=5)
                 elif method == 'put':
                     res = await client.put(url, timeout=5)
                 elif method == 'delete':
@@ -116,7 +116,7 @@ class Recent_Network:
         else:
             platform_api_url = MASTER_API_URL
         region = REGION_LIST.get(region_id)
-        url = f'{platform_api_url}/r1/features/user/?account_id={account_id}&region_id={region_id}'
+        url = f'{platform_api_url}/r1/features/user/?region={region}&account_id={account_id}'
         result = await self.fetch_data(url)
         return result
     
@@ -132,13 +132,13 @@ class Recent_Network:
         return result
     
     @classmethod
-    async def update_user_recent(self,user_recent:dict):
+    async def update_user_recent(self,data:dict):
         if CLIENT_TYPE == 'slave':
             platform_api_url = SALVE_API_URL
         else:
             platform_api_url = MASTER_API_URL
         url = f'{platform_api_url}/r1/features/user/'
-        result = await self.fetch_data(url, method='post', data=user_recent)
+        result = await self.fetch_data(url, method='post', data=data)
         return result
 
     @classmethod 
@@ -147,7 +147,7 @@ class Recent_Network:
             platform_api_url = SALVE_API_URL
         else:
             platform_api_url = MASTER_API_URL
-        url = f'{platform_api_url}/r/game/user/info/?account_id={account_id}'
+        url = f'{platform_api_url}/p/game/user/info/?account_id={account_id}'
         result = await self.fetch_data(url)
         return result
     
@@ -157,7 +157,7 @@ class Recent_Network:
             platform_api_url = SALVE_API_URL
         else:
             platform_api_url = MASTER_API_URL
-        url = f'{platform_api_url}/r/game/user/info/'
+        url = f'{platform_api_url}/p/game/user/info/'
         result = await self.fetch_data(url, method='post', data=data)
         return result
     
@@ -167,7 +167,7 @@ class Recent_Network:
             platform_api_url = SALVE_API_URL
         else:
             platform_api_url = MASTER_API_URL
-        url = f'{platform_api_url}/r/game/user/basic/'
+        url = f'{platform_api_url}/p/game/user/basic/'
         result = await self.fetch_data(url, method='post', data=data)
         return result
 
