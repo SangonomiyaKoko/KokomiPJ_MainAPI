@@ -1,5 +1,19 @@
+import os
 import sqlite3
+from sqlite3 import Connection
+
+from app.core import EnvConfig
 
 class SQLiteConnection:
-    def get_connection():
-        ...
+    config = EnvConfig.get_config()
+
+    @classmethod
+    def get_recent_db_path(self, account_id: int,region_id: int) -> str:
+        "获取db文件path"
+        return os.path.join(self.config.SQLITE_PATH, f'{region_id}', f'{account_id}.db')
+
+    def get_db_connection(db_path: str) -> Connection:
+        "获取数据库连接"
+        connection = sqlite3.connect(db_path)
+        return connection
+    

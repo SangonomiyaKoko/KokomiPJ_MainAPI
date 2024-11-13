@@ -1,14 +1,10 @@
-import uuid
-import traceback
-
 import pymysql
-from pymysql.err import ProgrammingError
 
 from app.response import JSONResponse
-from app.log import write_error_info
+from app.log import ExceptionLogger
 
 
-
+@ExceptionLogger.handle_database_exception_sync
 def check_user_basic(
     pool,
     users: list
@@ -58,32 +54,14 @@ def check_user_basic(
                     )
             conn.commit()
         return JSONResponse.API_1000_Success
-    except ProgrammingError as e:
-        error_id = str(uuid.uuid4())
-        write_error_info(
-            error_id = error_id,
-            error_type = 'MySQL',
-            error_name = f'ERROR_{e.args[0]}',
-            error_file = __file__,
-            error_info = f'\n{str(e.args[1])}'
-        )
-        return JSONResponse.get_error_response(3000,'DatabaseError',error_id)
     except Exception as e:
-        error_id = str(uuid.uuid4())
-        write_error_info(
-            error_id = error_id,
-            error_type = 'Program',
-            error_name = str(type(e).__name__),
-            error_file = __file__,
-            error_info = f'\n{traceback.format_exc()}'
-        )
-        return JSONResponse.get_error_response(5000,'ProgramError',error_id)
+        raise e
     finally:
         if cur:
             cur.close()
         conn.close()  # 归还连接到连接池
 
-
+@ExceptionLogger.handle_database_exception_sync
 def check_clan_tag_and_league(
     pool,
     clans: list
@@ -143,31 +121,14 @@ def check_clan_tag_and_league(
                     )
             conn.commit()
         return JSONResponse.API_1000_Success
-    except ProgrammingError as e:
-        error_id = str(uuid.uuid4())
-        write_error_info(
-            error_id = error_id,
-            error_type = 'MySQL',
-            error_name = f'ERROR_{e.args[0]}',
-            error_file = __file__,
-            error_info = f'\n{str(e.args[1])}'
-        )
-        return JSONResponse.get_error_response(3000,'DatabaseError',error_id)
     except Exception as e:
-        error_id = str(uuid.uuid4())
-        write_error_info(
-            error_id = error_id,
-            error_type = 'Program',
-            error_name = str(type(e).__name__),
-            error_file = __file__,
-            error_info = f'\n{traceback.format_exc()}'
-        )
-        return JSONResponse.get_error_response(5000,'ProgramError',error_id)
+        raise e
     finally:
         if cur:
             cur.close()
         conn.close()  # 归还连接到连接池
 
+@ExceptionLogger.handle_database_exception_sync
 def check_user_info(
     pool,
     users: list
@@ -208,31 +169,14 @@ def check_user_info(
             cur.execute(sql, params)
         conn.commit()
         return JSONResponse.API_1000_Success
-    except ProgrammingError as e:
-        error_id = str(uuid.uuid4())
-        write_error_info(
-            error_id = error_id,
-            error_type = 'MySQL',
-            error_name = f'ERROR_{e.args[0]}',
-            error_file = __file__,
-            error_info = f'\n{str(e.args[1])}'
-        )
-        return JSONResponse.get_error_response(3000,'DatabaseError',error_id)
     except Exception as e:
-        error_id = str(uuid.uuid4())
-        write_error_info(
-            error_id = error_id,
-            error_type = 'Program',
-            error_name = str(type(e).__name__),
-            error_file = __file__,
-            error_info = f'\n{traceback.format_exc()}'
-        )
-        return JSONResponse.get_error_response(5000,'ProgramError',error_id)
+        raise e
     finally:
         if cur:
             cur.close()
         conn.close()  # 归还连接到连接池
 
+@ExceptionLogger.handle_database_exception_sync
 def update_user_clan(
     pool,
     user_clans: list
@@ -277,26 +221,8 @@ def update_user_clan(
             cur.execute(sql,params)
         conn.commit()
         return JSONResponse.API_1000_Success
-    except ProgrammingError as e:
-        error_id = str(uuid.uuid4())
-        write_error_info(
-            error_id = error_id,
-            error_type = 'MySQL',
-            error_name = f'ERROR_{e.args[0]}',
-            error_file = __file__,
-            error_info = f'\n{str(e.args[1])}'
-        )
-        return JSONResponse.get_error_response(3000,'DatabaseError',error_id)
     except Exception as e:
-        error_id = str(uuid.uuid4())
-        write_error_info(
-            error_id = error_id,
-            error_type = 'Program',
-            error_name = str(type(e).__name__),
-            error_file = __file__,
-            error_info = f'\n{traceback.format_exc()}'
-        )
-        return JSONResponse.get_error_response(5000,'ProgramError',error_id)
+        raise e
     finally:
         if cur:
             cur.close()

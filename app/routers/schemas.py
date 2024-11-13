@@ -3,6 +3,13 @@ from pydantic import BaseModel, Field
 from typing import Optional
 
 class RegionList(str, Enum):
+    '''
+    关于region和region_id的区别
+
+    region主要是用于和前端相关进行交互
+
+    region_id主要是后端处理时使用
+    '''
     asia = "asia"
     eu = "eu"
     na = "na"
@@ -34,5 +41,15 @@ class UserRecentModel(BaseModel):
     recent_class: Optional[int] = Field(None, description='需要更新的字段')
     last_query_time: Optional[int] = Field(None, description='需要更新的字段')
     last_update_time: Optional[int] = Field(None, description='需要更新的字段')
+
+class RecentEnableModel(BaseModel):
+    region: RegionList = Field(..., description='服务器')
+    account_id: int = Field(..., description='用户id')
+    recent_class: Optional[int] = Field(30, description='需要更新的字段')
+    
+
+class RecentDisableModel(BaseModel):
+    region: RegionList = Field(..., description='服务器')
+    account_id: int = Field(..., description='用户id')
 
 

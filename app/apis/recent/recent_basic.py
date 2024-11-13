@@ -1,9 +1,7 @@
 import gc
-import uuid
-import traceback
 
 from app.network import BasicAPI
-from app.log import write_error_info
+from app.log import ExceptionLogger
 from app.response import JSONResponse
 from app.models import RecentUserModel, UserModel, UserAccessToken
 from app.utils import UtilityFunctions, TimeFormat
@@ -11,6 +9,21 @@ from app.middlewares.celery import task_check_user_basic, task_check_user_info
 
 
 class RecentBasic:
+    @ExceptionLogger.handle_program_exception_async
+    async def get_overview():
+        try:
+            data = {}
+            result = await RecentUserModel.get_recent_user_overview()
+            if result.get('code', None) != 1000:
+                return result
+            data = result['data']
+            return JSONResponse.get_success_response(data)            
+        except Exception as e:
+            raise e
+        finally:
+            gc.collect()
+
+    @ExceptionLogger.handle_program_exception_async
     async def get_recent(region_id: int):
         try:
             data = {
@@ -25,19 +38,12 @@ class RecentBasic:
             data['access'] = ac_value
             return JSONResponse.get_success_response(data)            
         except Exception as e:
-            error_id = str(uuid.uuid4())
-            write_error_info(
-                error_id = error_id,
-                error_type = 'Program',
-                error_name = str(type(e).__name__),
-                error_file = __file__,
-                error_info = f'\n{traceback.format_exc()}'
-            )
-            return JSONResponse.get_error_response(5000,'ProgramError',error_id)
+            raise e
         finally:
             gc.collect()
 
     @classmethod
+    @ExceptionLogger.handle_program_exception_async
     async def add_recent(self, account_id: int,region_id: int, recent_class: int):
         try:
             check_result = await self.__check_user_status(account_id,region_id)
@@ -46,54 +52,32 @@ class RecentBasic:
             result = await RecentUserModel.add_recent_user(account_id,region_id,recent_class)
             return result
         except Exception as e:
-            error_id = str(uuid.uuid4())
-            write_error_info(
-                error_id = error_id,
-                error_type = 'Program',
-                error_name = str(type(e).__name__),
-                error_file = __file__,
-                error_info = f'\n{traceback.format_exc()}'
-            )
-            return JSONResponse.get_error_response(5000,'ProgramError',error_id)
+            raise e
         finally:
             gc.collect()
 
     @classmethod
+    @ExceptionLogger.handle_program_exception_async
     async def update_recent(self, user_recent: dict):
         try:
             result = await RecentUserModel.update_recent_user(user_recent)
             return result
         except Exception as e:
-            error_id = str(uuid.uuid4())
-            write_error_info(
-                error_id = error_id,
-                error_type = 'Program',
-                error_name = str(type(e).__name__),
-                error_file = __file__,
-                error_info = f'\n{traceback.format_exc()}'
-            )
-            return JSONResponse.get_error_response(5000,'ProgramError',error_id)
+            raise e
         finally:
             gc.collect()
 
-    
+    @ExceptionLogger.handle_program_exception_async
     async def del_recent(account_id: int,region_id: int):
         try:
             result = await RecentUserModel.del_recent_user(account_id,region_id)
             return result
         except Exception as e:
-            error_id = str(uuid.uuid4())
-            write_error_info(
-                error_id = error_id,
-                error_type = 'Program',
-                error_name = str(type(e).__name__),
-                error_file = __file__,
-                error_info = f'\n{traceback.format_exc()}'
-            )
-            return JSONResponse.get_error_response(5000,'ProgramError',error_id)
+            raise e
         finally:
             gc.collect()
 
+    @ExceptionLogger.handle_program_exception_async
     async def get_user_recent(account_id: int, region_id: int):
         try:
             data = {
@@ -110,15 +94,7 @@ class RecentBasic:
             data['user_info'] = user_info_result['data']
             return JSONResponse.get_success_response(data)
         except Exception as e:
-            error_id = str(uuid.uuid4())
-            write_error_info(
-                error_id = error_id,
-                error_type = 'Program',
-                error_name = str(type(e).__name__),
-                error_file = __file__,
-                error_info = f'\n{traceback.format_exc()}'
-            )
-            return JSONResponse.get_error_response(5000,'ProgramError',error_id)
+            raise e
         finally:
             gc.collect()
 

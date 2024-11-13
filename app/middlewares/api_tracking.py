@@ -1,16 +1,12 @@
-import uuid
-import traceback
-
-from aioredis.exceptions import RedisError
-
 from .redis import RedisConnection
 from app.utils import TimeFormat
-from app.log import write_error_info
+from app.log import ExceptionLogger
 
 # 当前存在key的简单缓存，避免重复查询设置expire
 exist_daily_key = []
 exist_hourly_key = []
 
+@ExceptionLogger.handle_cache_exception_async
 async def record_api_call(status: str = 'ok') -> None:
     '''记录api请求次数和请求结果概括
 
@@ -47,23 +43,5 @@ async def record_api_call(status: str = 'ok') -> None:
                 await redis.expire(daily_key, 60 * 60 * 24 * 31)
                 exist_daily_key.append(daily_key)
         return None
-    except RedisError as e:
-        error_id = str(uuid.uuid4())
-        write_error_info(
-            error_id = error_id,
-            error_type = 'Redis',
-            error_name = str(type(e).__name__),
-            error_file = __file__,
-            error_info = f'\n{traceback.format_exc()}'
-        )
-        return None
     except Exception as e:
-        error_id = str(uuid.uuid4())
-        write_error_info(
-            error_id = error_id,
-            error_type = 'Program',
-            error_name = str(type(e).__name__),
-            error_file = __file__,
-            error_info = f'\n{traceback.format_exc()}'
-        )
-        return None
+        raise e

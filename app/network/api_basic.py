@@ -5,7 +5,7 @@ import traceback
 import httpx
 
 from .api_base import BaseUrl
-from app.log import write_error_info
+from app.log import ExceptionLogger
 from app.response import JSONResponse
 from app.const import ClanColor
 from app.middlewares.celery import task_check_clan_basic, task_check_user_basic
@@ -21,6 +21,7 @@ class BasicAPI:
     3. 获取搜索用户的结果
     4. 获取搜索工会的结果
     '''
+    @ExceptionLogger.handle_network_exception_async
     async def fetch_data(url):
         try:
             async with httpx.AsyncClient() as client:
@@ -66,56 +67,8 @@ class BasicAPI:
                     return JSONResponse.get_success_response(data)
                 else:
                     res.raise_for_status()  # 其他状态码
-        except httpx.ConnectTimeout:
-            error_id = str(uuid.uuid4())
-            write_error_info(
-                error_id = error_id,
-                error_type = 'Network',
-                error_name = 'ConnectTimeout',
-                error_file = __file__,
-                error_info = f'\nErrorURL: {url}'
-            )
-            return JSONResponse.get_error_response(2001,'NetworkError',error_id)
-        except httpx.ReadTimeout:
-            error_id = str(uuid.uuid4())
-            write_error_info(
-                error_id = error_id,
-                error_type = 'Network',
-                error_name = 'ReadTimeout',
-                error_file = __file__,
-                error_info = f'\nErrorURL: {url}'
-            )
-            return JSONResponse.get_error_response(2002,'NetworkError',error_id)
-        except httpx.TimeoutException:
-            error_id = str(uuid.uuid4())
-            write_error_info(
-                error_id = error_id,
-                error_type = 'Network',
-                error_name = 'RequestTimeout',
-                error_file = __file__,
-                error_info = f'\nErrorURL: {url}'
-            )
-            return JSONResponse.get_error_response(2003,'NetworkError',error_id)
-        except httpx.HTTPStatusError as e:
-            error_id = str(uuid.uuid4())
-            write_error_info(
-                error_id = error_id,
-                error_type = 'Network',
-                error_name = 'NetworkError',
-                error_file = __file__,
-                error_info = f'\nErrorURL: {url}\nStatusCode: {e.response.status_code}'
-            )
-            return JSONResponse.get_error_response(2000,'NetworkError',error_id)
         except Exception as e:
-            error_id = str(uuid.uuid4())
-            write_error_info(
-                error_id = error_id,
-                error_type = 'Program',
-                error_name = str(type(e).__name__),
-                error_file = __file__,
-                error_info = f'\n{traceback.format_exc()}'
-            )
-            return JSONResponse.get_error_response(5000,'ProgramError',error_id)
+            raise e
 
     @classmethod
     async def get_user_basic(

@@ -56,7 +56,7 @@ async def request_rate_limiter(request: Request, call_next):
     if not IPAccessListManager.is_whitelisted(client_ip):
         # ip是否在白名单，在则跳过限速检查
         check_rate_limiter = await rate_limit(client_ip)
-        if check_rate_limiter is None:
+        if check_rate_limiter not in [True, False]:
             return JSONResponse(
                 status_code=500,
                 content={"dateil": "Internal server error"}

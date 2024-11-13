@@ -1,15 +1,12 @@
-import uuid
-import traceback
-from aiomysql import MySQLError
 from aiomysql.connection import Connection
 from aiomysql.cursors import Cursor
 
 from app.db import MysqlConnection
 from app.response import JSONResponse
-from app.utils import TimeFormat
-from app.log import write_error_info
+from app.log import ExceptionLogger
 
 class ClanModel:
+    @ExceptionLogger.handle_database_exception_async
     async def get_clan_tag_and_league(
         clan_id: int, 
         region_id: int
@@ -65,28 +62,12 @@ class ClanModel:
                 data['league'] = clan[1]
                 data['updated_at'] = clan[2]
             return JSONResponse.get_success_response(data)
-        except MySQLError as e:
-            await conn.rollback()
-            error_id = str(uuid.uuid4())
-            write_error_info(
-                error_id = error_id,
-                error_type = 'MySQL',
-                error_name = f'ERROR_{e.args[0]}',
-                error_file = __file__,
-                error_info = f'\n{str(e.args[1])}'
-            )
-            return JSONResponse.get_error_response(3000,'DatabaseError',error_id)
         except Exception as e:
-            error_id = str(uuid.uuid4())
-            write_error_info(
-                error_id = error_id,
-                error_type = 'Program',
-                error_name = str(type(e).__name__),
-                error_file = __file__,
-                error_info = f'\n{traceback.format_exc()}'
-            )
-            return JSONResponse.get_error_response(5000,'ProgramError',error_id)
+            # 数据库回滚
+            await conn.rollback()
+            raise e
         finally:
+            # 释放资源
             await cur.close()
             await MysqlConnection.release_connection(conn)
             

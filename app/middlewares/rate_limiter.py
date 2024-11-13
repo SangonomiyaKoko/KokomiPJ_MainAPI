@@ -1,12 +1,8 @@
-import uuid
-import traceback
-
-from aioredis.exceptions import RedisError
-
 from .redis import RedisConnection
 from app.utils import TimeFormat
-from app.log import write_error_info
+from app.log import ExceptionLogger
 
+@ExceptionLogger.handle_cache_exception_async
 async def rate_limit(host: str, limit: int = 20, window = 10) -> bool:
     '''判断当前ip请求是否到达限速
 
@@ -37,23 +33,5 @@ async def rate_limit(host: str, limit: int = 20, window = 10) -> bool:
             return True
         else:
             return False
-    except RedisError as e:
-        error_id = str(uuid.uuid4())
-        write_error_info(
-            error_id = error_id,
-            error_type = 'Redis',
-            error_name = str(type(e).__name__),
-            error_file = __file__,
-            error_info = f'\n{traceback.format_exc()}'
-        )
-        return None
     except Exception as e:
-        error_id = str(uuid.uuid4())
-        write_error_info(
-            error_id = error_id,
-            error_type = 'Program',
-            error_name = str(type(e).__name__),
-            error_file = __file__,
-            error_info = f'\n{traceback.format_exc()}'
-        )
-        return None
+        raise e

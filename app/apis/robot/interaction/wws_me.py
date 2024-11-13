@@ -1,11 +1,9 @@
-import uuid
-import traceback
-
 from ..user_basic import get_user_name_and_clan
-from app.log import write_error_info
+from app.log import ExceptionLogger
 from app.network import DetailsAPI
 from app.response import JSONResponse
 
+@ExceptionLogger.handle_program_exception_async
 async def main(
     account_id: int, 
     region_id: int, 
@@ -50,12 +48,4 @@ async def main(
         # 返回结果
         return JSONResponse.get_success_response(data)
     except Exception as e:
-        error_id = str(uuid.uuid4())
-        write_error_info(
-            error_id = error_id,
-            error_type = 'Program',
-            error_name = str(type(e).__name__),
-            error_file = __file__,
-            error_info = f'\n{traceback.format_exc()}'
-        )
-        return JSONResponse.get_error_response(5000,'ProgramError',error_id)
+        raise e

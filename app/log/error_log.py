@@ -25,7 +25,8 @@ def write_error_info(
     error_type: str,
     error_name: str,
     error_file: str,
-    error_info: str
+    error_args: str = None,
+    error_info: str = None
 ):
     now_day = TimeFormat.get_today()
     form_time = TimeFormat.get_form_time()
@@ -37,6 +38,6 @@ def write_error_info(
         f.write(f">Error Name:   {error_name}\n")
         f.write(f">Error File:   {error_file}\n")
         f.write(f">Error Time:   {form_time}\n")
-        f.write(f">Error Info: {error_info}\n")
+        f.write(f">Error Info:   \n{error_args}\n{error_info}\n")
         f.write('-------------------------------------------------------------------------------------------------------------\n')
     f.close()
