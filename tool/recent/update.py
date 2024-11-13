@@ -174,7 +174,7 @@ class Recent_Update:
         else:
             # 检查存储的数据是否超过允许的储存的上限
             # 如果超过则删除超过部分的数据
-            if len(user_info_data) > user_recent_result['recent_class']:
+            if len(user_info_data) > user_recent_result['recent_class'] + 1:
                 del_table_dict = {}
                 del_date_dict = {}
                 # 获取需要删除date下的table_name
