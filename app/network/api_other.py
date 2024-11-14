@@ -1,6 +1,3 @@
-import uuid
-import traceback
-
 import httpx
 
 from .api_base import BaseUrl

@@ -1,6 +1,5 @@
 import gc
 from app.log import ExceptionLogger
-from app.response import JSONResponse
 from app.models import UserModel
 
 class GameUser:

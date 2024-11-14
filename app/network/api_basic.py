@@ -1,6 +1,4 @@
-import uuid
 import asyncio
-import traceback
 
 import httpx
 

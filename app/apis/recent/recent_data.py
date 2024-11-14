@@ -13,7 +13,7 @@ class RecentData:
             if result.get('code', None) != 1000:
                 return result
             data = result['data']
-            return JSONResponse.get_success_response(data)            
+            return JSONResponse.get_success_response(data)    
         except Exception as e:
             raise e
         finally:

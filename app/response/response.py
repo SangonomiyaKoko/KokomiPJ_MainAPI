@@ -21,7 +21,7 @@ class JSONResponse:
     API_1004_IllegalClanIDorRegionID = {'status': 'ok','code': 1004,'message': 'IllegalClanIDorRegionID','data' : None}
     API_1005_UserHiddenProfite = {'status': 'ok','code': 1005,'message': 'UserHiddenProfite','data' : None}
     API_1006_UserDataisNone = {'status': 'ok','code': 1006,'message': 'UserDataisNone','data' : None}
-    API_1007_CLanDataisNone = {'status': 'ok','code': 1007,'message': 'CLanDataisNone','data' : None}
+    API_1007_ClanDataisNone = {'status': 'ok','code': 1007,'message': 'ClanDataisNone','data' : None}
     API_1008_UserNotExistinDatabase = {'status': 'ok','code': 1008,'message': 'UserNotExistinDatabase','data' : None}
     API_1009_ClanNotExistinDatabase = {'status': 'ok','code': 1009,'message': 'ClanNotExistinDatabase','data' : None}
     API_1010_IllegalRegion = {'status': 'ok','code': 1010,'message': 'IllegalRegion','data' : None}
@@ -32,6 +32,9 @@ class JSONResponse:
     API_1015_EnableRecentsFailed = {'status': 'ok','code': 1015,'message': 'EnableRecentsFailed','data' : None}
     API_1016_UserInBlacklist = {'status': 'ok','code': 1016,'message': 'UserInBlacklist','data': None}
     API_1017_ClanInBlacklist = {'status': 'ok','code': 1017,'message': 'ClanInBlacklist','data': None}
+    API_1018_RecentNotEnabled = {'status': 'ok','code': 1018,'message': 'RecentNotEnabled','data': None}
+
+    # API_1_ = {'status': 'ok','code': 1,'message': '','data': None}
 
 
     @staticmethod

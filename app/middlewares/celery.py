@@ -1,5 +1,3 @@
-import uuid
-import traceback
 import pymysql
 from dbutils.pooled_db import PooledDB
 from celery import Celery, signals
