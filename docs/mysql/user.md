@@ -77,8 +77,12 @@ CREATE TABLE user_cache (
     -- 相关id
     id               INT          AUTO_INCREMENT,
     account_id       BIGINT       NOT NULL,     -- 1-11位的非连续数字
+    -- 记录用户上次更新的PR数据
+    pr_data          INT          DEFAULT -1,   -- PR缓存数据
+    pr_updated       INT          DEFAULT 0,    -- PR缓存更新时间
     -- 记录用户缓存的数据和更新时间
-    cache_data       INT          DEFAULT -1,   -- 数据条目的数量,-1表示新增用户
+    ships_data       BLOB         DEFAULT NULL,  -- 数据
+    ships_data       INT          DEFAULT 0,    
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -106,6 +110,52 @@ CREATE TABLE user_cache (
 | 8            | 20d               |
 | 9            | 25d               |
 
+#### 用户 cache_data 格式
+
+##### 存储字典格式的数据（用户船只数据缓存）
+
+```python
+user_ship_data = {
+    # Key: Value
+    # 船只id: 总场次
+    4285445840: 75,
+    4077828048: 20,
+    3760075984: 191,
+    ... # 更多数据，最多不超过1000行数据
+}
+```
+
+因为上述数据为纯数字，所以直接存储二进制更为节省空间
+
+每行数据提供 7 字节的存储空间，前 34 比特存储船只 ID，后 22 比特存储船只总场次
+
+读取的时候，每次读取 7 个字节，解析出 key 和 value，返回字典
+
+```txt
+单个数据格式示例
+
+... | ---------------- 7 Byte ------------------- | ...
+... | ------- 34 Bit ------- | ----- 22 Bit ----- | ...
+... | --------- Key -------- | ------ Value ----- | ...
+
+Key：  船只ID，34位Bit存储
+Value：总场次，22位Bit存储
+```
+
+##### 两种存储方式效率的分析
+
+> 测试数据行数: 229 行, 9312 字节
+
+1. Str <-> Dict 转换
+   - 存储空间：3539 字节
+   - 解析耗时：0.001 ± 0.0005 s
+
+2. Byte <-> Dict 转换
+   - 存储空间：1603 字节
+   - 解析耗时：0.001 ± 0.001 s
+
+结论: 在花费时间基本不变的情况下，减少了数据库 55% 的存储空间
+
 ### Table 4：Cache
 
 用于记录用户中所有的 ship_id 的数据
@@ -119,20 +169,24 @@ CREATE TABLE user_details (
     -- 用户基本信息
     ship_id          BIGINT       NOT NULL,
     account_id       BIGINT       NOT NULL,
-    -- 具体数据
-    battles_count    INT          NULL,
-    wins             INT          NULL,
-    damage_dealt     BIGINT       NULL,
-    frags            INT          NULL,
-    exp              BIGINT       NULL,
-    survived         INT          NULL,
-    scouting_damage  BIGINT       NULL,
-    art_agro         BIGINT       NULL,
-    planes_killed    INT          NULL,
-    -- Record
-    max_exp          INT          NULL,
-    max_damage_dealt INT          NULL,
-    max_frags        INT          NULL,
+    -- 场次，其中根据组队占比增加 `组队效率` 算法
+    battles_count    INT          NULL,    -- 总场次
+    battles_type_1   INT          NULL,      -- 单野场次
+    battles_type_2   INT          NULL,      -- 双排场次
+    battles_type_3   INT          NULL,      -- 三排场次
+    -- 具体数据，用于计算数据
+    wins             INT          NULL,    -- 胜场
+    damage_dealt     BIGINT       NULL,    -- 总伤害
+    frags            INT          NULL,    -- 总击杀数
+    exp              BIGINT       NULL,    -- 总裸经验
+    survived         INT          NULL,    -- 总存活场次
+    scouting_damage  BIGINT       NULL,    -- 总侦查伤害
+    art_agro         BIGINT       NULL,    -- 总潜在伤害
+    planes_killed    INT          NULL,    -- 总飞机击杀数
+    -- 最高记录
+    max_exp          INT          NULL,    -- 最高裸经验
+    max_damage_dealt INT          NULL,    -- 最高伤害
+    max_frags        INT          NULL,    -- 最多击杀
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
