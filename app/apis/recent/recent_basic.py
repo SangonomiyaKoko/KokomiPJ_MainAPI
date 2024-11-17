@@ -2,7 +2,7 @@ import gc
 
 from app.network import BasicAPI
 from app.log import ExceptionLogger
-from app.response import JSONResponse
+from app.response import JSONResponse, ResponseDict
 from app.models import RecentUserModel, UserModel, UserAccessToken
 from app.utils import UtilityFunctions, TimeFormat
 from app.middlewares.celery import task_check_user_basic, task_check_user_info
@@ -10,21 +10,7 @@ from app.middlewares.celery import task_check_user_basic, task_check_user_info
 
 class RecentBasic:
     @ExceptionLogger.handle_program_exception_async
-    async def get_overview():
-        try:
-            data = {}
-            result = await RecentUserModel.get_recent_user_overview()
-            if result.get('code', None) != 1000:
-                return result
-            data = result['data']
-            return JSONResponse.get_success_response(data)            
-        except Exception as e:
-            raise e
-        finally:
-            gc.collect()
-
-    @ExceptionLogger.handle_program_exception_async
-    async def get_recent(region_id: int):
+    async def get_recent(region_id: int) -> ResponseDict:
         try:
             data = {
                 'users': None,
@@ -44,7 +30,7 @@ class RecentBasic:
 
     @classmethod
     @ExceptionLogger.handle_program_exception_async
-    async def add_recent(self, account_id: int,region_id: int, recent_class: int):
+    async def add_recent(self, account_id: int,region_id: int, recent_class: int) -> ResponseDict:
         try:
             check_result = await self.__check_user_status(account_id,region_id)
             if check_result.get('code',None) != 1000:
@@ -58,7 +44,7 @@ class RecentBasic:
 
     @classmethod
     @ExceptionLogger.handle_program_exception_async
-    async def update_recent(self, user_recent: dict):
+    async def update_recent(self, user_recent: dict) -> ResponseDict:
         try:
             result = await RecentUserModel.update_recent_user(user_recent)
             return result
@@ -68,7 +54,7 @@ class RecentBasic:
             gc.collect()
 
     @ExceptionLogger.handle_program_exception_async
-    async def del_recent(account_id: int,region_id: int):
+    async def del_recent(account_id: int,region_id: int) -> ResponseDict:
         try:
             result = await RecentUserModel.del_recent_user(account_id,region_id)
             return result
@@ -78,32 +64,22 @@ class RecentBasic:
             gc.collect()
 
     @ExceptionLogger.handle_program_exception_async
-    async def get_user_recent(account_id: int, region_id: int):
+    async def get_user_recent(account_id: int, region_id: int) -> ResponseDict:
         try:
-            data = {
-                'user_recent': None,
-                'user_info': None
-            } 
-            user_recent_result = await RecentUserModel.get_user_recent_data(account_id,region_id)
-            if user_recent_result.get('code', None) != 1000:
-                return user_recent_result
-            data['user_recent'] = user_recent_result['data']
-            user_info_result = await UserModel.get_user_info(account_id)
-            if user_info_result.get('code', None) != 1000:
-                return user_info_result
-            data['user_info'] = user_info_result['data']
-            return JSONResponse.get_success_response(data)
+            result = await RecentUserModel.get_user_recent_data(account_id,region_id)
+            return result
         except Exception as e:
             raise e
         finally:
             gc.collect()
 
-    async def __check_user_status(account_id: int,region_id: int):
+    async def __check_user_status(account_id: int,region_id: int) -> ResponseDict:
         '''检查用户数据是否符合开启recent的条件
 
         1. 账号有数据
         2. 最近6个月活跃
-        
+
+        只有符合条件的账号才会启用
         '''
         # 用于后台更新user_info表的数据
         user_info = {

@@ -3,40 +3,14 @@ from aiomysql.cursors import Cursor
 
 from app.db import MysqlConnection
 from app.log import ExceptionLogger
-from app.response import JSONResponse
+from app.response import JSONResponse, ResponseDict
 from app.utils import TimeFormat
 
 
 
 class RecentUserModel:
     @ExceptionLogger.handle_database_exception_async
-    async def get_recent_user_overview():
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
-        try:
-            data = {}
-            await cur.execute(
-                "SELECT r.region_str, COALESCE(COUNT(u.region_id), 0) AS count "
-                "FROM region AS r "
-                "LEFT JOIN recent AS u ON r.region_id = u.region_id "
-                "WHERE r.region_id BETWEEN 1 AND 5 "
-                "GROUP BY r.region_id, r.region_str;"
-            )
-            users = await cur.fetchall()
-            for user in users:
-                data[user[0]] = user[1]
-            return JSONResponse.get_success_response(data)
-        except Exception as e:
-            # 数据库回滚
-            await conn.rollback()
-            raise e
-        finally:
-            # 释放资源
-            await cur.close()
-            await MysqlConnection.release_connection(conn)
-
-    @ExceptionLogger.handle_database_exception_async
-    async def get_recent_user_by_rid(region_id: int):
+    async def get_recent_user_by_rid(region_id: int) -> ResponseDict:
         conn: Connection = await MysqlConnection.get_connection()
         cur: Cursor = await conn.cursor()
         try:
@@ -59,7 +33,7 @@ class RecentUserModel:
             await MysqlConnection.release_connection(conn)
 
     @ExceptionLogger.handle_database_exception_async
-    async def check_recent_user(account_id: int, region_id: int):
+    async def check_recent_user(account_id: int, region_id: int) -> ResponseDict:
         try:
             conn: Connection = await MysqlConnection.get_connection()
             cur: Cursor = await conn.cursor()
@@ -81,7 +55,7 @@ class RecentUserModel:
             await MysqlConnection.release_connection(conn)
 
     @ExceptionLogger.handle_database_exception_async
-    async def add_recent_user(account_id: int, region_id: int, recent_class: int):
+    async def add_recent_user(account_id: int, region_id: int, recent_class: int) -> ResponseDict:
         conn: Connection = await MysqlConnection.get_connection()
         cur: Cursor = await conn.cursor()
         try:
@@ -116,7 +90,7 @@ class RecentUserModel:
             await MysqlConnection.release_connection(conn)
 
     @ExceptionLogger.handle_database_exception_async
-    async def del_recent_user(account_id: int, region_id: int):
+    async def del_recent_user(account_id: int, region_id: int) -> ResponseDict:
         conn: Connection = await MysqlConnection.get_connection()
         cur: Cursor = await conn.cursor()
         try:
@@ -136,14 +110,15 @@ class RecentUserModel:
             await MysqlConnection.release_connection(conn)
 
     @ExceptionLogger.handle_database_exception_async
-    async def update_recent_user(user_recent: dict):
+    async def update_recent_user(user_recent: dict) -> ResponseDict:
         conn: Connection = await MysqlConnection.get_connection()
         cur: Cursor = await conn.cursor()
         try:
             account_id = user_recent['account_id']
             region_id = user_recent['region_id']
             await cur.execute(
-                "SELECT recent_class, last_query_time, last_update_time FROM recent WHERE region_id = %s and account_id = %s;", 
+                "SELECT recent_class, last_query_time, last_update_time "
+                "FROM recent WHERE region_id = %s and account_id = %s;", 
                 [region_id, account_id]
             )
             user = await cur.fetchone()
@@ -175,22 +150,35 @@ class RecentUserModel:
             await MysqlConnection.release_connection(conn)
 
     @ExceptionLogger.handle_database_exception_async
-    async def get_user_recent_data(account_id: int, region_id: int):
+    async def get_user_recent_data(account_id: int, region_id: int) -> ResponseDict:
         '''获取用户recent表的数据'''
         conn: Connection = await MysqlConnection.get_connection()
         cur: Cursor = await conn.cursor()
         try:
             await cur.execute(
-                "SELECT recent_class, last_query_time, last_update_time FROM recent "
-                "WHERE region_id = %s and account_id = %s;",
+                "SELECT u.is_active, u.active_level, u.is_public, u.total_battles, u.last_battle_time, UNIX_TIMESTAMP(u.updated_at) AS update_time, "
+                "r.recent_class, r.last_query_time, r.last_update_time "
+                "FROM recent AS r "
+                "LEFT JOIN user_info AS u ON u.account_id = r.account_id "
+                "WHERE r.region_id = %s and r.account_id = %s;",
                 [region_id, account_id]
             )
             user = await cur.fetchone()
             if user:
                 data = {
-                    'recent_class': user[0],
-                    'last_query_time': user[1],
-                    'last_update_time': user[2]
+                    'user_recent': {
+                        'recent_class': user[6],
+                        'last_query_time': user[7],
+                        'last_update_time': user[8]
+                    },
+                    'user_info': {
+                        'is_active': user[0],
+                        'active_level': user[1],
+                        'is_public': user[2],
+                        'total_battles': user[3],
+                        'last_battle_time': user[4],
+                        'update_time': user[5]
+                    }
                 }
             else:
                 data = None

@@ -2,15 +2,12 @@ from aiomysql.connection import Connection
 from aiomysql.cursors import Cursor
 
 from app.db import MysqlConnection
-from app.response import JSONResponse
+from app.response import JSONResponse, ResponseDict
 from app.log import ExceptionLogger
 
 class ClanModel:
     @ExceptionLogger.handle_database_exception_async
-    async def get_clan_tag_and_league(
-        clan_id: int, 
-        region_id: int
-    ) -> dict:
+    async def get_clan_tag_and_league(clan_id: int, region_id: int) -> ResponseDict:
         '''获取工会名称
 
         从clan_basic中获取工会名称数据

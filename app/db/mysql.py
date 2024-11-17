@@ -24,7 +24,10 @@ class MysqlConnection:
                 user=config.MYSQL_USERNAME, 
                 password=config.MYSQL_PASSWORD, 
                 db='kokomi',
-                pool_recycle=3600
+                pool_recycle=3600, # 设置连接的回收时间
+                autocommit=False  # 禁用隐式事务
+                # 由于禁用了隐式事务，必须确保事务被正确提交或者回滚！
+                # 如果未调用，事务将保持未提交状态，可能会导致死锁或连接超时问题
             )
             api_logger.info('MySQL connection initialization is complete')
         except Exception as e:

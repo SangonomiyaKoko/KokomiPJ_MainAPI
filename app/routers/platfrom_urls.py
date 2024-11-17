@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from .schemas import RegionList, LanguageList, UserInfoModel, UserBasicModel
 from app.apis.platform import Search, Update, GameUser
 from app.utils import UtilityFunctions
-from app.response import JSONResponse
+from app.response import JSONResponse, ResponseDict
 from app.middlewares import record_api_call
 
 router = APIRouter()
@@ -16,7 +16,7 @@ async def searchUser(
     nickname: str,
     limit: Optional[int] = 10,
     check: Optional[bool] = False
-):
+) -> ResponseDict:
     """用户搜索接口
 
     搜索输入的用户名称
@@ -53,7 +53,7 @@ async def searchClan(
     tag: str,
     limit: Optional[int] = 10,
     check: Optional[bool] = False
-):
+) -> ResponseDict:
     """工会搜索接口
 
     搜索输入的工会名称
@@ -90,7 +90,7 @@ async def searchShip(
     region: RegionList,
     language: LanguageList,
     shipname: str
-):
+) -> ResponseDict:
     """船只搜索接口
 
     搜索输入的船只名称
@@ -119,9 +119,7 @@ async def searchShip(
 
 
 @router.put("/update/ship-name/")
-async def updateShipName(
-    region: RegionList,
-):
+async def updateShipName(region: RegionList) -> ResponseDict:
     """更新船只名称数据
 
     更新wg或者lesta船只的数据
@@ -142,7 +140,7 @@ async def updateShipName(
 
 
 @router.post("/game/user/basic/")
-async def post_user_info(user_basic: UserBasicModel):
+async def post_user_info(user_basic: UserBasicModel) -> ResponseDict:
     result = await GameUser.check_user_basic_data(user_basic.model_dump())
     await record_api_call(result['status'])
     # 返回结果
@@ -150,7 +148,7 @@ async def post_user_info(user_basic: UserBasicModel):
 
 
 @router.get("/game/user/info/")
-async def get_user_info(account_id: int):
+async def get_user_info(account_id: int) -> ResponseDict:
     result = await GameUser.get_user_info_data(account_id)
     await record_api_call(result['status'])
     # 返回结果
@@ -158,7 +156,7 @@ async def get_user_info(account_id: int):
 
 
 @router.post("/game/user/info/")
-async def post_user_info(user_info: UserInfoModel):
+async def post_user_info(user_info: UserInfoModel) -> ResponseDict:
     result = await GameUser.check_user_info_data(user_info.model_dump())
     await record_api_call(result['status'])
     # 返回结果

@@ -1,4 +1,11 @@
-from typing import Any, Optional
+from typing import TypedDict, Optional, Literal, Any
+
+class ResponseDict(TypedDict):
+    '''返回数据格式'''
+    status: Literal['ok', 'error']
+    code: int
+    message: str
+    data: Optional[dict]
 
 class JSONResponse:
     '''接口返回值

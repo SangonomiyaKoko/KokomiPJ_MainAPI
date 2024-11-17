@@ -1,10 +1,11 @@
 import gc
 from app.log import ExceptionLogger
+from app.response import ResponseDict
 from app.models import UserModel
 
 class GameUser:
     @ExceptionLogger.handle_program_exception_async
-    async def get_user_info_data(account_id: int) -> dict:
+    async def get_user_info_data(account_id: int) -> ResponseDict:
         try:
             result = await UserModel.get_user_info(account_id)
             return result
@@ -14,7 +15,7 @@ class GameUser:
             gc.collect()
 
     @ExceptionLogger.handle_program_exception_async
-    async def check_user_info_data(user_info: dict) -> dict:
+    async def check_user_info_data(user_info: dict) -> ResponseDict:
         try:
             result = await UserModel.check_user_info(user_info)
             return result
@@ -24,7 +25,7 @@ class GameUser:
             gc.collect()
 
     @ExceptionLogger.handle_program_exception_async
-    async def check_user_basic_data(user_basic: dict) -> dict:
+    async def check_user_basic_data(user_basic: dict) -> ResponseDict:
         try:
             result = await UserModel.check_user_basic(user_basic)
             return result

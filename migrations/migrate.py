@@ -62,12 +62,12 @@ CREATE TABLE user_info (
     FOREIGN KEY (account_id) REFERENCES user_basic(account_id) ON DELETE CASCADE -- 外键
 );
 
-CREATE TABLE user_cache (
+CREATE TABLE user_ships (
     -- 相关id
     id               INT          AUTO_INCREMENT,
     account_id       BIGINT       NOT NULL,     -- 1-11位的非连续数字
     -- 记录用户缓存的数据和更新时间
-    cache_data       INT          DEFAULT -1,   -- 数据条目的数量,-1表示新增用户
+    ships_data       BLOB         DEFAULT NULL,  -- 数据
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -75,6 +75,178 @@ CREATE TABLE user_cache (
     PRIMARY KEY (id), -- 主键
 
     UNIQUE INDEX idx_aid (account_id), -- 索引
+
+    FOREIGN KEY (account_id) REFERENCES user_basic(account_id) ON DELETE CASCADE -- 外键
+);
+
+CREATE TABLE user_pr (
+    -- 相关id
+    id               INT          AUTO_INCREMENT,
+    account_id       BIGINT       NOT NULL,     -- 1-11位的非连续数字
+    -- 记录用户pr缓存的数据和更新时间
+    pr_data          INT          DEFAULT -2,    -- -2表示无数据，-1表示无法计算，0~9999表示pr值
+    -- 记录数据创建的时间和更新时间
+    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id), -- 主键
+
+    UNIQUE INDEX idx_aid (account_id), -- 索引
+
+    FOREIGN KEY (account_id) REFERENCES user_basic(account_id) ON DELETE CASCADE -- 外键
+);
+
+CREATE TABLE user_ship_00 (
+    -- 用户基本信息
+    ship_id          BIGINT       NOT NULL,
+    account_id       BIGINT       NOT NULL,
+    -- 场次，其中根据组队占比增加 `组队效率` 算法
+    battles_count    INT          NULL,    -- 总场次
+    battle_type_1    INT          NULL,      -- 单野场次
+    battle_type_2    INT          NULL,      -- 双排场次
+    battle_type_3    INT          NULL,      -- 三排场次
+    -- 具体数据，用于计算数据
+    wins             INT          NULL,    -- 胜场
+    damage_dealt     BIGINT       NULL,    -- 总伤害
+    frags            INT          NULL,    -- 总击杀数
+    exp              BIGINT       NULL,    -- 总裸经验
+    survived         INT          NULL,    -- 总存活场次
+    scouting_damage  BIGINT       NULL,    -- 总侦查伤害
+    art_agro         BIGINT       NULL,    -- 总潜在伤害
+    planes_killed    INT          NULL,    -- 总飞机击杀数
+    -- 最高记录
+    max_exp          INT          NULL,    -- 最高裸经验
+    max_damage_dealt INT          NULL,    -- 最高伤害
+    max_frags        INT          NULL,    -- 最多击杀
+    -- 记录数据创建的时间和更新时间
+    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (ship_id, account_id), -- 主键
+
+    FOREIGN KEY (account_id) REFERENCES user_basic(account_id) ON DELETE CASCADE -- 外键
+);
+
+CREATE TABLE user_ship_02 (
+    -- 用户基本信息
+    ship_id          BIGINT       NOT NULL,
+    account_id       BIGINT       NOT NULL,
+    -- 场次，其中根据组队占比增加 `组队效率` 算法
+    battles_count    INT          NULL,    -- 总场次
+    battle_type_1    INT          NULL,      -- 单野场次
+    battle_type_2    INT          NULL,      -- 双排场次
+    battle_type_3    INT          NULL,      -- 三排场次
+    -- 具体数据，用于计算数据
+    wins             INT          NULL,    -- 胜场
+    damage_dealt     BIGINT       NULL,    -- 总伤害
+    frags            INT          NULL,    -- 总击杀数
+    exp              BIGINT       NULL,    -- 总裸经验
+    survived         INT          NULL,    -- 总存活场次
+    scouting_damage  BIGINT       NULL,    -- 总侦查伤害
+    art_agro         BIGINT       NULL,    -- 总潜在伤害
+    planes_killed    INT          NULL,    -- 总飞机击杀数
+    -- 最高记录
+    max_exp          INT          NULL,    -- 最高裸经验
+    max_damage_dealt INT          NULL,    -- 最高伤害
+    max_frags        INT          NULL,    -- 最多击杀
+    -- 记录数据创建的时间和更新时间
+    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (ship_id, account_id), -- 主键
+
+    FOREIGN KEY (account_id) REFERENCES user_basic(account_id) ON DELETE CASCADE -- 外键
+);
+
+CREATE TABLE user_ship_04 (
+    -- 用户基本信息
+    ship_id          BIGINT       NOT NULL,
+    account_id       BIGINT       NOT NULL,
+    -- 场次，其中根据组队占比增加 `组队效率` 算法
+    battles_count    INT          NULL,    -- 总场次
+    battle_type_1    INT          NULL,      -- 单野场次
+    battle_type_2    INT          NULL,      -- 双排场次
+    battle_type_3    INT          NULL,      -- 三排场次
+    -- 具体数据，用于计算数据
+    wins             INT          NULL,    -- 胜场
+    damage_dealt     BIGINT       NULL,    -- 总伤害
+    frags            INT          NULL,    -- 总击杀数
+    exp              BIGINT       NULL,    -- 总裸经验
+    survived         INT          NULL,    -- 总存活场次
+    scouting_damage  BIGINT       NULL,    -- 总侦查伤害
+    art_agro         BIGINT       NULL,    -- 总潜在伤害
+    planes_killed    INT          NULL,    -- 总飞机击杀数
+    -- 最高记录
+    max_exp          INT          NULL,    -- 最高裸经验
+    max_damage_dealt INT          NULL,    -- 最高伤害
+    max_frags        INT          NULL,    -- 最多击杀
+    -- 记录数据创建的时间和更新时间
+    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (ship_id, account_id), -- 主键
+
+    FOREIGN KEY (account_id) REFERENCES user_basic(account_id) ON DELETE CASCADE -- 外键
+);
+
+CREATE TABLE user_ship_06 (
+    -- 用户基本信息
+    ship_id          BIGINT       NOT NULL,
+    account_id       BIGINT       NOT NULL,
+    -- 场次，其中根据组队占比增加 `组队效率` 算法
+    battles_count    INT          NULL,    -- 总场次
+    battle_type_1    INT          NULL,      -- 单野场次
+    battle_type_2    INT          NULL,      -- 双排场次
+    battle_type_3    INT          NULL,      -- 三排场次
+    -- 具体数据，用于计算数据
+    wins             INT          NULL,    -- 胜场
+    damage_dealt     BIGINT       NULL,    -- 总伤害
+    frags            INT          NULL,    -- 总击杀数
+    exp              BIGINT       NULL,    -- 总裸经验
+    survived         INT          NULL,    -- 总存活场次
+    scouting_damage  BIGINT       NULL,    -- 总侦查伤害
+    art_agro         BIGINT       NULL,    -- 总潜在伤害
+    planes_killed    INT          NULL,    -- 总飞机击杀数
+    -- 最高记录
+    max_exp          INT          NULL,    -- 最高裸经验
+    max_damage_dealt INT          NULL,    -- 最高伤害
+    max_frags        INT          NULL,    -- 最多击杀
+    -- 记录数据创建的时间和更新时间
+    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (ship_id, account_id), -- 主键
+
+    FOREIGN KEY (account_id) REFERENCES user_basic(account_id) ON DELETE CASCADE -- 外键
+);
+
+CREATE TABLE user_ship_08 (
+    -- 用户基本信息
+    ship_id          BIGINT       NOT NULL,
+    account_id       BIGINT       NOT NULL,
+    -- 场次，其中根据组队占比增加 `组队效率` 算法
+    battles_count    INT          NULL,    -- 总场次
+    battle_type_1    INT          NULL,      -- 单野场次
+    battle_type_2    INT          NULL,      -- 双排场次
+    battle_type_3    INT          NULL,      -- 三排场次
+    -- 具体数据，用于计算数据
+    wins             INT          NULL,    -- 胜场
+    damage_dealt     BIGINT       NULL,    -- 总伤害
+    frags            INT          NULL,    -- 总击杀数
+    exp              BIGINT       NULL,    -- 总裸经验
+    survived         INT          NULL,    -- 总存活场次
+    scouting_damage  BIGINT       NULL,    -- 总侦查伤害
+    art_agro         BIGINT       NULL,    -- 总潜在伤害
+    planes_killed    INT          NULL,    -- 总飞机击杀数
+    -- 最高记录
+    max_exp          INT          NULL,    -- 最高裸经验
+    max_damage_dealt INT          NULL,    -- 最高伤害
+    max_frags        INT          NULL,    -- 最多击杀
+    -- 记录数据创建的时间和更新时间
+    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (ship_id, account_id), -- 主键
 
     FOREIGN KEY (account_id) REFERENCES user_basic(account_id) ON DELETE CASCADE -- 外键
 );
@@ -158,7 +330,7 @@ CREATE TABLE recent (
     region_id        TINYINT      NOT NULL,
     -- 用户配置
     recent_class     INT          DEFAULT 30,     -- 最多保留多少天的数据
-    last_query_time  INT          DEFAULT CURRENT_TIMESTAMP, -- 该功能上次查询的时间
+    last_query_time  INT          DEFAULT 0, -- 该功能上次查询的时间
     last_update_time INT          DEFAULT 0,      -- 数据库上次更新时间
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,

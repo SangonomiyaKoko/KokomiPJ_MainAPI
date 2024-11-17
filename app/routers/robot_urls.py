@@ -4,7 +4,7 @@ from fastapi import APIRouter
 
 from .schemas import RegionList, LanguageList
 from app.utils import UtilityFunctions
-from app.response import JSONResponse
+from app.response import JSONResponse, ResponseDict
 from app.apis.robot import wws_me
 
 router = APIRouter()
@@ -15,8 +15,7 @@ async def getUserBasic(
     account_id: int,
     language: LanguageList,
     ac_value: Optional[str] = None
-):
-    
+) -> ResponseDict:
     # 参数效验
     region_id = UtilityFunctions.get_region_id(region)
     if not region_id:

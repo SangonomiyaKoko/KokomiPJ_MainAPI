@@ -46,8 +46,8 @@ class HandleLog:
     """
 
     def __init__(self):
-        self.__all_log_path = os.path.join(LOG_PATH, 'recent-log' + "-all" + ".log")  # 收集所有日志信息文件
-        self.__error_log_path = os.path.join(LOG_PATH, 'recent-log' + "-error" + ".log")  # 收集错误日志信息文件
+        self.__all_log_path = os.path.join(LOG_PATH, f'{CLIENT_NAME}-log' + "-all" + ".log")  # 收集所有日志信息文件
+        self.__error_log_path = os.path.join(LOG_PATH, f'{CLIENT_NAME}-log' + "-error" + ".log")  # 收集错误日志信息文件
         self.__logger = logging.getLogger(CLIENT_NAME)  # 创建日志记录器
         self.__logger.setLevel(set_log_level)  # 设置日志记录器记录级别
 

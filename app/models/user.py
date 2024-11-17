@@ -3,11 +3,11 @@ from aiomysql.cursors import Cursor
 
 from app.db import MysqlConnection
 from app.log import ExceptionLogger
-from app.response import JSONResponse
+from app.response import JSONResponse, ResponseDict
 
 class UserModel:
     @ExceptionLogger.handle_database_exception_async
-    async def get_user_basic(account_id: int, region_id: int) -> dict:
+    async def get_user_basic(account_id: int, region_id: int) -> ResponseDict:
         '''获取用户名称
 
         从user_basic中获取用户名称数据
@@ -34,7 +34,7 @@ class UserModel:
             )
             user = await cur.fetchone()
             if user is None:
-                await conn.begin()
+                await conn.begin() # 开始事务
                 # 用户不存在，插入新用户
                 nickname = f'User_{account_id}'
                 await cur.execute(
@@ -46,10 +46,14 @@ class UserModel:
                     [account_id]
                 )
                 await cur.execute(
-                    "INSERT IGNORE INTO user_cache (account_id) VALUES (%s);", 
+                    "INSERT IGNORE INTO user_ships (account_id) VALUES (%s);", 
                     [account_id]
                 )
-                await conn.commit()
+                await cur.execute(
+                    "INSERT IGNORE INTO user_pr (account_id) VALUES (%s);", 
+                    [account_id]
+                )
+                await conn.commit() # 提交事务
                 data['nickname'] = nickname
                 data['update_time'] = 0
             else:
@@ -66,7 +70,7 @@ class UserModel:
             await MysqlConnection.release_connection(conn)
 
     @ExceptionLogger.handle_database_exception_async
-    async def check_user_basic(user_basic: dict) -> dict:
+    async def check_user_basic(user_basic: dict) -> ResponseDict:
         conn: Connection = await MysqlConnection.get_connection()
         cur: Cursor = await conn.cursor()
         try:
@@ -78,8 +82,8 @@ class UserModel:
                 [region_id, account_id]
             )
             user = await cur.fetchone()
+            await conn.begin()
             if user is None:
-                await conn.begin()
                 # 用户不存在，插入新用户
                 nickname = f'User_{account_id}'
                 await cur.execute(
@@ -91,7 +95,11 @@ class UserModel:
                     [account_id]
                 )
                 await cur.execute(
-                    "INSERT IGNORE INTO user_cache (account_id) VALUES (%s);", 
+                    "INSERT IGNORE INTO user_ships (account_id) VALUES (%s);", 
+                    [account_id]
+                )
+                await cur.execute(
+                    "INSERT IGNORE INTO user_pr (account_id) VALUES (%s);", 
                     [account_id]
                 )
             else:
@@ -117,7 +125,7 @@ class UserModel:
             await MysqlConnection.release_connection(conn)
 
     @ExceptionLogger.handle_database_exception_async
-    async def get_user_clan(account_id: int) -> dict:
+    async def get_user_clan(account_id: int) -> ResponseDict:
         '''获取用户所在工会数据
 
         从user_clan中获取用户工会数据
@@ -156,7 +164,7 @@ class UserModel:
             await MysqlConnection.release_connection(conn)
 
     @ExceptionLogger.handle_database_exception_async
-    async def get_user_info(account_id: int) -> dict:
+    async def get_user_info(account_id: int) -> ResponseDict:
         '''获取用户详细数据
 
         从user_info中获取用户详细数据
@@ -173,7 +181,8 @@ class UserModel:
         cur: Cursor = await conn.cursor()
         try:
             await cur.execute(
-                "SELECT is_active, active_level, is_public, total_battles, last_battle_time, UNIX_TIMESTAMP(updated_at) AS update_time FROM user_info WHERE account_id = %s;", 
+                "SELECT is_active, active_level, is_public, total_battles, last_battle_time, UNIX_TIMESTAMP(updated_at) AS update_time "
+                "FROM user_info WHERE account_id = %s;", 
                 [account_id]
             )
             user = await cur.fetchone()
@@ -199,7 +208,7 @@ class UserModel:
             await MysqlConnection.release_connection(conn)
 
     @ExceptionLogger.handle_database_exception_async
-    async def check_user_info(user_info: dict) -> dict:
+    async def check_user_info(user_info: dict) -> ResponseDict:
         '''检查并更新user_info表
 
         参数:

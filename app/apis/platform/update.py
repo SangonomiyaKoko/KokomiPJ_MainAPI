@@ -2,12 +2,12 @@ import gc
 
 from app.log import ExceptionLogger
 from app.network import OtherAPI
-from app.response import JSONResponse
+from app.response import JSONResponse, ResponseDict
 from app.json import JsonData
 
 class Update:
     @ExceptionLogger.handle_program_exception_async
-    async def update_ship_name(region_id: int):
+    async def update_ship_name(region_id: int) -> ResponseDict:
         "更新ship_name.json文件的数据"
         try:
             if region_id == 4:

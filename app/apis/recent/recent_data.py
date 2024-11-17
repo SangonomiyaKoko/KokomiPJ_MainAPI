@@ -2,11 +2,11 @@ import gc
 
 from app.log import ExceptionLogger
 from app.models import RecentUserModel
-from app.response import JSONResponse
+from app.response import JSONResponse, ResponseDict
 
 class RecentData:
     @ExceptionLogger.handle_database_exception_async
-    async def get_data_overview(account_id: int, region_id: int):
+    async def get_data_overview(account_id: int, region_id: int) -> ResponseDict:
         try:
             data = None
             result = await RecentUserModel.check_recent_user(account_id,region_id)

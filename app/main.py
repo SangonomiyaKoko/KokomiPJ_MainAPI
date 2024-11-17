@@ -13,7 +13,7 @@ from app.db import MysqlConnection
 from app.response import JSONResponse as API_JSONResponse
 from app.middlewares import RedisConnection, IPAccessListManager, rate_limit
 
-from app.routers import platform_router, robot_router, recent_1_router
+from app.routers import platform_router, robot_router, recent_1_router, root_router
 
 
 # 应用程序的生命周期
@@ -84,6 +84,12 @@ async def root():
 
 
 # 在主路由中注册子路由
+app.include_router(
+    root_router, 
+    prefix="/s", 
+    tags=['Root Interface']
+)
+
 app.include_router(
     platform_router, 
     prefix="/p", 

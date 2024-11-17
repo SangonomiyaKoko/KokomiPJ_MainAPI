@@ -3,14 +3,14 @@ from typing import Optional
 from app.models import UserModel, ClanModel
 from app.utils import UtilityFunctions
 from app.network import BasicAPI
-from app.response import JSONResponse
+from app.response import JSONResponse, ResponseDict
 from app.middlewares.celery import task_check_user_basic, task_check_clan_basic, task_update_user_clan, task_check_user_info
 
 async def get_user_name_and_clan(
     account_id: int,
     region_id: str,
     ac_value: Optional[str]
-):
+) -> ResponseDict:
     '''获取用户的基本数据(name+clan)
 
     这是一个公用函数，用于获取用户名称、工会以及状态

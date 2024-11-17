@@ -16,7 +16,7 @@ CREATE TABLE user_basic (
     username         VARCHAR(25)  NOT NULL,    -- 最大25个字符，编码：utf-8
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP    NOT NULL DEFAULT 0 ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id), -- 主键
 
@@ -68,21 +68,17 @@ CREATE TABLE user_info (
 | 1         | -             | [6m, 1y]         | 8            | -        |
 | 1         | -             | [1y, + ]         | 9            | 不活跃   |
 
-### Table 3: User_Cache
+### Table 3: User_Ships_Cache
 
 用于用户缓存相关的数据
 
 ```sql
-CREATE TABLE user_cache (
+CREATE TABLE user_ships (
     -- 相关id
     id               INT          AUTO_INCREMENT,
     account_id       BIGINT       NOT NULL,     -- 1-11位的非连续数字
-    -- 记录用户上次更新的PR数据
-    pr_data          INT          DEFAULT -1,   -- PR缓存数据
-    pr_updated       INT          DEFAULT 0,    -- PR缓存更新时间
     -- 记录用户缓存的数据和更新时间
     ships_data       BLOB         DEFAULT NULL,  -- 数据
-    ships_data       INT          DEFAULT 0,    
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -147,6 +143,7 @@ Value：总场次，22位Bit存储
 > 测试数据行数: 229 行, 9312 字节
 
 1. Str <-> Dict 转换
+
    - 存储空间：3539 字节
    - 解析耗时：0.001 ± 0.0005 s
 
@@ -156,7 +153,30 @@ Value：总场次，22位Bit存储
 
 结论: 在花费时间基本不变的情况下，减少了数据库 55% 的存储空间
 
-### Table 4：Cache
+### Table 4: User_PR_Cache
+
+用于用户缓存相关的数据
+
+```sql
+CREATE TABLE user_pr (
+    -- 相关id
+    id               INT          AUTO_INCREMENT,
+    account_id       BIGINT       NOT NULL,     -- 1-11位的非连续数字
+    -- 记录用户pr缓存的数据和更新时间
+    pr_data          INT          DEFAULT -2,    -- -2表示无数据，-1表示无法计算，0~9999表示pr值
+    -- 记录数据创建的时间和更新时间
+    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id), -- 主键
+
+    UNIQUE INDEX idx_aid (account_id), -- 索引
+
+    FOREIGN KEY (account_id) REFERENCES user_basic(account_id) ON DELETE CASCADE -- 外键
+);
+```
+
+### Table 5：User_Ship_Cache
 
 用于记录用户中所有的 ship_id 的数据
 
@@ -165,15 +185,15 @@ Value：总场次，22位Bit存储
 如果需要计算船只排行榜只用筛选出有效数据计算排行榜
 
 ```sql
-CREATE TABLE user_details (
+CREATE TABLE user_ship_00 (
     -- 用户基本信息
     ship_id          BIGINT       NOT NULL,
     account_id       BIGINT       NOT NULL,
     -- 场次，其中根据组队占比增加 `组队效率` 算法
     battles_count    INT          NULL,    -- 总场次
-    battles_type_1   INT          NULL,      -- 单野场次
-    battles_type_2   INT          NULL,      -- 双排场次
-    battles_type_3   INT          NULL,      -- 三排场次
+    battle_type_1    INT          NULL,      -- 单野场次
+    battle_type_2    INT          NULL,      -- 双排场次
+    battle_type_3    INT          NULL,      -- 三排场次
     -- 具体数据，用于计算数据
     wins             INT          NULL,    -- 胜场
     damage_dealt     BIGINT       NULL,    -- 总伤害
