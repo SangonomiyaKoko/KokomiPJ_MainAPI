@@ -38,19 +38,19 @@ class UserModel:
                 # 用户不存在，插入新用户
                 nickname = f'User_{account_id}'
                 await cur.execute(
-                    "INSERT IGNORE INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                    "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
                     [account_id, region_id, nickname]
                 )
                 await cur.execute(
-                    "INSERT IGNORE INTO user_info (account_id) VALUES (%s);", 
+                    "INSERT INTO user_info (account_id) VALUES (%s);", 
                     [account_id]
                 )
                 await cur.execute(
-                    "INSERT IGNORE INTO user_ships (account_id) VALUES (%s);", 
+                    "INSERT INTO user_ships (account_id) VALUES (%s);", 
                     [account_id]
                 )
                 await cur.execute(
-                    "INSERT IGNORE INTO user_pr (account_id) VALUES (%s);", 
+                    "INSERT INTO user_pr (account_id) VALUES (%s);", 
                     [account_id]
                 )
                 await conn.commit() # 提交事务
@@ -87,19 +87,19 @@ class UserModel:
                 # 用户不存在，插入新用户
                 nickname = f'User_{account_id}'
                 await cur.execute(
-                    "INSERT IGNORE INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                    "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
                     [account_id, region_id, nickname]
                 )
                 await cur.execute(
-                    "INSERT IGNORE INTO user_info (account_id) VALUES (%s);", 
+                    "INSERT INTO user_info (account_id) VALUES (%s);", 
                     [account_id]
                 )
                 await cur.execute(
-                    "INSERT IGNORE INTO user_ships (account_id) VALUES (%s);", 
+                    "INSERT INTO user_ships (account_id) VALUES (%s);", 
                     [account_id]
                 )
                 await cur.execute(
-                    "INSERT IGNORE INTO user_pr (account_id) VALUES (%s);", 
+                    "INSERT INTO user_pr (account_id) VALUES (%s);", 
                     [account_id]
                 )
             else:

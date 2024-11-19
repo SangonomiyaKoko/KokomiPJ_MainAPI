@@ -3,7 +3,7 @@ import asyncio
 from typing import Optional
 from dataclasses import dataclass
 
-from config import CLIENT_TYPE, SALVE_API_URL, MASTER_API_URL
+from config import API_URL
 
 VORTEX_API_URL_LIST = {
     1: 'http://vortex.worldofwarships.asia',
@@ -67,7 +67,7 @@ recent_json_index = [
     json_index('shots_by_tbomb',                37),
 ]
 
-class Recent_Network:
+class UserCache_Network:
     async def fetch_data(url, method: str = 'get', data: Optional[dict] = None):
         async with httpx.AsyncClient() as client:
             try:
@@ -136,4 +136,12 @@ class Recent_Network:
                 tasks.append(self.fetch_data(url))
             responses = await asyncio.gather(*tasks)
             return responses
+        
+    @classmethod
+    async def get_user_cache(self,account_id: int,region_id: int):
+        platform_api_url = API_URL
+        region = REGION_LIST.get(region_id)
+        url = f'{platform_api_url}/r1/features/user/?region={region}&account_id={account_id}'
+        result = await self.fetch_data(url)
+        return result
     

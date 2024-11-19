@@ -5,8 +5,9 @@ class UserAccessToken:
     
     account_id： 'access_token'
     '''
-    access_token_list = {1:{},2:{},3:{},4:{},5:{}}
+    access_token_list = {1:{},2:{},3:{},4:{'211817574':'X3mXceQus5lufCl5pJi5CMG6IKY'},5:{}}
     
     @classmethod
     def get_ac_value_by_rid(self, region_id) -> dict:
         return self.access_token_list.get(region_id)
+    
