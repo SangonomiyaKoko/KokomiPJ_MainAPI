@@ -7,6 +7,40 @@ from app.response import JSONResponse, ResponseDict
 
 class UserModel:
     @ExceptionLogger.handle_database_exception_async
+    async def get_user_max_number() -> ResponseDict:
+        '''获取数据库中id的最大值
+
+        获取id的最大值，用于数据库遍历更新
+
+        参数:
+            - None
+        
+        返回:
+            - ResponseDict
+        '''
+        conn: Connection = await MysqlConnection.get_connection()
+        cur: Cursor = await conn.cursor()
+        try:
+            data = {
+                'max_id': 0
+            }
+            await cur.execute(
+                "SELECT MAX(id) AS max_id FROM user_basic;"
+            )
+            user = await cur.fetchone()
+            data['max_id'] = user[0]
+            return JSONResponse.get_success_response(data)
+        except Exception as e:
+            # 数据库回滚
+            await conn.rollback()
+            raise e
+        finally:
+            # 释放资源
+            await cur.close()
+            await MysqlConnection.release_connection(conn)
+
+
+    @ExceptionLogger.handle_database_exception_async
     async def get_user_basic(account_id: int, region_id: int) -> ResponseDict:
         '''获取用户名称
 
@@ -19,7 +53,7 @@ class UserModel:
             region_id: 服务器id
 
         返回：
-            nickname: 用户昵称
+            ResponseDict
         '''
         conn: Connection = await MysqlConnection.get_connection()
         cur: Cursor = await conn.cursor()
@@ -134,7 +168,7 @@ class UserModel:
             account_id: 用户id
 
         返回：
-            nickname: 用户昵称
+            ResponseDict
         '''
         conn: Connection = await MysqlConnection.get_connection()
         cur: Cursor = await conn.cursor()
@@ -175,7 +209,7 @@ class UserModel:
             account_id: 用户id
 
         返回：
-            dict
+            ResponseDict
         '''
         conn: Connection = await MysqlConnection.get_connection()
         cur: Cursor = await conn.cursor()
@@ -213,6 +247,9 @@ class UserModel:
 
         参数:
             user_info: dict
+        
+        返回:
+            ResponseDict
         '''
         conn: Connection = await MysqlConnection.get_connection()
         cur: Cursor = await conn.cursor()
@@ -256,6 +293,9 @@ class UserModel:
         参数:
             offset: 从哪个id开始读取
             limit: 每次读取多少条数据
+        
+        返回值:
+            ResponseDict
         '''
         conn: Connection = await MysqlConnection.get_connection()
         cur: Cursor = await conn.cursor()

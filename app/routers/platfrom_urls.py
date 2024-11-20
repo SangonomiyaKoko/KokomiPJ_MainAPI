@@ -142,6 +142,13 @@ async def updateShipName(region: RegionList) -> ResponseDict:
     # 返回结果
     return result
 
+@router.get("/game/users/number/")
+async def get_user_max_number() -> ResponseDict:
+    result = await GameUser.get_user_max_number()
+    await record_api_call(result['status'])
+    # 返回结果
+    return result
+
 @router.get("/game/user/info/")
 async def get_user_info(account_id: int) -> ResponseDict:
     result = await GameUser.get_user_info_data(account_id)
