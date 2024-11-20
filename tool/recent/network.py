@@ -153,7 +153,7 @@ class Recent_Network:
         return result
     
     @classmethod 
-    async def post_user_info_data(self, data: dict):
+    async def update_user_info_data(self, data: dict):
         if CLIENT_TYPE == 'slave':
             platform_api_url = SALVE_API_URL
         else:
@@ -163,7 +163,7 @@ class Recent_Network:
         return result
     
     @classmethod 
-    async def post_user_basic_data(self, data: dict):
+    async def update_user_basic_data(self, data: dict):
         if CLIENT_TYPE == 'slave':
             platform_api_url = SALVE_API_URL
         else:
@@ -173,7 +173,7 @@ class Recent_Network:
         return result
 
     @classmethod
-    async def post_user_basic_and_info_data(self, data: dict):
+    async def update_user_basic_and_info_data(self, data: dict):
         if CLIENT_TYPE == 'slave':
             platform_api_url = SALVE_API_URL
         else:
@@ -232,10 +232,7 @@ class Recent_Network:
         else:
             return error
     
-    def __recent_data_processing(
-        account_id: int,
-        responses: dict
-    ):
+    def __recent_data_processing(account_id: int,responses: dict):
         result = {
             'battles_count':{},
             'ships': {}

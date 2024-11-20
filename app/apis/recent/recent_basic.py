@@ -56,6 +56,7 @@ class RecentBasic:
     @ExceptionLogger.handle_program_exception_async
     async def del_recent(account_id: int,region_id: int) -> ResponseDict:
         try:
+            # 先删recent数据库再删user_recent数据库，防止出现垃圾数据
             RecentDatabaseModel.del_user_recent(account_id,region_id)
             result = await RecentUserModel.del_recent_user(account_id,region_id)
             return result

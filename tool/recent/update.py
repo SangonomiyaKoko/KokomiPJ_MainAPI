@@ -7,30 +7,6 @@ from database import Recent_DB
 from network import Recent_Network
 from config import REGION_UTC_LIST, CLIENT_TYPE
 
-special_time_dict = {
-    0: 8*60*60,
-    1: 8*60*60,
-    2: 1*60*60,
-    3: 2*60*60,
-    4: 4*60*60,
-    5: 4*60*60,
-    6: 4*60*60,
-    7: 6*60*60,
-    8: 6*60*60,
-    9: 8*60*60,
-}
-normal_time_dict = {
-    0: 2*60*60,
-    1: 2*60*60,
-    2: 20*60,
-    3: 30*60,
-    4: 40*60,
-    5: 1*60*60,
-    6: 2*60*60,
-    7: 3*60*60,
-    8: 3*60*60,
-    9: 4*60*60,
-}
 
 class Recent_Update:
     @classmethod
@@ -366,14 +342,14 @@ class Recent_Update:
             logger.debug(f'{region_id} - {account_id} | ├── UserRecent数据更新成功')
 
     async def update_user_info_data(account_id: int, region_id: int, user_info: dict) -> None:
-        update_result = await Recent_Network.post_user_info_data(user_info)
+        update_result = await Recent_Network.update_user_info_data(user_info)
         if update_result.get('code',None) != 1000:
             logger.error(f"{region_id} - {account_id} | ├── UserInfo数据更新失败，Error: {update_result.get('message')}")
         else:
             logger.debug(f'{region_id} - {account_id} | ├── UserInfo数据更新成功')
 
     async def update_user_basic_data(account_id: int, region_id: int, user_basic: dict) -> None:
-        update_result = await Recent_Network.post_user_basic_data(user_basic)
+        update_result = await Recent_Network.update_user_basic_data(user_basic)
         if update_result.get('code',None) != 1000:
             logger.error(f"{region_id} - {account_id} | ├── UserBasic数据更新失败，Error: {update_result.get('message')}")
         else:
@@ -384,7 +360,7 @@ class Recent_Update:
             'basic': user_basic,
             'info': user_info
         }
-        update_result = await Recent_Network.post_user_basic_and_info_data(data)
+        update_result = await Recent_Network.update_user_basic_and_info_data(data)
         if update_result.get('code',None) != 1000:
             logger.error(f"{region_id} - {account_id} | ├── UserBasic数据更新失败，Error: {update_result.get('message')}")
             logger.error(f"{region_id} - {account_id} | ├── UserInfo数据更新失败，Error: {update_result.get('message')}")
@@ -409,6 +385,7 @@ class Recent_Update:
             logger.info(f"{user_recent['region_id']} - {user_recent['account_id']} | ├── 用户存储降级，因为长时间未活跃")
 
     def get_active_level(user_info: dict):
+        "获取用户数据对应的active_level"
         is_public = user_info['is_public']
         total_battles = user_info['total_battles']
         last_battle_time = user_info['last_battle_time']
@@ -433,6 +410,31 @@ class Recent_Update:
         return 9
 
     def get_update_interval_time(region_id: int, active_level: int):
+        "获取active_level对应的更新时间间隔"
+        special_time_dict = {
+            0: 8*60*60,
+            1: 8*60*60,
+            2: 1*60*60,
+            3: 2*60*60,
+            4: 4*60*60,
+            5: 4*60*60,
+            6: 4*60*60,
+            7: 6*60*60,
+            8: 6*60*60,
+            9: 8*60*60,
+        }
+        normal_time_dict = {
+            0: 2*60*60,
+            1: 2*60*60,
+            2: 20*60,
+            3: 30*60,
+            4: 40*60,
+            5: 1*60*60,
+            6: 2*60*60,
+            7: 3*60*60,
+            8: 3*60*60,
+            9: 4*60*60,
+        }
         current_timestamp = time.time()
         time_zone = REGION_UTC_LIST[region_id]
         utc_time = time.gmtime(current_timestamp + time_zone * 3600)

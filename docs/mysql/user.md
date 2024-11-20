@@ -78,7 +78,8 @@ CREATE TABLE user_ships (
     id               INT          AUTO_INCREMENT,
     account_id       BIGINT       NOT NULL,     -- 1-11位的非连续数字
     -- 记录用户缓存的数据和更新时间
-    ships_data       BLOB         DEFAULT NULL,  -- 数据
+    battles_count    INT          DEFAULT 0,    -- 用于标记是否需要更新
+    ships_data       BLOB         DEFAULT NULL, -- 缓存的简略数据
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

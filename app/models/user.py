@@ -1,6 +1,7 @@
 from aiomysql.connection import Connection
 from aiomysql.cursors import Cursor
 
+from .ac import UserAccessToken
 from app.db import MysqlConnection
 from app.log import ExceptionLogger
 from app.response import JSONResponse, ResponseDict
@@ -302,7 +303,8 @@ class UserModel:
         try:
             data = []
             await cur.execute(
-                "SELECT b.region_id, b.account_id, i.is_active, i.active_level, s.ships_data, UNIX_TIMESTAMP(s.updated_at) AS update_time "
+                "SELECT b.region_id, b.account_id, i.is_active, i.active_level, "
+                "s.battles_count, s.ships_data, UNIX_TIMESTAMP(s.updated_at) AS update_time "
                 "FROM user_basic AS b "
                 "LEFT JOIN user_info AS i ON i.account_id = b.account_id "
                 "LEFT JOIN user_ships AS s ON s.account_id = b.account_id "
@@ -314,15 +316,17 @@ class UserModel:
                 user = {
                     'user_basic': {
                         'region_id': row[0],
-                        'account_id': row[1]
+                        'account_id': row[1],
+                        'ac_value': UserAccessToken.get_ac_value_by_aid(row[1],row[0])
                     },
                     'user_info': {
                         'is_active': row[2],
                         'active_level': row[3]
                     },
                     'user_ships':{
-                        'ships_data': row[4],
-                        'update_time': row[5]
+                        'battles_count': row[4],
+                        'ships_data': row[5],
+                        'update_time': row[6]
                     }
                 }
                 data.append(user)
