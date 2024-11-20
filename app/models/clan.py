@@ -40,15 +40,15 @@ class ClanModel:
                 # 用户不存在，插入新用户
                 tag = 'N/A'
                 await cur.execute(
-                    "INSERT IGNORE INTO clan_basic (clan_id, region_id, tag) VALUES (%s, %s, %s);",
+                    "INSERT INTO clan_basic (clan_id, region_id, tag) VALUES (%s, %s, %s);",
                     [clan_id, region_id, tag]
                 )
                 await cur.execute(
-                    "INSERT IGNORE INTO clan_info (clan_id) VALUES (%s);", 
+                    "INSERT INTO clan_info (clan_id) VALUES (%s);", 
                     [clan_id]
                 )
                 await cur.execute(
-                    "INSERT IGNORE INTO user_cache (clan_id) VALUES (%s);", 
+                    "INSERT INTO user_cache (clan_id) VALUES (%s);", 
                     [clan_id]
                 )
                 await conn.commit()

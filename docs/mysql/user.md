@@ -189,6 +189,7 @@ CREATE TABLE user_pr (
 CREATE TABLE user_ship_00 (
     -- 用户基本信息
     ship_id          BIGINT       NOT NULL,
+    region_id        TINYINT      NOT NULL,
     account_id       BIGINT       NOT NULL,
     -- 场次，其中根据组队占比增加 `组队效率` 算法
     battles_count    INT          NULL,    -- 总场次
@@ -212,7 +213,7 @@ CREATE TABLE user_ship_00 (
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-    PRIMARY KEY (ship_id, account_id), -- 主键
+    PRIMARY KEY (ship_id, region_id, account_id), -- 主键
 
     FOREIGN KEY (account_id) REFERENCES user_basic(account_id) ON DELETE CASCADE -- 外键
 );

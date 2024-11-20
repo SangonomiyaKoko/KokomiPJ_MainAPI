@@ -348,12 +348,12 @@ class Recent_Update:
         else:
             logger.debug(f'{region_id} - {account_id} | ├── UserInfo数据更新成功')
 
-    async def update_user_basic_data(account_id: int, region_id: int, user_basic: dict) -> None:
-        update_result = await Recent_Network.update_user_basic_data(user_basic)
-        if update_result.get('code',None) != 1000:
-            logger.error(f"{region_id} - {account_id} | ├── UserBasic数据更新失败，Error: {update_result.get('message')}")
-        else:
-            logger.debug(f'{region_id} - {account_id} | ├── UserBasic数据更新成功')
+    # async def update_user_basic_data(account_id: int, region_id: int, user_basic: dict) -> None:
+    #     update_result = await Recent_Network.update_user_basic_data(user_basic)
+    #     if update_result.get('code',None) != 1000:
+    #         logger.error(f"{region_id} - {account_id} | ├── UserBasic数据更新失败，Error: {update_result.get('message')}")
+    #     else:
+    #         logger.debug(f'{region_id} - {account_id} | ├── UserBasic数据更新成功')
 
     async def update_user_basic_and_info_data(account_id: int, region_id: int, user_basic: dict = None, user_info: dict = None) -> None:
         data = {

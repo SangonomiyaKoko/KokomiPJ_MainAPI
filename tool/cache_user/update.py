@@ -87,7 +87,7 @@ class UserCache_Update:
             user_info['active_level'] = self.get_active_level(user_info)
             await self.update_user_basic_and_info_data(account_id,region_id,user_basic,user_info)
         if user_data['user_ships']['battles_count'] == user_info['total_battles']:
-            logger.debug(f'{region_id} - {account_id} | ├── 未到达更新时间，跳过更新')
+            logger.debug(f'{region_id} - {account_id} | ├── 未有更新数据，跳过更新')
             return
         user_ships_data = await UserCache_Network.get_cache_data(account_id,region_id,ac_value)
         if user_ships_data.get('code', None) != 1000:
@@ -97,7 +97,8 @@ class UserCache_Update:
         user_cache = {
             'account_id': account_id,
             'region_id': region_id,
-            'new_ships_data': new_user_data['basic'],
+            'battles_count': user_info['total_battles'],
+            'ships_data': self.to_binary_data_dict(new_user_data['basic']),
             'delete_ship_list': [],
             'replace_ship_dict': {}
         }
@@ -126,12 +127,12 @@ class UserCache_Update:
         else:
             logger.debug(f'{region_id} - {account_id} | ├── UserInfo数据更新成功')
 
-    async def update_user_basic_data(account_id: int, region_id: int, user_basic: dict) -> None:
-        update_result = await UserCache_Network.update_user_basic_data(user_basic)
-        if update_result.get('code',None) != 1000:
-            logger.error(f"{region_id} - {account_id} | ├── UserBasic数据更新失败，Error: {update_result.get('message')}")
-        else:
-            logger.debug(f'{region_id} - {account_id} | ├── UserBasic数据更新成功')
+    # async def update_user_basic_data(account_id: int, region_id: int, user_basic: dict) -> None:
+    #     update_result = await UserCache_Network.update_user_basic_data(user_basic)
+    #     if update_result.get('code',None) != 1000:
+    #         logger.error(f"{region_id} - {account_id} | ├── UserBasic数据更新失败，Error: {update_result.get('message')}")
+    #     else:
+    #         logger.debug(f'{region_id} - {account_id} | ├── UserBasic数据更新成功')
 
     async def update_user_basic_and_info_data(account_id: int, region_id: int, user_basic: dict = None, user_info: dict = None) -> None:
         data = {
@@ -163,6 +164,33 @@ class UserCache_Update:
             # 将 key 和 value 存入字典
             result[key] = value
         return result
+    
+    def to_binary_data_dict(self, data_dict):
+        # 存储合并后的二进制数据
+        result = bytearray()
+        for key, value in data_dict.items():
+            # 获取每个键值对的二进制数据并合并
+            result.extend(self.__to_binary_data(key, value))
+        # 返回合并后的二进制数据
+        return bytes(result)
+    
+    def __to_binary_data(key, value):
+        # 确保 key 和 value 都在允许的范围内
+        if not (0 <= key < 2**34):
+            raise ValueError("key must be a non-negative integer less than 2^34.")
+        if not (0 <= value < 2**22):
+            raise ValueError("value must be a non-negative integer less than 2^22.")
+        # 将 key 和 value 转换为二进制字符串，确保它们有足够的位数
+        key_bin = f'{key:034b}'  # 34 位二进制，确保 key 为 34 位
+        value_bin = f'{value:022b}'  # 22 位二进制，确保 value 为 22 位
+        # 将二进制字符串拼接成一个 56 位的字符串
+        full_bin = key_bin + value_bin
+        # 将 56 位二进制字符串按 8 位分割，并转换为字节
+        byte_data = bytearray()
+        for i in range(0, len(full_bin), 8):
+            byte_data.append(int(full_bin[i:i+8], 2))  # 每 8 位转换为一个字节
+        # 返回字节数据，应该是 7 字节大小
+        return bytes(byte_data)
     
     def __from_binary_data(byte_data):
         # 确保字节数据的长度是7字节

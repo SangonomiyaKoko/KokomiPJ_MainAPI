@@ -107,18 +107,25 @@ class UserCache_Network:
         return result
     
     @classmethod 
-    async def update_user_info_data(self, data: dict):
+    async def update_user_cache_data(self, data: dict):
         platform_api_url = API_URL
         url = f'{platform_api_url}/p/game/user/info/'
         result = await self.fetch_data(url, method='put', data=data)
         return result
     
     @classmethod 
-    async def update_user_basic_data(self, data: dict):
+    async def update_user_info_data(self, data: dict):
         platform_api_url = API_URL
-        url = f'{platform_api_url}/p/game/user/basic/'
+        url = f'{platform_api_url}/p/game/user/info/'
         result = await self.fetch_data(url, method='put', data=data)
         return result
+    
+    # @classmethod 
+    # async def update_user_basic_data(self, data: dict):
+    #     platform_api_url = API_URL
+    #     url = f'{platform_api_url}/p/game/user/basic/'
+    #     result = await self.fetch_data(url, method='put', data=data)
+    #     return result
 
     @classmethod
     async def update_user_basic_and_info_data(self, data: dict):

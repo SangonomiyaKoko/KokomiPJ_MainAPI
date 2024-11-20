@@ -162,15 +162,15 @@ class Recent_Network:
         result = await self.fetch_data(url, method='put', data=data)
         return result
     
-    @classmethod 
-    async def update_user_basic_data(self, data: dict):
-        if CLIENT_TYPE == 'slave':
-            platform_api_url = SALVE_API_URL
-        else:
-            platform_api_url = MASTER_API_URL
-        url = f'{platform_api_url}/p/game/user/basic/'
-        result = await self.fetch_data(url, method='put', data=data)
-        return result
+    # @classmethod 
+    # async def update_user_basic_data(self, data: dict):
+    #     if CLIENT_TYPE == 'slave':
+    #         platform_api_url = SALVE_API_URL
+    #     else:
+    #         platform_api_url = MASTER_API_URL
+    #     url = f'{platform_api_url}/p/game/user/basic/'
+    #     result = await self.fetch_data(url, method='put', data=data)
+    #     return result
 
     @classmethod
     async def update_user_basic_and_info_data(self, data: dict):

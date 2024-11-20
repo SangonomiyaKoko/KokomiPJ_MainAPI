@@ -22,31 +22,39 @@ class LanguageList(str, Enum):
     ja = 'ja'
     ru = 'ru'
 
-class UserInfoModel(BaseModel):
-    account_id: int
-    is_active: int
-    active_level: int
-    is_public: int
-    total_battles: int
-    last_battle_time: int
-
-class UserBasicModel(BaseModel):
-    account_id: int = Field(..., description='用户id')
+class UserBaseModel(BaseModel):
     region_id: int = Field(..., description='服务器id')
+    account_id: int = Field(..., description='用户id')
+
+class UserBaseDerivedModel(BaseModel):
+    region: RegionList = Field(..., description='服务器')
+    account_id: int = Field(..., description='用户id')
+
+class UserInfoModel(BaseModel):
+    account_id: int = Field(..., description='用户id')
+    is_active: int = Field(None, description='是否活跃')
+    active_level: int = Field(None, description='活跃等级')
+    is_public: int = Field(None, description='是否隐藏战绩')
+    total_battles: int = Field(None, description='总战斗场次')
+    last_battle_time: int = Field(None, description='最后战斗时间')
+
+class UserBasicModel(UserBaseModel):
     nickname: str = Field(..., description='用户名称')
 
 class UserBasicAndInfoModel(BaseModel):
     basic: Optional[UserBasicModel] = Field(None, description='用户基础数据')
     info: Optional[UserInfoModel] = Field(None, description='用户详细数据')
 
-class UserRecentModel(BaseModel):
-    account_id: int = Field(..., description='用户id')
-    region_id: int = Field(..., description='服务器id')
+class UserRecentModel(UserBaseModel):
     recent_class: Optional[int] = Field(None, description='需要更新的字段')
     last_query_time: Optional[int] = Field(None, description='需要更新的字段')
     last_update_time: Optional[int] = Field(None, description='需要更新的字段')
 
-class RecentEnableModel(BaseModel):
-    region: RegionList = Field(..., description='服务器')
-    account_id: int = Field(..., description='用户id')
+class RecentEnableModel(UserBaseDerivedModel):
     recent_class: Optional[int] = Field(30, description='需要更新的字段')
+
+class UserCacheModel(UserBaseModel):
+    battles_count: int = Field(None, description='战斗总场次')
+    ships_data: bytes = Field(None, description='二进制存储的用户船只数据')
+    delete_ship_list: list = Field(None, description='需要删除的船只数据')
+    replace_ship_dict: dict = Field(None, description='需要修改的船只数据')

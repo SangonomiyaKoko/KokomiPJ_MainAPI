@@ -68,7 +68,7 @@ class RecentUserModel:
                 # 用户不存在，插入新用户
                 current_timestamp = TimeFormat.get_current_timestamp()
                 await cur.execute(
-                    "INSERT IGNORE INTO recent (account_id, region_id, recent_class, last_query_time) VALUES (%s, %s, %s, %s);",
+                    "INSERT INTO recent (account_id, region_id, recent_class, last_query_time) VALUES (%s, %s, %s, %s);",
                     [account_id, region_id, recent_class, current_timestamp]
                 )
                 await conn.commit()
