@@ -2,7 +2,13 @@ from typing import Optional
 
 from fastapi import APIRouter
 
-from .schemas import RegionList, LanguageList, UserInfoModel, UserBasicModel
+from .schemas import (
+    RegionList, 
+    LanguageList, 
+    UserInfoModel, 
+    UserBasicModel, 
+    UserBasicAndInfoModel
+)
 from app.apis.platform import Search, Update, GameUser
 from app.utils import UtilityFunctions
 from app.response import JSONResponse, ResponseDict
@@ -28,7 +34,7 @@ async def searchUser(
     - check: 是否检查并返回唯一合适的结果
 
     返回:
-    - JSONResponse: 返回值
+    - ResponseDict
     """
     # 参数效验
     region_id = UtilityFunctions.get_region_id(region)
@@ -65,7 +71,7 @@ async def searchClan(
     - check: 是否检查并返回唯一合适的结果
 
     返回:
-    - JSONResponse: 返回值
+    - ResponseDict
     """
     # 参数效验
     region_id = UtilityFunctions.get_region_id(region)
@@ -84,7 +90,6 @@ async def searchClan(
     # 返回结果
     return result
 
-
 @router.get("/search/ship/")
 async def searchShip(
     region: RegionList,
@@ -101,7 +106,7 @@ async def searchShip(
     - shipname: 搜索的名称
 
     返回:
-    - JSONResponse: 返回值
+    - ResponseDict
     """
     # 参数效验
     region_id = UtilityFunctions.get_region_id(region)
@@ -117,7 +122,6 @@ async def searchShip(
     # 返回结果
     return result
 
-
 @router.put("/update/ship-name/")
 async def updateShipName(region: RegionList) -> ResponseDict:
     """更新船只名称数据
@@ -125,9 +129,9 @@ async def updateShipName(region: RegionList) -> ResponseDict:
     更新wg或者lesta船只的数据
     
     参数:
-    - region: 服务器
+    - region: 服务器，推荐使用na和ru来更新
     返回:
-    - JSONResponse
+    - ResponseDict
     """
     # 参数效验
     region_id = UtilityFunctions.get_region_id(region)
@@ -138,15 +142,6 @@ async def updateShipName(region: RegionList) -> ResponseDict:
     # 返回结果
     return result
 
-
-@router.post("/game/user/basic/")
-async def post_user_info(user_basic: UserBasicModel) -> ResponseDict:
-    result = await GameUser.check_user_basic_data(user_basic.model_dump())
-    await record_api_call(result['status'])
-    # 返回结果
-    return result
-
-
 @router.get("/game/user/info/")
 async def get_user_info(account_id: int) -> ResponseDict:
     result = await GameUser.get_user_info_data(account_id)
@@ -154,10 +149,26 @@ async def get_user_info(account_id: int) -> ResponseDict:
     # 返回结果
     return result
 
+@router.put("/game/user/basic/")
+async def post_user_info(user_basic: UserBasicModel) -> ResponseDict:
+    result = await GameUser.check_user_basic_data(user_basic.model_dump())
+    await record_api_call(result['status'])
+    # 返回结果
+    return result
 
-@router.post("/game/user/info/")
+@router.put("/game/user/info/")
 async def post_user_info(user_info: UserInfoModel) -> ResponseDict:
     result = await GameUser.check_user_info_data(user_info.model_dump())
+    await record_api_call(result['status'])
+    # 返回结果
+    return result
+
+@router.put("/game/user/basic-and-info/")
+async def post_user_info(data: UserBasicAndInfoModel) -> ResponseDict:
+    data = data.model_dump()
+    if not data.get('basic', None) and not data.get('info', None):
+        return JSONResponse.API_7000_InvalidParameter
+    result = await GameUser.check_user_basic_and_info_data(data.get('basic', None), data.get('info', None))
     await record_api_call(result['status'])
     # 返回结果
     return result

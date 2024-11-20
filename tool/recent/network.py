@@ -3,6 +3,7 @@ import asyncio
 from typing import Optional
 from dataclasses import dataclass
 
+from log import log as logger
 from config import CLIENT_TYPE, SALVE_API_URL, MASTER_API_URL
 
 VORTEX_API_URL_LIST = {
@@ -73,12 +74,12 @@ class Recent_Network:
             try:
                 if method == 'get':
                     res = await client.get(url, timeout=5)
+                elif method == 'delete':
+                    res = await client.delete(url, timeout=5)
                 elif method == 'post':
                     res = await client.post(url, json=data, timeout=5)
                 elif method == 'put':
-                    res = await client.put(url, timeout=5)
-                elif method == 'delete':
-                    res = await client.delete(url, timeout=5)
+                    res = await client.put(url, json=data, timeout=5)
                 else:
                     return {'status': 'ok','code': 7000,'message': 'InvalidParameter','data': None}
                 requset_code = res.status_code
@@ -105,7 +106,7 @@ class Recent_Network:
         else:
             platform_api_url = MASTER_API_URL
         region = REGION_LIST.get(region_id)
-        url = f'{platform_api_url}/r1/features/users/enabled/?region={region}'
+        url = f'{platform_api_url}/r1/features/users/{region}/'
         result = await self.fetch_data(url)
         return result
     
@@ -116,7 +117,7 @@ class Recent_Network:
         else:
             platform_api_url = MASTER_API_URL
         region = REGION_LIST.get(region_id)
-        url = f'{platform_api_url}/r1/features/user/?region={region}&account_id={account_id}'
+        url = f'{platform_api_url}/r1/features/user/{region}/{account_id}/'
         result = await self.fetch_data(url)
         return result
     
@@ -127,7 +128,7 @@ class Recent_Network:
         else:
             platform_api_url = MASTER_API_URL
         region = REGION_LIST.get(region_id)
-        url = f'{platform_api_url}/r1/features/disable/?region={region}&account_id={account_id}'
+        url = f'{platform_api_url}/r1/features/user/{region}/{account_id}/'
         result = await self.fetch_data(url,method='delete')
         return result
     
@@ -138,7 +139,7 @@ class Recent_Network:
         else:
             platform_api_url = MASTER_API_URL
         url = f'{platform_api_url}/r1/features/user/'
-        result = await self.fetch_data(url, method='post', data=data)
+        result = await self.fetch_data(url, method='put', data=data)
         return result
 
     @classmethod 
@@ -158,7 +159,7 @@ class Recent_Network:
         else:
             platform_api_url = MASTER_API_URL
         url = f'{platform_api_url}/p/game/user/info/'
-        result = await self.fetch_data(url, method='post', data=data)
+        result = await self.fetch_data(url, method='put', data=data)
         return result
     
     @classmethod 
@@ -168,7 +169,17 @@ class Recent_Network:
         else:
             platform_api_url = MASTER_API_URL
         url = f'{platform_api_url}/p/game/user/basic/'
-        result = await self.fetch_data(url, method='post', data=data)
+        result = await self.fetch_data(url, method='put', data=data)
+        return result
+
+    @classmethod
+    async def post_user_basic_and_info_data(self, data: dict):
+        if CLIENT_TYPE == 'slave':
+            platform_api_url = SALVE_API_URL
+        else:
+            platform_api_url = MASTER_API_URL
+        url = f'{platform_api_url}/p/game/user/basic-and-info/'
+        result = await self.fetch_data(url, method='put', data=data)
         return result
 
     @classmethod
@@ -210,10 +221,18 @@ class Recent_Network:
             for url in urls:
                 tasks.append(self.fetch_data(url))
             responses = await asyncio.gather(*tasks)
-            return responses
-        
+        error = None
+        for response in responses:
+            if response.get('code', None) != 1000:
+                logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {response.get('message')}")
+                error = response
+        if not error:
+            result = self.__recent_data_processing(account_id,responses)
+            return {'status': 'ok', 'code': 1000, 'message': 'Success', 'data': result}
+        else:
+            return error
     
-    def data_processing(
+    def __recent_data_processing(
         account_id: int,
         responses: dict
     ):

@@ -35,6 +35,10 @@ class UserBasicModel(BaseModel):
     region_id: int = Field(..., description='服务器id')
     nickname: str = Field(..., description='用户名称')
 
+class UserBasicAndInfoModel(BaseModel):
+    basic: Optional[UserBasicModel] = Field(None, description='用户基础数据')
+    info: Optional[UserInfoModel] = Field(None, description='用户详细数据')
+
 class UserRecentModel(BaseModel):
     account_id: int = Field(..., description='用户id')
     region_id: int = Field(..., description='服务器id')

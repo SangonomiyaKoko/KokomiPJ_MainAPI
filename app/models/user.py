@@ -246,3 +246,52 @@ class UserModel:
             # 释放资源
             await cur.close()
             await MysqlConnection.release_connection(conn)
+
+    @ExceptionLogger.handle_database_exception_async
+    async def get_user_cache_batch(offset: int, limit = 1000) -> ResponseDict:
+        '''批量获取用户缓存的数据
+
+        获取用户缓存数据，用于缓存的更新
+
+        参数:
+            offset: 从哪个id开始读取
+            limit: 每次读取多少条数据
+        '''
+        conn: Connection = await MysqlConnection.get_connection()
+        cur: Cursor = await conn.cursor()
+        try:
+            data = []
+            await cur.execute(
+                "SELECT b.region_id, b.account_id, i.is_active, i.active_level, s.ships_data, UNIX_TIMESTAMP(s.updated_at) AS update_time "
+                "FROM user_basic AS b "
+                "LEFT JOIN user_info AS i ON i.account_id = b.account_id "
+                "LEFT JOIN user_ships AS s ON s.account_id = b.account_id "
+                "ORDER BY b.id LIMIT %s OFFSET %s;", 
+                [limit, offset]
+            )
+            rows = await cur.fetchall()
+            for row in rows:
+                user = {
+                    'user_basic': {
+                        'region_id': row[0],
+                        'account_id': row[1]
+                    },
+                    'user_info': {
+                        'is_active': row[2],
+                        'active_level': row[3]
+                    },
+                    'user_ships':{
+                        'ships_data': row[4],
+                        'update_time': row[5]
+                    }
+                }
+                data.append(user)
+            return JSONResponse.get_success_response(data)
+        except Exception as e:
+            # 数据库回滚
+            await conn.rollback()
+            raise e
+        finally:
+            # 释放资源
+            await cur.close()
+            await MysqlConnection.release_connection(conn)

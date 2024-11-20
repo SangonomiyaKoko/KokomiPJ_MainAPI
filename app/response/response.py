@@ -47,7 +47,7 @@ class JSONResponse:
     @staticmethod
     def get_success_response(
         data: Optional[Any] = None
-    ) -> dict:
+    ) -> ResponseDict:
         "成功的返回值"
         return {
             'status': 'ok',
@@ -61,7 +61,7 @@ class JSONResponse:
         code: str,
         message: str,
         error_id: str
-    ) -> dict:
+    ) -> ResponseDict:
         "失败的返回值"
         return {
             'status': 'error',
