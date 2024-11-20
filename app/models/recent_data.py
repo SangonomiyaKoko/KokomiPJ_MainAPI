@@ -12,11 +12,18 @@ class RecentDatabaseModel:
         try:
             if not os.path.exists(user_db_path):
                 self.__create_user_db(user_db_path)
-
         except Exception as e:
             raise e
-        finally:
-            ...
+
+    @ExceptionLogger.handle_database_exception_sync
+    def del_user_recent(account_id: int, region_id: int) -> ResponseDict:
+        user_db_path = SQLiteConnection.get_recent_db_path(account_id,region_id)
+        try:
+            if os.path.exists(user_db_path):
+                os.remove(user_db_path)
+        except Exception as e:
+            raise e
+
 
     def __create_user_db(db_path: str) -> None:
         "创建数据库"

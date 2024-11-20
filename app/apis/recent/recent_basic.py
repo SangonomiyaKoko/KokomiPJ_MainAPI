@@ -3,7 +3,7 @@ import gc
 from app.network import BasicAPI
 from app.log import ExceptionLogger
 from app.response import JSONResponse, ResponseDict
-from app.models import RecentUserModel, UserModel, UserAccessToken
+from app.models import RecentUserModel, RecentDatabaseModel, UserModel, UserAccessToken
 from app.utils import UtilityFunctions, TimeFormat
 from app.middlewares.celery import task_check_user_basic, task_check_user_info
 
@@ -56,6 +56,7 @@ class RecentBasic:
     @ExceptionLogger.handle_program_exception_async
     async def del_recent(account_id: int,region_id: int) -> ResponseDict:
         try:
+            RecentDatabaseModel.del_user_recent(account_id,region_id)
             result = await RecentUserModel.del_recent_user(account_id,region_id)
             return result
         except Exception as e:

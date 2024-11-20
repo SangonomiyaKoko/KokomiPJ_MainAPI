@@ -108,18 +108,15 @@ async def searchShip(
     返回:
     - ResponseDict
     """
-    # 参数效验
     region_id = UtilityFunctions.get_region_id(region)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
-    # 调用函数
     result = await Search.search_ship(
         region_id = region_id,
         ship_name = shipname,
         language = language
     )
     await record_api_call(result['status'])
-    # 返回结果
     return result
 
 @router.put("/update/ship-name/")
@@ -130,52 +127,96 @@ async def updateShipName(region: RegionList) -> ResponseDict:
     
     参数:
     - region: 服务器，推荐使用na和ru来更新
+    
     返回:
     - ResponseDict
     """
-    # 参数效验
     region_id = UtilityFunctions.get_region_id(region)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
     result = await Update.update_ship_name(region_id)
     await record_api_call(result['status'])
-    # 返回结果
     return result
 
 @router.get("/game/users/number/")
 async def get_user_max_number() -> ResponseDict:
+    """获取user表中id最大值
+
+    用于user表的遍历更新
+
+    参数:
+    - None
+
+    返回:
+    - ResponseDict
+    """
     result = await GameUser.get_user_max_number()
     await record_api_call(result['status'])
-    # 返回结果
     return result
 
 @router.get("/game/user/info/")
 async def get_user_info(account_id: int) -> ResponseDict:
+    """获取user_info表中的数据
+
+    用于recent相关更新用户数据使用
+
+    参数:
+    - account_id: 用户id
+
+    返回:
+    - ResponseDict
+    """
     result = await GameUser.get_user_info_data(account_id)
     await record_api_call(result['status'])
-    # 返回结果
     return result
 
 @router.put("/game/user/basic/")
 async def post_user_info(user_basic: UserBasicModel) -> ResponseDict:
+    """更新user_basic表
+
+    如果username发生更新则更新，反之则更新update_time
+
+    参数:
+    - UserBasicModel
+
+    返回:
+    - ResponseDict
+    """
     result = await GameUser.check_user_basic_data(user_basic.model_dump())
     await record_api_call(result['status'])
-    # 返回结果
     return result
 
 @router.put("/game/user/info/")
 async def post_user_info(user_info: UserInfoModel) -> ResponseDict:
+    """更新user_info表
+
+    如果数据发生改变则更新，反之则更新update_time
+
+    参数:
+    - UserInfoModel
+
+    返回:
+    - ResponseDict
+    """
     result = await GameUser.check_user_info_data(user_info.model_dump())
     await record_api_call(result['status'])
-    # 返回结果
     return result
 
 @router.put("/game/user/basic-and-info/")
 async def post_user_info(data: UserBasicAndInfoModel) -> ResponseDict:
+    """更新user_basic和user_info表
+
+    逻辑更新上，只是用于减少一个网络的请求
+
+    参数:
+    - UserBasicAndInfoModel
+
+    返回:
+    - ResponseDict
+    """
     data = data.model_dump()
     if not data.get('basic', None) and not data.get('info', None):
         return JSONResponse.API_7000_InvalidParameter
     result = await GameUser.check_user_basic_and_info_data(data.get('basic', None), data.get('info', None))
     await record_api_call(result['status'])
-    # 返回结果
     return result

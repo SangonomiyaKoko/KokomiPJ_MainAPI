@@ -50,10 +50,3 @@ class RecentEnableModel(BaseModel):
     region: RegionList = Field(..., description='服务器')
     account_id: int = Field(..., description='用户id')
     recent_class: Optional[int] = Field(30, description='需要更新的字段')
-    
-
-class RecentDisableModel(BaseModel):
-    region: RegionList = Field(..., description='服务器')
-    account_id: int = Field(..., description='用户id')
-
-
