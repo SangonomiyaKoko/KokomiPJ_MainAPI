@@ -3,6 +3,14 @@ from .time_utils import TimeFormat
 
 
 class UtilityFunctions: 
+    def get_user_default_name(account_id: int):
+        "获取用户的默认名称"
+        return f'User_{account_id}'
+    
+    def get_clan_default_name(clan_id: int):
+        "获取工会的默认名称"
+        return f'N/A'
+    
     def check_clan_vaild(updated_at: int):
         "检查工会缓存的更新时间是否有效"
         current_timestamp = TimeFormat.get_current_timestamp()

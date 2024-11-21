@@ -12,6 +12,6 @@ class UserAccessToken:
         return self.access_token_list.get(region_id)
     
     @classmethod
-    def get_ac_value_by_aid(self, account_id: int,region_id: int) -> str | None:
+    def get_ac_value_by_id(self, account_id: int,region_id: int) -> str | None:
         return self.access_token_list[region_id].get(account_id, None)
     

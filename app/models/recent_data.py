@@ -21,7 +21,7 @@ class RecentDatabaseModel:
     @ExceptionLogger.handle_database_exception_sync
     def del_user_recent(account_id: int, region_id: int) -> ResponseDict:
         "删除用户的recent数据"
-        # 实际上是将数据转移到待删除文件夹中，防止程序bug导致误删
+        # 实际上是将数据转移到待删除文件夹中，防止程序bug导致误删后可以恢复
         user_db_path = SQLiteConnection.get_recent_db_path(account_id,region_id)
         try:
             if os.path.exists(user_db_path):

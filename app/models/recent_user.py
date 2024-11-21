@@ -7,7 +7,6 @@ from app.response import JSONResponse, ResponseDict
 from app.utils import TimeFormat
 
 
-
 class RecentUserModel:
     @ExceptionLogger.handle_database_exception_async
     async def get_recent_user_by_rid(region_id: int) -> ResponseDict:

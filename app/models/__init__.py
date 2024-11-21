@@ -1,8 +1,9 @@
-from .user import UserModel
-from .clan import ClanModel
-from .recent import RecentUserModel
+from .game_user import UserModel
+from .game_clan import ClanModel
+from .recent_user import RecentUserModel
+from .recents_user import RecentsUserModel
 from .recent_data import RecentDatabaseModel
-from .ac import UserAccessToken
+from .access_token import UserAccessToken
 from .root import RootModel
 
 __all__ = [
@@ -10,6 +11,7 @@ __all__ = [
     'ClanModel',
     'RootModel',
     'RecentUserModel',
+    'RecentsUserModel',
     'UserAccessToken',
     'RecentDatabaseModel'
 ]
