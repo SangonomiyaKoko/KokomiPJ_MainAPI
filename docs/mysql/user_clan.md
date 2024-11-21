@@ -9,8 +9,8 @@
 ```sql
 CREATE TABLE user_clan (
     id               INT          AUTO_INCREMENT,
-    account_id       BIGINT       NOT NULL,     -- 1-11位的非连续数字
-    clan_id          BIGINT       DEFAULT NULL, -- 11位的非连续数字
+    account_id       BIGINT       NOT NULL,     -- 1-10位的非连续数字
+    clan_id          BIGINT       DEFAULT -1,   -- 10位的非连续数字 -1表示无数据，none表示无工会
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

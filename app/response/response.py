@@ -1,11 +1,13 @@
-from typing import TypedDict, Optional, Literal, Any
+from typing import Optional, Literal, Union, Any, Dict, List
+from typing_extensions import TypedDict
+
 
 class ResponseDict(TypedDict):
     '''返回数据格式'''
     status: Literal['ok', 'error']
     code: int
     message: str
-    data: Optional[dict]
+    data: Optional[Union[Dict, List]]
 
 class JSONResponse:
     '''接口返回值

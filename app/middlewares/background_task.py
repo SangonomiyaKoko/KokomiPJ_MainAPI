@@ -77,7 +77,7 @@ def check_clan_tag_and_league(
         if clans == []:
             return JSONResponse.API_1000_Success
         cur = conn.cursor(pymysql.cursors.DictCursor)
-        for clan_id, region_id, tag, league in clans:
+        for clan_id, region_id, tag, league in clans.items():
             cur.execute(
                 "SELECT tag, league FROM clan_basic WHERE region_id = %s and clan_id = %s;", 
                 [region_id, clan_id]

@@ -8,7 +8,7 @@ from app.middlewares.celery import task_check_user_basic, task_check_user_info
 
 class RootData:
     @ExceptionLogger.handle_program_exception_async
-    async def get_innodb_trx(region_id: int) -> ResponseDict:
+    async def get_innodb_trx() -> ResponseDict:
         try:
             result = await RootModel.get_innodb_trx()
             return result         
@@ -18,7 +18,7 @@ class RootData:
             gc.collect()
 
     @ExceptionLogger.handle_program_exception_async
-    async def get_innodb_processlist(region_id: int) -> ResponseDict:
+    async def get_innodb_processlist() -> ResponseDict:
         try:
             result = await RootModel.get_innodb_processlist()
             return result         
@@ -28,7 +28,7 @@ class RootData:
             gc.collect()
 
     @ExceptionLogger.handle_program_exception_async
-    async def get_basic_user_overview(region_id: int) -> ResponseDict:
+    async def get_basic_user_overview() -> ResponseDict:
         try:
             result = await RootModel.get_basic_user_overview()
             return result         
@@ -38,7 +38,7 @@ class RootData:
             gc.collect()
 
     @ExceptionLogger.handle_program_exception_async
-    async def get_basic_clan_overview(region_id: int) -> ResponseDict:
+    async def get_basic_clan_overview() -> ResponseDict:
         try:
             result = await RootModel.get_basic_clan_overview()
             return result         
@@ -48,7 +48,7 @@ class RootData:
             gc.collect()
 
     @ExceptionLogger.handle_program_exception_async
-    async def get_recent_user_overview(region_id: int) -> ResponseDict:
+    async def get_recent_user_overview() -> ResponseDict:
         try:
             result = await RootModel.get_recent_user_overview()
             return result         

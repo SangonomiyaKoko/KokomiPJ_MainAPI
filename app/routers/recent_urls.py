@@ -108,7 +108,7 @@ async def postUserFeatureDatae(user_recent: UserRecentModel) -> ResponseDict:
 async def disableFeature(region: RegionList,account_id: int) -> ResponseDict: 
     """删除用户的recent功能
 
-    删除用户recent功能，但没有删除recent数据库
+    删除用户recent功能
 
     参数:
     - None

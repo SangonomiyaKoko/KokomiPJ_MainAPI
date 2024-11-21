@@ -73,20 +73,12 @@ class UserModel:
                 # 用户不存在，插入新用户
                 nickname = f'User_{account_id}'
                 await cur.execute(
-                    "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
-                    [account_id, region_id, nickname]
-                )
-                await cur.execute(
-                    "INSERT INTO user_info (account_id) VALUES (%s);", 
-                    [account_id]
-                )
-                await cur.execute(
-                    "INSERT INTO user_ships (account_id) VALUES (%s);", 
-                    [account_id]
-                )
-                await cur.execute(
-                    "INSERT INTO user_pr (account_id) VALUES (%s);", 
-                    [account_id]
+                    "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);"
+                    "INSERT INTO user_info (account_id) VALUES (%s);"
+                    "INSERT INTO user_ships (account_id) VALUES (%s);"
+                    "INSERT INTO user_clan (account_id) VALUES (%s);"
+                    "INSERT INTO user_pr (account_id) VALUES (%s);",
+                    [account_id, region_id, nickname, account_id, account_id, account_id, account_id]
                 )
                 await conn.commit() # 提交事务
                 data['nickname'] = nickname
@@ -122,20 +114,12 @@ class UserModel:
                 # 用户不存在，插入新用户
                 nickname = f'User_{account_id}'
                 await cur.execute(
-                    "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
-                    [account_id, region_id, nickname]
-                )
-                await cur.execute(
-                    "INSERT INTO user_info (account_id) VALUES (%s);", 
-                    [account_id]
-                )
-                await cur.execute(
-                    "INSERT INTO user_ships (account_id) VALUES (%s);", 
-                    [account_id]
-                )
-                await cur.execute(
-                    "INSERT INTO user_pr (account_id) VALUES (%s);", 
-                    [account_id]
+                    "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);"
+                    "INSERT INTO user_info (account_id) VALUES (%s);"
+                    "INSERT INTO user_ships (account_id) VALUES (%s);"
+                    "INSERT INTO user_clan (account_id) VALUES (%s);"
+                    "INSERT INTO user_pr (account_id) VALUES (%s);",
+                    [account_id, region_id, nickname, account_id, account_id, account_id, account_id]
                 )
             else:
                 if user[0] != nickname:
@@ -313,6 +297,9 @@ class UserModel:
             )
             rows = await cur.fetchall()
             for row in rows:
+                # 排除已注销账号的数据，避免浪费服务器资源
+                if not row[2]:
+                    continue
                 user = {
                     'user_basic': {
                         'region_id': row[0],

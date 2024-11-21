@@ -16,13 +16,26 @@ CREATE TABLE user_basic (
     username         VARCHAR(25)  NOT NULL,    -- 最大25个字符，编码：utf-8
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at       TIMESTAMP    NOT NULL DEFAULT 0 ON UPDATE CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP    DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id), -- 主键
 
     INDEX idx_username (username), -- 索引
 
     UNIQUE INDEX idx_rid_aid (region_id, account_id) -- 索引
+)
+```
+
+### Table 2: User_History
+
+```sql
+CREATE TABLE user_history (
+    -- 相关id
+    id               INT          AUTO_INCREMENT,
+    account_id       BIGINT       NOT NULL UNIQUE,    -- 1-11位的非连续数字
+    -- 用户历史名称的记录
+    username         VARCHAR(25)  NOT NULL,    -- 最大25个字符，编码：utf-8
+    
 )
 ```
 
@@ -36,14 +49,14 @@ CREATE TABLE user_info (
     id               INT          AUTO_INCREMENT,
     account_id       BIGINT       NOT NULL,     -- 1-11位的非连续数字
     -- 关于用户活跃的信息，用于recent/recents/用户排行榜功能
-    is_active        TINYINT      DEFAULT -1,   -- 用于标记用户的有效性，-1表示新增，0表示无效，1表示有效
+    is_active        TINYINT      DEFAULT 0,   -- 用于标记用户的有效性，0表示无效，1表示有效
     active_level     TINYINT      DEFAULT 0,    -- 人为设置的用户活跃的等级
     is_public        TINYINT      DEFAULT 0,    -- 用户是否隐藏战绩，0表示隐藏，1表示公开
     total_battles    INT          DEFAULT 0,    -- 用户总场次
     last_battle_time INT          DEFAULT 0,    -- 用户最后战斗时间
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP    DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id), -- 主键
 
@@ -82,7 +95,7 @@ CREATE TABLE user_ships (
     ships_data       BLOB         DEFAULT NULL, -- 缓存的简略数据
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP    DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id), -- 主键
 
@@ -164,10 +177,10 @@ CREATE TABLE user_pr (
     id               INT          AUTO_INCREMENT,
     account_id       BIGINT       NOT NULL,     -- 1-11位的非连续数字
     -- 记录用户pr缓存的数据和更新时间
-    pr_data          INT          DEFAULT -2,    -- -2表示无数据，-1表示无法计算，0~9999表示pr值
+    pr_data          INT          DEFAULT -1,    -- -1表示无法计算，0~9999表示pr值
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP    DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id), -- 主键
 

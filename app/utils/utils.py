@@ -12,7 +12,7 @@ class UtilityFunctions:
             return True
 
     def check_aid_and_rid(account_id: int, region_id: int) -> bool:
-        "检查aid和region是否合法"
+        "检查account_id和region_id是否合法"
         if not (isinstance(account_id, int) and isinstance(region_id, int)):
             return False
         if region_id < 1 and region_id > 5:
@@ -55,6 +55,17 @@ class UtilityFunctions:
         ):
             return True
         return False
+    
+    def check_cid_and_rif(clan_id: int, region_id: int) -> bool:
+        "检查clan_id和region_id是否合法"
+        if not (isinstance(clan_id, int) and isinstance(region_id, int)):
+            return False
+        if region_id < 1 and region_id > 5:
+            return False
+        account_id_len = len(str(clan_id))
+        # 亚服 10 [2字端]
+        # 欧服 9 [5字段]
+        # 美服 10 [1字段]
     
     def get_rid_by_aid(account_id: int) -> int | None:
         "通过account_id的字段判断region_id，没匹配到返回为空"

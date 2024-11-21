@@ -37,13 +37,16 @@ class RecentUserModel:
         try:
             conn: Connection = await MysqlConnection.get_connection()
             cur: Cursor = await conn.cursor()
-            data = False
+            data = {
+                'enabled': False
+            }
             await cur.execute(
                 "SELECT EXISTS(SELECT 1 FROM recent WHERE region_id = %s and account_id = %s) AS is_exists_user;",
                 [region_id, account_id]
             )
             user = await cur.fetchone()
-            data = user[0]
+            if user[0]:
+                data['enabled'] = True
             return JSONResponse.get_success_response(data)
         except Exception as e:
             # 数据库回滚

@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-# 捕获 RequestValidationError 异常
+# 捕获 RequestValidationError 异常 (HTTP_422_Unprocessable_Entity)
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     # 返回自定义的 JSON 错误响应
