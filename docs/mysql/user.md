@@ -23,10 +23,12 @@ CREATE TABLE user_basic (
     INDEX idx_username (username), -- 索引
 
     UNIQUE INDEX idx_rid_aid (region_id, account_id) -- 索引
-)
+);
 ```
 
 ### Table 2: User_History
+
+记录用户曾经使用过昵称和时间段
 
 ```sql
 CREATE TABLE user_history (
@@ -35,11 +37,20 @@ CREATE TABLE user_history (
     account_id       BIGINT       NOT NULL UNIQUE,    -- 1-11位的非连续数字
     -- 用户历史名称的记录
     username         VARCHAR(25)  NOT NULL,    -- 最大25个字符，编码：utf-8
-    
-)
+    start_time       INT          NOT NULL,    -- 使用该名称的开始时间
+    end_time         INT          NOT NULL,    -- 使用该名称的结束时间
+    -- 记录数据创建的时间
+    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id), -- 主键
+
+    INDEX idx_aid (account_id), -- 索引
+
+    INDEX idx_username (username) -- 索引
+);
 ```
 
-### Table 2: User_Info
+### Table 3: User_Info
 
 用于存储用户的基本信息
 
@@ -81,7 +92,7 @@ CREATE TABLE user_info (
 | 1         | -             | [6m, 1y]         | 8            | -        |
 | 1         | -             | [1y, + ]         | 9            | 不活跃   |
 
-### Table 3: User_Ships_Cache
+### Table 4: User_Ships_Cache
 
 用于用户缓存相关的数据
 
@@ -166,29 +177,6 @@ Value：总场次，22位Bit存储
    - 解析耗时：0.001 ± 0.001 s
 
 结论: 在花费时间基本不变的情况下，减少了数据库 55% 的存储空间
-
-### Table 4: User_PR_Cache
-
-用于用户缓存相关的数据
-
-```sql
-CREATE TABLE user_pr (
-    -- 相关id
-    id               INT          AUTO_INCREMENT,
-    account_id       BIGINT       NOT NULL,     -- 1-11位的非连续数字
-    -- 记录用户pr缓存的数据和更新时间
-    pr_data          INT          DEFAULT -1,    -- -1表示无法计算，0~9999表示pr值
-    -- 记录数据创建的时间和更新时间
-    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at       TIMESTAMP    DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-
-    PRIMARY KEY (id), -- 主键
-
-    UNIQUE INDEX idx_aid (account_id), -- 索引
-
-    FOREIGN KEY (account_id) REFERENCES user_basic(account_id) ON DELETE CASCADE -- 外键
-);
-```
 
 ### Table 5：User_Ship_Cache
 

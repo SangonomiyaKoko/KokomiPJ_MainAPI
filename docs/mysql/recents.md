@@ -18,7 +18,7 @@ CREATE TABLE recents (
     last_update_time INT          DEFAULT 0,      -- 数据库上次更新时间
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP    DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (region_id, account_id) -- 主键
 );

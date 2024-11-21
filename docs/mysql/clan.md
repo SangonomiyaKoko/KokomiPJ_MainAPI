@@ -37,7 +37,7 @@ CREATE TABLE clan_info (
     id               INT          AUTO_INCREMENT,
     clan_id          BIGINT       NOT NULL,     -- 10位的非连续数字
     -- 关于工会活跃的信息，用于工会排行榜功能
-    is_active        TINYINT      DEFAULT 0,   -- 用于标记工会的有效性，0表示无效，1表示有效
+    is_active        TINYINT      DEFAULT 0,    -- 用于标记工会的有效性，0表示无效，1表示有效
     season           TINYINT      DEFAULT 0,    -- 当前赛季代码 1-30+
     public_rating    INT          DEFAULT 1100, -- 工会评分 1199 - 3000+  1100表示无数据
     league           TINYINT      DEFAULT 4,    -- 段位 0紫金 1白金 2黄金 3白银 4青铜
@@ -56,7 +56,50 @@ CREATE TABLE clan_info (
 );
 ```
 
-### Table 3: Clan_Cache
+### Table 3: Clan_User
+
+用于存储用户和工会的对应关系
+
+```sql
+CREATE TABLE clan_user (
+    id               INT          AUTO_INCREMENT,
+    account_id       BIGINT       NOT NULL,       -- 1-10位的非连续数字
+    clan_id          BIGINT       DEFAULT NULL,   -- 10位的非连续数字 none表示无工会
+    -- 记录数据创建的时间和更新时间
+    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP    DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id), -- 主键
+
+    UNIQUE INDEX idx_aid (account_id), -- 唯一索引
+
+    INDEX idx_cid (clan_id) -- 非唯一索引
+);
+```
+
+### Table 4: Clan_History
+
+记录工会用户的进出
+
+```sql
+CREATE TABLE clan_history (
+    id               INT          AUTO_INCREMENT,
+    -- 记录某个用户进入或者离开某个工会
+    account_id       BIGINT       NOT NULL,       -- 1-10位的非连续数字
+    clan_id          BIGINT       NOT NULL,       -- 10位的非连续数字
+    action_type      TINYINT      NOT NULL,       -- 表示行为 1表示离开 2表示进入
+    -- 记录数据创建的时间
+    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id), -- 主键
+
+    INDEX idx_aid (account_id), -- 索引
+
+    UNIQUE INDEX idx_cid (clan_id) -- 唯一索引
+);
+```
+
+### Table 5: Clan_Cache
 
 用于存储工会的赛季数据
 
@@ -107,7 +150,7 @@ team_data_2 = {
 }
 ```
 
-### Table 4: Clan_Battle
+### Table 6: Clan_Battle
 
 用于存储工会的赛季数据
 
@@ -135,7 +178,6 @@ CREATE TABLE clan_battle_s27 (
 
     PRIMARY KEY (id), -- 主键
 
-    INDEX idx_cid (battle_time), -- 索引
-
-    FOREIGN KEY (clan_id) REFERENCES clan_basic(clan_id) ON DELETE CASCADE -- 外键
+    INDEX idx_cid (battle_time) -- 索引
 );
+```
