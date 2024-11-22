@@ -4,7 +4,12 @@ from app.models import UserModel, ClanModel
 from app.utils import UtilityFunctions
 from app.network import BasicAPI
 from app.response import JSONResponse, ResponseDict
-from app.middlewares.celery import task_check_user_basic, task_check_clan_basic, task_update_user_clan, task_check_user_info
+from app.middlewares.celery import (
+    task_check_user_basic, 
+    task_check_clan_basic, 
+    task_update_user_clan, 
+    task_check_user_info
+)
 
 async def get_user_name_and_clan(
     account_id: int,
@@ -18,8 +23,7 @@ async def get_user_name_and_clan(
     参数：
         account_id: 用户id
         region_id: 服务器id
-        use_ac: 是否使用ac查询数据
-        ac: ac值
+        ac_value: ac值
 
     返回：
         JSONResponse
@@ -37,7 +41,7 @@ async def get_user_name_and_clan(
     # 返回的user和clan数据格式
     user_basic = {
         'id': account_id,
-        'name': f'User_{account_id}',
+        'name': UtilityFunctions.get_user_default_name(account_id),
         'karma': 0,
         'crated_at': 0,
         'actived_at': 0,
@@ -65,14 +69,13 @@ async def get_user_name_and_clan(
     user_basic['name'] = user_basic_result['data']['nickname']
 
     # 获取用户所在工会的clan_id
-    user_clan_result: dict = await UserModel.get_user_clan(account_id,region_id)
+    user_clan_result: dict = await UserModel.get_user_clan_id(account_id,region_id)
     if user_clan_result.get('code',None) != 1000:
         return user_clan_result
     valid_clan = True
     # 判断用户所在工会数据是否有效
     if not UtilityFunctions.check_clan_vaild(user_clan_result['data']['updated_at']):
         valid_clan = False
-        
     # 工会的tag和league
     if valid_clan and user_clan_result['data']['clan_id']:
         # 如果有效则获取工会tag和league
@@ -87,6 +90,7 @@ async def get_user_name_and_clan(
             clan_basic['id'] = user_clan_result['data']['clan_id']
             clan_basic['tag'] = clan_basic_result['data']['tag']
             clan_basic['league'] = clan_basic_result['data']['league']
+    
     # 如果clan数据有效则只请求user数据，否则请求user和clan数据
     if valid_clan:
         basic_data = await BasicAPI.get_user_basic(account_id,region_id,ac_value)
@@ -100,15 +104,21 @@ async def get_user_name_and_clan(
     if basic_data[0]['code'] == 1001:
         # 用户数据不存在
         user_info['is_active'] = False
-        task_check_user_info.delay([user_info])
+        task_check_user_info.delay(user_info)
         return JSONResponse.API_1001_UserNotExist
-    user_basic['name'] = basic_data[0]['data'][str(account_id)]['name']
-    task_check_user_basic.delay([{'account_id':account_id,'region_id':region_id,'nickname':user_basic['name']}])
+    if user_basic_result['data']['nickname'] != basic_data[0]['data'][str(account_id)]['name']:
+        # 用户名称改变
+        user_basic['name'] = basic_data[0]['data'][str(account_id)]['name']
+        task_check_user_basic.delay({
+            'account_id':account_id,
+            'region_id':region_id,
+            'nickname':user_basic['name']
+        })
     if 'hidden_profile' in basic_data[0]['data'][str(account_id)]:
         # 隐藏战绩
         user_info['is_public'] = False
         user_info['active_level'] = UtilityFunctions.get_active_level(user_info)
-        task_check_user_info.delay([user_info])
+        task_check_user_info.delay(user_info)
         if ac_value:
             return JSONResponse.API_1013_ACisInvalid
         else:
@@ -116,20 +126,24 @@ async def get_user_name_and_clan(
     user_basic_data = basic_data[0]['data'][str(account_id)]['statistics']
     if (
         user_basic_data == {} or
-        user_basic_data['basic'] == {} or
-        user_basic_data['basic']['leveling_points'] == 0
+        user_basic_data['basic'] == {}
     ):
+        # 用户没有数据
+        user_info['is_active'] = False
+        task_check_user_info.delay(user_info)
+        return JSONResponse.API_1006_UserDataisNone
+    if user_basic_data['basic']['leveling_points'] == 0:
         # 用户没有数据
         user_info['total_battles'] = 0
         user_info['last_battle_time'] = 0
-        user_info['active_level'] = UtilityFunctions.get_active_level(user_info)
-        task_check_user_info.delay([user_info])
+        user_info['active_level'] = 1
+        task_check_user_info.delay(user_info)
         return JSONResponse.API_1006_UserDataisNone
     # 获取user_info的数据并更新数据库
     user_info['total_battles'] = user_basic_data['basic']['leveling_points']
     user_info['last_battle_time'] = user_basic_data['basic']['last_battle_time']
     user_info['active_level'] = UtilityFunctions.get_active_level(user_info)
-    task_check_user_info.delay([user_info])
+    task_check_user_info.delay(user_info)
     # 获取user_basic的数据
     user_basic['karma'] = user_basic_data['basic']['karma']
     user_basic['crated_at'] = user_basic_data['basic']['created_at']
@@ -142,10 +156,21 @@ async def get_user_name_and_clan(
             clan_basic['id'] = user_clan_data['clan_id']
             clan_basic['tag'] = user_clan_data['clan']['tag']
             clan_basic['league'] = UtilityFunctions.get_league_by_color(user_clan_data['clan']['color'])
-            task_update_user_clan.delay([(user_basic['id'],clan_basic['id'])])
-            task_check_clan_basic.delay([(clan_basic['id'],region_id,clan_basic['tag'],clan_basic['league'])])
+            task_check_clan_basic.delay({
+                'clan_id': clan_basic['id'],
+                'region_id': region_id,
+                'tag': clan_basic['tag'],
+                'league': clan_basic['league']
+            })
+            task_update_user_clan.delay({
+                'account_id': user_basic['id'],
+                'clan_id': clan_basic['id']
+            })
         else:
-            task_update_user_clan.delay([(user_basic['id'],None)])
+            task_update_user_clan.delay({
+                'account_id': user_basic['id'],
+                'clan_id': None
+            })
     # 返回user和clan数据
     data = {
         'user': user_basic,

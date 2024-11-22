@@ -1,8 +1,11 @@
+import hashlib
+
 from app.const import GameData, ClanColor
 from .time_utils import TimeFormat
 
 
 class UtilityFunctions: 
+    '''存储一些公用的函数'''
     def get_user_default_name(account_id: int):
         "获取用户的默认名称"
         return f'User_{account_id}'
@@ -11,8 +14,15 @@ class UtilityFunctions:
         "获取工会的默认名称"
         return f'N/A'
     
+    def get_sha256_value(hash_str: str) -> str:
+        "计算SHA256哈希值"
+        hash_value = hashlib.sha256(hash_str.encode('utf-8')).hexdigest()
+        return hash_value
+    
     def check_clan_vaild(updated_at: int):
         "检查工会缓存的更新时间是否有效"
+        if not updated_at:
+            return False
         current_timestamp = TimeFormat.get_current_timestamp()
         if (current_timestamp - updated_at) > 3 * 24 * 60 * 60:
             return False

@@ -65,8 +65,8 @@ CREATE TABLE clan_users (
     id               INT          AUTO_INCREMENT,
     clan_id          BIGINT       DEFAULT NULL,   -- 10位的非连续数字 none表示无工会
     -- 记录工会内玩家
-    hash_users       VARCHAR(50)  DEFAULT NULL,
-    users            BLOB         DEFAULT NULL, -- 缓存的简数据
+    hash_value       CHAR(64)     DEFAULT NULL, -- 缓存数据的哈希值
+    users_data       BLOB         DEFAULT NULL, -- 压缩处理后的缓存数据
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP    DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
@@ -161,10 +161,12 @@ CREATE TABLE clan_battle_s27 (
     -- 对局相关信息和ID
     battle_time      INT          NOT NULL,     -- 战斗时间
     clan_id          BIGINT       NOT NULL,     -- 10位的非连续数字
-    team_number      TINYINT      NOT NULL,     -- 队伍代码
+    region_id        TINYINT      NOT NULL,     -- 服务器id
+    team_number      TINYINT      NOT NULL,     -- 队伍id
     -- 对局结果
     battle_result    VARCHAR(10)  NOT NULL,     -- 对局结果 胜利或者时报
-    battle_rating    INT          NOT NULL,     -- 对局分数 如果是晋级赛则会显示为0
+    battle_rating    INT          DEFAULT NULL, -- 对局分数 如果是晋级赛则会显示为0
+    battle_stage     VARCHAR(10)  DEFAULT NULL, -- 对局结果 仅对于stage有效
     -- 对局结算的数据
     league           TINYINT      NOT NULL,     -- 段位 0紫金 1白金 2黄金 3白银 4青铜
     division         TINYINT      NOT NULL,     -- 分段 1 2 3

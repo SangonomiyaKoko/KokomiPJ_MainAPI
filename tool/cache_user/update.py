@@ -1,4 +1,5 @@
 import time
+import hashlib
 import traceback
 
 from log import log as logger
@@ -28,7 +29,7 @@ class UserCache_Update:
         ac_value = user_data['user_basic']['ac_value']
         
         # 首先更新active_level和是否有缓存数据判断用户是否需要更新
-        if user_data['user_info']['update_time'] != None and user_data['user_ships']['ships_data'] != None:
+        if user_data['user_info']['update_time'] != None:
             active_level = user_data['user_info']['active_level']
             update_interval_time = self.get_update_interval_time(active_level)
             current_time = int(time.time())
@@ -95,11 +96,17 @@ class UserCache_Update:
             return
         old_user_data = self.from_binary_data_dict(user_data['user_ships']['ships_data'])
         new_user_data = user_ships_data['data']
+        sorted_dict = dict(sorted(new_user_data.items()))
+        new_hash_value = hashlib.sha256(str(sorted_dict).encode('utf-8')).hexdigest()
+        if user_data['user_ships']['hash_value'] == new_hash_value:
+            logger.debug(f'{region_id} - {account_id} | ├── 未有更新数据，跳过更新')
+            return
         user_cache = {
             'account_id': account_id,
             'region_id': region_id,
             'battles_count': user_info['total_battles'],
-            'ships_data': self.to_binary_data_dict(new_user_data['basic']),
+            'hash_value': new_hash_value,
+            'ships_data': self.to_binary_data_dict(sorted_dict),
             'delete_ship_list': [],
             'replace_ship_dict': {}
         }

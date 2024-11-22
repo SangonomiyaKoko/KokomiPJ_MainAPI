@@ -3,7 +3,13 @@ from dbutils.pooled_db import PooledDB
 from celery import Celery, signals
 from celery.app.base import logger
 
-from .background_task import check_user_basic, check_clan_tag_and_league, update_user_clan, check_user_info
+from .background_task import (
+    check_user_basic, 
+    check_user_info,
+    check_clan_basic, 
+    update_user_clan, 
+    check_user_ships
+)
 from app.core import EnvConfig
 
 
@@ -43,22 +49,26 @@ def close_mysql_pool(**kwargs):
 
 
 @celery_app.task
-def task_check_user_basic(users: list):
-    result = check_user_basic(pool,users)
+def task_check_user_basic(user_data: dict):
+    result = check_user_basic(pool,user_data)
     return result
     
 @celery_app.task
-def task_check_clan_basic(clans: list):
-    result = check_clan_tag_and_league(pool,clans)
+def task_check_clan_basic(clan_data: dict):
+    result = check_clan_basic(pool,clan_data)
     return result
     
 @celery_app.task
-def task_update_user_clan(user_clans: list):
-    result = update_user_clan(pool,user_clans)
+def task_update_user_clan(user_data: dict):
+    result = update_user_clan(pool,user_data)
     return result
     
 @celery_app.task
-def task_check_user_info(users: list):
-    result = check_user_info(pool,users)
+def task_check_user_info(user_data: dict):
+    result = check_user_info(pool,user_data)
     return result
 
+@celery_app.task
+def task_check_user_cache(user_data: dict):
+    result = check_user_ships(pool,user_data)
+    return result

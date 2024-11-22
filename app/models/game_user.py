@@ -291,7 +291,7 @@ class UserModel:
                 'updated_at': 0
             }
             await cur.execute(
-                "SELECT clan_id, UNIX_TIMESTAMP(updated_at) AS update_time FROM clan_user WHERE account_id = %s;", 
+                "SELECT clan_id, UNIX_TIMESTAMP(updated_at) AS update_time FROM user_clan WHERE account_id = %s;", 
                 [account_id]
             )
             user = await cur.fetchone()
@@ -387,7 +387,7 @@ class UserModel:
             data = []
             await cur.execute(
                 "SELECT b.region_id, b.account_id, i.is_active, i.active_level, "
-                "s.battles_count, s.ships_data, UNIX_TIMESTAMP(s.updated_at) AS update_time "
+                "s.battles_count, s.hash_value, UNIX_TIMESTAMP(s.updated_at) AS update_time "
                 "FROM user_basic AS b "
                 "LEFT JOIN user_info AS i ON i.account_id = b.account_id "
                 "LEFT JOIN user_ships AS s ON s.account_id = b.account_id "
@@ -411,110 +411,12 @@ class UserModel:
                     },
                     'user_ships':{
                         'battles_count': row[4],
-                        'ships_data': row[5],
+                        'hash_value': row[5],
                         'update_time': row[6]
                     }
                 }
                 data.append(user)
             return JSONResponse.get_success_response(data)
-        except Exception as e:
-            await conn.rollback()
-            raise e
-        finally:
-            await cur.close()
-            await MysqlConnection.release_connection(conn)
-
-    @ExceptionLogger.handle_database_exception_async
-    async def update_user_ships(
-        account_id: int, 
-        battles_count: int = None, 
-        ships_data: bytes = None
-    ) -> ResponseDict:
-        '''更新用户缓存的数据
-
-        更新用户缓存的更新时间
-
-        参数:
-            account_id: 用户id
-            battles_count: 战斗总场次
-            ships_data: 用户数据
-        
-        返回值:
-            ResponseDict
-        '''
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
-        try:
-            if battles_count:
-                await cur.execute(
-                    "UPDATE user_ships "
-                    "SET battles_count = %s, ships_data = %s "
-                    "WHERE account_id = %s;", 
-                    [battles_count, ships_data, account_id]
-                )
-            else:
-                await cur.execute(
-                    "UPDATE user_ships "
-                    "SET updated_at = CURRENT_TIMESTAMP "
-                    "WHERE account_id = %s;", 
-                    [battles_count, ships_data, account_id]
-                )
-            await conn.commit()
-            return JSONResponse.API_1000_Success
-        except Exception as e:
-            await conn.rollback()
-            raise e
-        finally:
-            await cur.close()
-            await MysqlConnection.release_connection(conn)
-
-    @ExceptionLogger.handle_database_exception_async
-    async def update_user_cache(
-        account_id: int, 
-        region_id: int, 
-        delete_ship_list: list, 
-        replace_ship_dict: dict
-    ) -> ResponseDict:
-        '''更新用户缓存的数据
-
-        更新用户缓存的更新时间
-
-        参数:
-            account_id: 用户id
-            region_id: 服务器id
-            user_cache: 用户需要更新的缓存数据
-        
-        返回值:
-            ResponseDict
-        '''
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
-        try:
-            await conn.begin()
-            for del_ship_id in delete_ship_list:
-                table_name = f'user_ship_0{del_ship_id % 10}'
-                await cur.execute(
-                    "DELETE FROM %s "
-                    "WHERE ship_id = %s and region_id = %s and account_id = %s;",
-                    [table_name, del_ship_id, region_id, account_id]
-                )
-            for update_ship_id, ship_data in replace_ship_dict.items():
-                table_name = f'user_ship_0{update_ship_id % 10}'
-                await cur.execute(
-                    "UPDATE %s SET battles_count = %s, battle_type_1 = %s, battle_type_2 = %s, battle_type_3 = %s, wins = %s, "
-                    "damage_dealt = %s, frags = %s, exp = %s, survived = %s, scouting_damage = %s, art_agro = %s, "
-                    "planes_killed = %s, max_exp = %s, max_damage_dealt = %s, max_frags = %s"
-                    "WHERE ship_id = %s and region_id = %s and account_id = %s;"
-                    "INSERT INTO %s (ship_id, region_id, account_id, battles_count, battle_type_1, battle_type_2, "
-                    "battle_type_3, wins, damage_dealt, frags, exp, survived, scouting_damage, art_agro, planes_killed, "
-                    "max_exp, max_damage_dealt, max_frags) "
-                    "SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s "
-                    "WHERE NOT EXISTS (SELECT 1 FROM %s WHERE ship_id = %s and region_id = %s and account_id = %s);",
-                    [table_name] + ship_data + [update_ship_id, region_id, account_id] + [table_name] + \
-                    [update_ship_id, region_id, account_id] + ship_data + [table_name] + [update_ship_id, region_id, account_id]
-                )
-            await conn.commit()
-            return JSONResponse.API_1000_Success
         except Exception as e:
             await conn.rollback()
             raise e

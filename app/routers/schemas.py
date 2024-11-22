@@ -54,6 +54,7 @@ class RecentEnableModel(UserBaseDerivedModel):
 
 class UserCacheModel(UserBaseModel):
     battles_count: int = Field(None, description='战斗总场次')
+    hash_value: str = Field(None, description='缓存数据的哈希值')
     ships_data: bytes = Field(None, description='二进制存储的用户船只数据')
     delete_ship_list: list = Field(None, description='需要删除的船只数据')
     replace_ship_dict: dict = Field(None, description='需要修改的船只数据')
