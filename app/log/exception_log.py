@@ -45,7 +45,6 @@ class ExceptionLogger:
                     error_id = error_id,
                     error_type = ExceptionType.program,
                     error_name = str(type(e).__name__),
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs),
                     error_info = traceback.format_exc()
                 )
@@ -65,7 +64,6 @@ class ExceptionLogger:
                     error_id = error_id,
                     error_type = ExceptionType.program,
                     error_name = str(type(e).__name__),
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs),
                     error_info = traceback.format_exc()
                 )
@@ -81,50 +79,42 @@ class ExceptionLogger:
                 return result
             except aiomysql.ProgrammingError as e:
                 error_id = generate_error_id()
-                traceback.print_exc()
                 write_error_info(
                     error_id = error_id,
                     error_type = ExceptionType.mysql,
                     error_name = DatabaseExceptionName.programming_error,
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs),
-                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1])
+                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1]) + f'\n{traceback.format_exc()}'
                 )
                 return JSONResponse.get_error_response(3001,'DatabaseError',error_id)
             except aiomysql.OperationalError as e:
                 error_id = generate_error_id()
-                traceback.print_exc()
                 write_error_info(
                     error_id = error_id,
                     error_type = ExceptionType.mysql,
                     error_name = DatabaseExceptionName.operational_error,
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs),
-                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1])
+                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1]) + f'\n{traceback.format_exc()}'
                 )
                 return JSONResponse.get_error_response(3002,'DatabaseError',error_id)
             except aiomysql.IntegrityError as e:
                 error_id = generate_error_id()
-                traceback.print_exc()
                 write_error_info(
                     error_id = error_id,
                     error_type = ExceptionType.mysql,
                     error_name = DatabaseExceptionName.integrity_error,
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs),
-                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1])
+                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1]) + f'\n{traceback.format_exc()}'
                 )
                 return JSONResponse.get_error_response(3003,'DatabaseError',error_id)
             except aiomysql.DatabaseError as e:
                 error_id = generate_error_id()
-                traceback.print_exc()
                 write_error_info(
                     error_id = error_id,
                     error_type = ExceptionType.mysql,
                     error_name = DatabaseExceptionName.database_error,
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs),
-                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1])
+                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1]) + f'\n{traceback.format_exc()}'
                 )
                 return JSONResponse.get_error_response(3000,'DatabaseError',error_id)
             except Exception as e:
@@ -133,7 +123,6 @@ class ExceptionLogger:
                     error_id = error_id,
                     error_type = ExceptionType.program,
                     error_name = str(type(e).__name__),
-                    error_file = __file__,
                     error_info = traceback.format_exc()
                 )
                 return JSONResponse.get_error_response(5000,'ProgramError',error_id)
@@ -148,98 +137,82 @@ class ExceptionLogger:
                 return result
             except pymysql.err.ProgrammingError as e:
                 error_id = generate_error_id()
-                traceback.print_exc()
                 write_error_info(
                     error_id = error_id,
                     error_type = ExceptionType.mysql,
                     error_name = DatabaseExceptionName.programming_error,
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs),
-                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1])
+                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1]) + f'\n{traceback.format_exc()}'
                 )
                 return JSONResponse.get_error_response(3001,'DatabaseError',error_id)
             except pymysql.err.OperationalError as e:
                 error_id = generate_error_id()
-                traceback.print_exc()
                 write_error_info(
                     error_id = error_id,
                     error_type = ExceptionType.mysql,
                     error_name = DatabaseExceptionName.operational_error,
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs),
-                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1])
+                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1]) + f'\n{traceback.format_exc()}'
                 )
                 return JSONResponse.get_error_response(3002,'DatabaseError',error_id)
             except pymysql.err.IntegrityError as e:
                 error_id = generate_error_id()
-                traceback.print_exc()
                 write_error_info(
                     error_id = error_id,
                     error_type = ExceptionType.mysql,
                     error_name = DatabaseExceptionName.integrity_error,
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs),
-                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1])
+                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1]) + f'\n{traceback.format_exc()}'
                 )
                 return JSONResponse.get_error_response(3003,'DatabaseError',error_id)
             except pymysql.err.DatabaseError as e:
                 error_id = generate_error_id()
-                traceback.print_exc()
                 write_error_info(
                     error_id = error_id,
                     error_type = ExceptionType.mysql,
                     error_name = DatabaseExceptionName.database_error,
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs),
-                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1])
+                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1]) + f'\n{traceback.format_exc()}'
                 )
                 return JSONResponse.get_error_response(3000,'DatabaseError',error_id)
             except sqlite3.ProgrammingError as e:
                 error_id = generate_error_id()
-                traceback.print_exc()
                 write_error_info(
                     error_id = error_id,
                     error_type = ExceptionType.mysql,
                     error_name = DatabaseExceptionName.programming_error,
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs),
-                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1])
+                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1]) + f'\n{traceback.format_exc()}'
                 )
                 return JSONResponse.get_error_response(3001,'DatabaseError',error_id)
             except sqlite3.OperationalError as e:
                 error_id = generate_error_id()
-                traceback.print_exc()
                 write_error_info(
                     error_id = error_id,
                     error_type = ExceptionType.mysql,
                     error_name = DatabaseExceptionName.operational_error,
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs),
-                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1])
+                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1]) + f'\n{traceback.format_exc()}'
                 )
                 return JSONResponse.get_error_response(3002,'DatabaseError',error_id)
             except sqlite3.IntegrityError as e:
                 error_id = generate_error_id()
-                traceback.print_exc()
                 write_error_info(
                     error_id = error_id,
                     error_type = ExceptionType.mysql,
                     error_name = DatabaseExceptionName.integrity_error,
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs),
-                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1])
+                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1]) + f'\n{traceback.format_exc()}'
                 )
                 return JSONResponse.get_error_response(3003,'DatabaseError',error_id)
             except sqlite3.DatabaseError as e:
                 error_id = generate_error_id()
-                traceback.print_exc()
                 write_error_info(
                     error_id = error_id,
                     error_type = ExceptionType.mysql,
                     error_name = DatabaseExceptionName.database_error,
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs),
-                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1])
+                    error_info = f'ERROR_{e.args[0]}\n' + str(e.args[1]) + f'\n{traceback.format_exc()}'
                 )
                 return JSONResponse.get_error_response(3000,'DatabaseError',error_id)
             except Exception as e:
@@ -248,7 +221,6 @@ class ExceptionLogger:
                     error_id = error_id,
                     error_type = ExceptionType.program,
                     error_name = str(type(e).__name__),
-                    error_file = __file__,
                     error_info = traceback.format_exc()
                 )
                 return JSONResponse.get_error_response(5000,'ProgramError',error_id)
@@ -267,7 +239,6 @@ class ExceptionLogger:
                     error_id = error_id,
                     error_type = ExceptionType.redis,
                     error_name = str(type(e).__name__),
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs),
                     error_info = f'\n{traceback.format_exc()}'
                 )
@@ -278,7 +249,6 @@ class ExceptionLogger:
                     error_id = error_id,
                     error_type = ExceptionType.program,
                     error_name = str(type(e).__name__),
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs),
                     error_info = traceback.format_exc()
                 )
@@ -298,7 +268,6 @@ class ExceptionLogger:
                     error_id = error_id,
                     error_type = ExceptionType.network,
                     error_name = NerworkExceptionName.connect_timeout,
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs)
                 )
                 return JSONResponse.get_error_response(2001,'NetworkError',error_id)
@@ -308,7 +277,6 @@ class ExceptionLogger:
                     error_id = error_id,
                     error_type = ExceptionType.network,
                     error_name = NerworkExceptionName.read_timeout,
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs)
                 )
                 return JSONResponse.get_error_response(2002,'NetworkError',error_id)
@@ -318,7 +286,6 @@ class ExceptionLogger:
                     error_id = error_id,
                     error_type = ExceptionType.network,
                     error_name = NerworkExceptionName.request_timeout,
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs)
                 )
                 return JSONResponse.get_error_response(2003,'NetworkError',error_id)
@@ -328,7 +295,6 @@ class ExceptionLogger:
                     error_id = error_id,
                     error_type = ExceptionType.network,
                     error_name = NerworkExceptionName.network_error,
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs),
                     error_info = f'StatusCode: {e.response.status_code}'
                 )
@@ -339,7 +305,6 @@ class ExceptionLogger:
                     error_id = error_id,
                     error_type = ExceptionType.program,
                     error_name = str(type(e).__name__),
-                    error_file = __file__,
                     error_args = str(args) + str(kwargs),
                     error_info = traceback.format_exc()
                 )

@@ -6,8 +6,7 @@ from .schemas import (
     RegionList, 
     LanguageList, 
     UserInfoModel, 
-    UserBasicModel, 
-    UserBasicAndInfoModel
+    UserBasicModel
 )
 from app.apis.platform import Search, Update, GameUser
 from app.utils import UtilityFunctions
@@ -199,24 +198,5 @@ async def post_user_info(user_info: UserInfoModel) -> ResponseDict:
     - ResponseDict
     """
     result = await GameUser.check_user_info_data(user_info.model_dump())
-    await record_api_call(result['status'])
-    return result
-
-@router.put("/game/user/basic-and-info/")
-async def post_user_info(data: UserBasicAndInfoModel) -> ResponseDict:
-    """更新user_basic和user_info表
-
-    逻辑更新上，只是用于减少一个网络的请求
-
-    参数:
-    - UserBasicAndInfoModel
-
-    返回:
-    - ResponseDict
-    """
-    data = data.model_dump()
-    if not data.get('basic', None) and not data.get('info', None):
-        return JSONResponse.API_7000_InvalidParameter
-    result = await GameUser.check_user_basic_and_info_data(data.get('basic', None), data.get('info', None))
     await record_api_call(result['status'])
     return result

@@ -59,15 +59,16 @@ async def main():
                         "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);"
                         "INSERT INTO user_info (account_id) VALUES (%s);"
                         "INSERT INTO user_ships (account_id) VALUES (%s);"
-                        "INSERT INTO clan_user (account_id) VALUES (%s);",
+                        "INSERT INTO user_clan (account_id) VALUES (%s);",
                         [user[1], user[0], f'User_{user[1]}', user[1], user[1], user[1]]
                     )
                 for clan in test_clan:
                     await cur.execute(
                         "INSERT INTO clan_basic (clan_id, region_id, tag) VALUES (%s, %s, %s);"
                         "INSERT INTO clan_info (clan_id) VALUES (%s);"
+                        "INSERT INTO clan_users (clan_id) VALUES (%s);"
                         "INSERT INTO clan_season (clan_id) VALUES (%s);",
-                        [clan[1], clan[0], 'N/A', clan[1], clan[1]]
+                        [clan[1], clan[0], 'N/A', clan[1], clan[1], clan[1]]
                     )
                 await conn.commit()
     except:

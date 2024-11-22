@@ -88,7 +88,7 @@ class UserModel:
                     "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);"
                     "INSERT INTO user_info (account_id) VALUES (%s);"
                     "INSERT INTO user_ships (account_id) VALUES (%s);"
-                    "INSERT INTO clan_user (account_id) VALUES (%s);",
+                    "INSERT INTO user_clan (account_id) VALUES (%s);",
                     [user[0], user[1], user[2], user[0], user[0], user[0]]
                 )
             else:
@@ -97,7 +97,7 @@ class UserModel:
                     "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);"
                     "INSERT INTO user_info (account_id) VALUES (%s);"
                     "INSERT INTO user_ships (account_id) VALUES (%s);"
-                    "INSERT INTO clan_user (account_id) VALUES (%s);"
+                    "INSERT INTO user_clan (account_id) VALUES (%s);"
                     "UPDATE user_basic SET updated_at = CURRENT_TIMESTAMP WHERE account_id = %s AND region_id = %s",
                     [user[0], user[1], user[2], user[0], user[0], user[0], user[0], user[1]]
                 )
@@ -155,7 +155,7 @@ class UserModel:
                         "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);"
                         "INSERT INTO user_info (account_id) VALUES (%s);"
                         "INSERT INTO user_ships (account_id) VALUES (%s);"
-                        "INSERT INTO clan_user (account_id) VALUES (%s);",
+                        "INSERT INTO user_clan (account_id) VALUES (%s);",
                         [user[0], user[1], user[2], user[0], user[0], user[0]]
                     )
                 else:
@@ -164,7 +164,7 @@ class UserModel:
                         "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);"
                         "INSERT INTO user_info (account_id) VALUES (%s);"
                         "INSERT INTO user_ships (account_id) VALUES (%s);"
-                        "INSERT INTO clan_user (account_id) VALUES (%s);"
+                        "INSERT INTO user_clan (account_id) VALUES (%s);"
                         "UPDATE user_basic SET updated_at = CURRENT_TIMESTAMP WHERE account_id = %s AND region_id = %s",
                         [user[0], user[1], user[2], user[0], user[0], user[0], user[0], user[1]]
                     )
@@ -203,7 +203,7 @@ class UserModel:
                         "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);"
                         "INSERT INTO user_info (account_id) VALUES (%s);"
                         "INSERT INTO user_ships (account_id) VALUES (%s);"
-                        "INSERT INTO clan_user (account_id) VALUES (%s);",
+                        "INSERT INTO user_clan (account_id) VALUES (%s);",
                         [user[0], user[1], user[2], user[0], user[0], user[0]]
                     )
                 else:
@@ -212,7 +212,7 @@ class UserModel:
                         "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);"
                         "INSERT INTO user_info (account_id) VALUES (%s);"
                         "INSERT INTO user_ships (account_id) VALUES (%s);"
-                        "INSERT INTO clan_user (account_id) VALUES (%s);"
+                        "INSERT INTO user_clan (account_id) VALUES (%s);"
                         "UPDATE user_basic SET updated_at = CURRENT_TIMESTAMP WHERE account_id = %s AND region_id = %s",
                         [user[0], user[1], user[2], user[0], user[0], user[0], user[0], user[1]]
                     )
@@ -258,7 +258,7 @@ class UserModel:
                 insert_result = await UserModel.insert_user([account_id,region_id,None])
                 if insert_result.get('code', None) != 1000:
                     return insert_result
-                data['nickname'] = UtilityFunctions.get_user_default_name(user[0])
+                data['nickname'] = UtilityFunctions.get_user_default_name(account_id)
                 data['update_time'] = None
             else:
                 data['nickname'] = user[0]

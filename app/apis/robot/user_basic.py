@@ -45,7 +45,7 @@ async def get_user_name_and_clan(
         'karma': 0,
         'crated_at': 0,
         'actived_at': 0,
-        'dog_tag': {},
+        'dog_tag': {}
     }
     clan_basic = {
         'id': None,

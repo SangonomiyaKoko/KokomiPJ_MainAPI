@@ -5,7 +5,7 @@ from app.log import ExceptionLogger
 from app.response import JSONResponse, ResponseDict
 from app.models import RecentUserModel, RecentDatabaseModel, UserModel, UserAccessToken
 from app.utils import UtilityFunctions, TimeFormat
-from app.middlewares.celery import task_check_user_basic, task_check_user_info
+from app.middlewares.celery import task_check_user_basic, task_check_user_info, task_check_user_recent
 
 
 class RecentBasic:
@@ -44,10 +44,15 @@ class RecentBasic:
 
     @classmethod
     @ExceptionLogger.handle_program_exception_async
-    async def update_recent(self, user_recent: dict) -> ResponseDict:
+    async def update_recent(self, user_data: dict) -> ResponseDict:
         try:
-            result = await RecentUserModel.update_recent_user(user_recent)
-            return result
+            if user_data['user_recent']:
+                task_check_user_recent.delay(user_data['user_recent'])
+            if user_data['user_basic']:
+                task_check_user_basic.delay(user_data['user_basic'])
+            if user_data['user_info']:
+                task_check_user_info.delay(user_data['user_info'])
+            return JSONResponse.API_1000_Success
         except Exception as e:
             raise e
         finally:
@@ -111,17 +116,17 @@ class RecentBasic:
         if basic_data[0]['code'] == 1001:
             # 用户数据不存在
             user_info['is_active'] = False
-            task_check_user_info.delay([user_info])
+            task_check_user_info.delay(user_info)
             return JSONResponse.API_1001_UserNotExist
         if user_basic['nickname'] != user_basic_result['data']['nickname']:
             # 用户名称改变
             user_basic['nickname'] = basic_data[0]['data'][str(account_id)]['name']
-            task_check_user_basic.delay([user_basic])
+            task_check_user_basic.delay(user_basic)
         if 'hidden_profile' in basic_data[0]['data'][str(account_id)]:
             # 隐藏战绩
             user_info['is_public'] = False
             user_info['active_level'] = UtilityFunctions.get_active_level(user_info)
-            task_check_user_info.delay([user_info])
+            task_check_user_info.delay(user_info)
             return JSONResponse.API_1005_UserHiddenProfite
         user_basic_data = basic_data[0]['data'][str(account_id)]['statistics']
         if (
@@ -133,13 +138,13 @@ class RecentBasic:
             user_info['total_battles'] = 0
             user_info['last_battle_time'] = 0
             user_info['active_level'] = UtilityFunctions.get_active_level(user_info)
-            task_check_user_info.delay([user_info])
+            task_check_user_info.delay(user_info)
             return JSONResponse.API_1006_UserDataisNone
         # 获取user_info的数据并更新数据库
         user_info['total_battles'] = user_basic_data['basic']['leveling_points']
         user_info['last_battle_time'] = user_basic_data['basic']['last_battle_time']
         user_info['active_level'] = UtilityFunctions.get_active_level(user_info)
-        task_check_user_info.delay([user_info])
+        task_check_user_info.delay(user_info)
         # 检查用户是否活跃
         current_timestamp = TimeFormat.get_current_timestamp()
         if current_timestamp - user_basic_data['basic']['last_battle_time'] >= 180*24*60*60:

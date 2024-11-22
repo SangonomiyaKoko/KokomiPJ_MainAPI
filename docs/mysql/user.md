@@ -34,7 +34,7 @@ CREATE TABLE user_basic (
 CREATE TABLE user_history (
     -- 相关id
     id               INT          AUTO_INCREMENT,
-    account_id       BIGINT       NOT NULL UNIQUE,    -- 1-11位的非连续数字
+    account_id       BIGINT       NOT NULL,    -- 1-11位的非连续数字
     -- 用户历史名称的记录
     username         VARCHAR(25)  NOT NULL,    -- 最大25个字符，编码：utf-8
     start_time       INT          NOT NULL,    -- 使用该名称的开始时间

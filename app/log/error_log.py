@@ -24,7 +24,6 @@ def write_error_info(
     error_id: str,
     error_type: str,
     error_name: str,
-    error_file: str,
     error_args: str = None,
     error_info: str = None
 ):
@@ -36,7 +35,6 @@ def write_error_info(
         f.write(f">Error ID:     {error_id}\n")
         f.write(f">Error Type:   {error_type}\n")
         f.write(f">Error Name:   {error_name}\n")
-        f.write(f">Error File:   {error_file}\n")
         f.write(f">Error Time:   {form_time}\n")
         f.write(f">Error Info:   \n{error_args}\n{error_info}\n")
         f.write('-------------------------------------------------------------------------------------------------------------\n')

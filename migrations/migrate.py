@@ -64,10 +64,25 @@ CREATE TABLE user_info (
     FOREIGN KEY (account_id) REFERENCES user_basic(account_id) ON DELETE CASCADE -- 外键
 );
 
+CREATE TABLE user_clan (
+    id               INT          AUTO_INCREMENT,
+    account_id       BIGINT       NOT NULL,       -- 1-10位的非连续数字
+    clan_id          BIGINT       DEFAULT NULL,   -- 10位的非连续数字 none表示无工会
+    -- 记录数据创建的时间和更新时间
+    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP    DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id), -- 主键
+
+    UNIQUE INDEX idx_aid (account_id), -- 唯一索引
+
+    INDEX idx_cid (clan_id) -- 非唯一索引
+);
+
 CREATE TABLE user_history (
     -- 相关id
     id               INT          AUTO_INCREMENT,
-    account_id       BIGINT       NOT NULL UNIQUE,    -- 1-11位的非连续数字
+    account_id       BIGINT       NOT NULL,    -- 1-11位的非连续数字
     -- 用户历史名称的记录
     username         VARCHAR(25)  NOT NULL,    -- 最大25个字符，编码：utf-8
     start_time       INT          NOT NULL,    -- 使用该名称的开始时间
@@ -87,9 +102,10 @@ CREATE TABLE user_ships (
     id               INT          AUTO_INCREMENT,
     account_id       BIGINT       NOT NULL,     -- 1-11位的非连续数字
     -- 记录用户缓存的数据和更新时间
-    battles_count    INT          DEFAULT 0,    -- 用于标记是否需要更新
-    ships_data       BLOB         DEFAULT NULL, -- 缓存的简略数据
-    -- 记录数据创建的时间和更新时间
+    battles_count    INT          DEFAULT NULL, -- 总战斗场次
+    hash_value       CHAR(64)     DEFAULT NULL, -- 缓存数据的哈希值
+    ships_data       BLOB         DEFAULT NULL, -- 压缩处理后的缓存数据
+    -- 记录数据创建的时间和更新时间略
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP    DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
 
@@ -297,19 +313,19 @@ CREATE TABLE clan_info (
     FOREIGN KEY (clan_id) REFERENCES clan_basic(clan_id) ON DELETE CASCADE -- 外键
 );
 
-CREATE TABLE clan_user (
+CREATE TABLE clan_users (
     id               INT          AUTO_INCREMENT,
-    account_id       BIGINT       NOT NULL,       -- 1-10位的非连续数字
     clan_id          BIGINT       DEFAULT NULL,   -- 10位的非连续数字 none表示无工会
+    -- 记录工会内玩家
+    hash_value       CHAR(64)     DEFAULT NULL, -- 缓存数据的哈希值
+    users_data       BLOB         DEFAULT NULL, -- 压缩处理后的缓存数据
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP    DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id), -- 主键
 
-    UNIQUE INDEX idx_aid (account_id), -- 唯一索引
-
-    INDEX idx_cid (clan_id) -- 非唯一索引
+    UNIQUE INDEX idx_cid (clan_id) -- 非唯一索引
 );
 
 CREATE TABLE clan_history (

@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from .schemas import RegionList, UserRecentModel, RecentEnableModel
+from .schemas import RegionList, RecentEnableModel, UserRecentUpdateModel
 from app.utils import UtilityFunctions
 from app.response import JSONResponse, ResponseDict
 from app.apis.recent import RecentBasic, RecentData
@@ -88,19 +88,15 @@ async def enableFeature(enable_data: RecentEnableModel) -> ResponseDict:
     return result
 
 @router.put("/features/user/")
-async def postUserFeatureDatae(user_recent: UserRecentModel) -> ResponseDict: 
+async def postUserFeatureDatae(user_recent: UserRecentUpdateModel) -> ResponseDict: 
     """更新用户的recent数据
 
-    更新recent_class数值，不考虑原始值
-
     参数:
-    - UserRecentModel
+    - UserRecentUpdateModel
 
     返回:
     - ResponseDict
     """
-    if UtilityFunctions.check_aid_and_rid(user_recent.account_id, user_recent.region_id) == False:
-        return JSONResponse.API_1003_IllegalAccoutIDorRegionID
     result = await RecentBasic.update_recent(user_recent.model_dump())
     return result
 

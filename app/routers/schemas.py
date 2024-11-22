@@ -40,14 +40,14 @@ class UserInfoModel(UserBaseModel):
 class UserBasicModel(UserBaseModel):
     nickname: str = Field(..., description='用户名称')
 
-class UserBasicAndInfoModel(BaseModel):
-    basic: Optional[UserBasicModel] = Field(None, description='用户基础数据')
-    info: Optional[UserInfoModel] = Field(None, description='用户详细数据')
-
 class UserRecentModel(UserBaseModel):
     recent_class: Optional[int] = Field(None, description='需要更新的字段')
-    last_query_time: Optional[int] = Field(None, description='需要更新的字段')
     last_update_time: Optional[int] = Field(None, description='需要更新的字段')
+
+class UserRecentUpdateModel(BaseModel):
+    user_basic: UserBasicModel = Field(None, description='用户基础数据')
+    user_info: UserInfoModel = Field(None, description='用户详细数据')
+    user_recent: UserRecentModel = Field(None, description='用户recent功能数据')
 
 class RecentEnableModel(UserBaseDerivedModel):
     recent_class: Optional[int] = Field(30, description='需要更新的字段')
