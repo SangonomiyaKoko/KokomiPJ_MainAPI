@@ -28,7 +28,7 @@ class UserCache_Update:
         ac_value = user_data['user_basic']['ac_value']
         
         # 首先更新active_level和是否有缓存数据判断用户是否需要更新
-        if user_data['user_info']['is_active'] and user_data['user_ships']['ships_data'] != None:
+        if user_data['user_info']['update_time'] != None and user_data['user_ships']['ships_data'] != None:
             active_level = user_data['user_info']['active_level']
             update_interval_time = self.get_update_interval_time(active_level)
             current_time = int(time.time())
@@ -43,6 +43,7 @@ class UserCache_Update:
         # 用于更新user_info表的数据
         user_info = {
             'account_id': account_id,
+            'region_id': region_id,
             'is_active': 1,
             'active_level': 0,
             'is_public': 1,

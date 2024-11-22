@@ -4,6 +4,7 @@ from aiomysql.cursors import Cursor
 from app.db import MysqlConnection
 from app.response import JSONResponse, ResponseDict
 from app.log import ExceptionLogger
+from app.utils import UtilityFunctions
 
 class ClanModel:
     @ExceptionLogger.handle_database_exception_async
@@ -36,20 +37,14 @@ class ClanModel:
             )
             clan = await cur.fetchone()
             if clan is None:
-                await conn.begin()
                 # 用户不存在，插入新用户
-                tag = 'N/A'
+                tag = UtilityFunctions.get_clan_default_name()
+                await conn.begin()
                 await cur.execute(
-                    "INSERT INTO clan_basic (clan_id, region_id, tag) VALUES (%s, %s, %s);",
-                    [clan_id, region_id, tag]
-                )
-                await cur.execute(
-                    "INSERT INTO clan_info (clan_id) VALUES (%s);", 
-                    [clan_id]
-                )
-                await cur.execute(
-                    "INSERT INTO user_cache (clan_id) VALUES (%s);", 
-                    [clan_id]
+                    "INSERT INTO clan_basic (clan_id, region_id, tag) VALUES (%s, %s, %s);"
+                    "INSERT INTO clan_info (clan_id) VALUES (%s);"
+                    "INSERT INTO clan_season (clan_id) VALUES (%s);",
+                    [clan_id, region_id, tag, clan_id, clan_id]
                 )
                 await conn.commit()
                 data['tag'] = tag
@@ -60,10 +55,8 @@ class ClanModel:
                 data['updated_at'] = clan[2]
             return JSONResponse.get_success_response(data)
         except Exception as e:
-            # 数据库回滚
             await conn.rollback()
             raise e
         finally:
-            # 释放资源
             await cur.close()
             await MysqlConnection.release_connection(conn)

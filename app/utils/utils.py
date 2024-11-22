@@ -7,7 +7,7 @@ class UtilityFunctions:
         "获取用户的默认名称"
         return f'User_{account_id}'
     
-    def get_clan_default_name(clan_id: int):
+    def get_clan_default_name():
         "获取工会的默认名称"
         return f'N/A'
     

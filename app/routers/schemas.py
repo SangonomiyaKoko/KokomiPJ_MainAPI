@@ -30,8 +30,7 @@ class UserBaseDerivedModel(BaseModel):
     region: RegionList = Field(..., description='服务器')
     account_id: int = Field(..., description='用户id')
 
-class UserInfoModel(BaseModel):
-    account_id: int = Field(..., description='用户id')
+class UserInfoModel(UserBaseModel):
     is_active: int = Field(None, description='是否活跃')
     active_level: int = Field(None, description='活跃等级')
     is_public: int = Field(None, description='是否隐藏战绩')

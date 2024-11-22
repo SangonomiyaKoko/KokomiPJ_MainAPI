@@ -272,70 +272,7 @@ class UserModel:
             await MysqlConnection.release_connection(conn)
 
     @ExceptionLogger.handle_database_exception_async
-    async def update_user_name_if_different(user_basic: dict) -> ResponseDict:
-        '''检查更新数据库中用户名称是否为最新
-
-        检查数据库中username是否和最新的数据一致
-
-        !: 传入的user_basic参数必须确保是最新的
-
-        参数:
-            user_basic: dict
-
-        返回:
-            ResponseDict
-        '''
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
-        try:
-            account_id= user_basic['account_id']
-            region_id = user_basic['region_id'] 
-            nickname = user_basic['nickname']
-            await cur.execute(
-                "SELECT username, UNIX_TIMESTAMP(updated_at) "
-                "FROM user_basic "
-                "WHERE region_id = %s and account_id = %s;", 
-                [region_id, account_id]
-            )
-            user = await cur.fetchone()
-            if user is None:
-                # 用户不存在
-                insert_result = await UserModel.insert_user([account_id,region_id,None])
-                if insert_result.get('code', None) != 1000:
-                    return insert_result
-                return JSONResponse.API_1020_UserNotFoundInDatabase
-            else:
-                if user[0] != nickname and user[1] == None:
-                    # 用户无数据，则直接插入数据
-                    await conn.begin()
-                    await cur.execute(
-                        "UPDATE user_basic SET username = %s WHERE region_id = %s and account_id = %s;", 
-                        [nickname, region_id, account_id]
-                    )
-                    await conn.commit()
-                elif user[0] != nickname and user[1] != None:
-                    # 用户名称发生改变，更新同时写入记录表
-                    await conn.begin()
-                    current_time = TimeFormat.get_current_timestamp()
-                    await cur.execute(
-                        "UPDATE user_basic SET username = %s WHERE region_id = %s and account_id = %s;"
-                        "INSERT INTO user_history (account_id, username, start_time, end_time) VALUES (%s, %s, %s, %s);", 
-                        [nickname, region_id, account_id, account_id, user[0], user[1], current_time]
-                    )
-                    await conn.commit()
-                else:
-                    # 用户名称没有发生变化，不做操作
-                    pass
-            return JSONResponse.API_1000_Success
-        except Exception as e:
-            await conn.rollback()
-            raise e
-        finally:
-            await cur.close()
-            await MysqlConnection.release_connection(conn)
-
-    @ExceptionLogger.handle_database_exception_async
-    async def get_user_clan(account_id: int, region_id: int) -> ResponseDict:
+    async def get_user_clan_id(account_id: int, region_id: int) -> ResponseDict:
         '''获取用户所在工会数据
 
         从clan_user中获取用户工会id
@@ -430,52 +367,6 @@ class UserModel:
             await cur.close()
             await MysqlConnection.release_connection(conn)
 
-    @ExceptionLogger.handle_database_exception_async
-    async def update_user_info(user_info: dict) -> ResponseDict:
-        '''检查并更新user_info表
-
-        参数:
-            user_info: dict
-        
-        返回:
-            ResponseDict
-        '''
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
-        try:
-            account_id = user_info['account_id']
-            region_id = user_info['region_id']
-            await cur.execute(
-                "SELECT is_active, active_level, is_public, total_battles, last_battle_time FROM user_info WHERE account_id = %s;", 
-                [account_id]
-            )
-            user = await cur.fetchone()
-            if user is None:
-                # 用户不存在
-                insert_result = await UserModel.insert_user([account_id,region_id,None])
-                if insert_result.get('code', None) != 1000:
-                    return insert_result
-            sql_str = ''
-            params = []
-            i = 0
-            for field in ['is_active', 'active_level', 'is_public', 'total_battles', 'last_battle_time']:
-                if user_info[field] != None and user_info[field] != user[i]:
-                    sql_str += f'{field} = %s, '
-                    params.append(user_info[field])
-                i += 1
-            params = params + [account_id]
-            await cur.execute(
-                f"UPDATE user_info SET {sql_str}updated_at = CURRENT_TIMESTAMP WHERE account_id = %s;", 
-                params
-            )
-            await conn.commit()
-            return JSONResponse.API_1000_Success
-        except Exception as e:
-            await conn.rollback()
-            raise e
-        finally:
-            await cur.close()
-            await MysqlConnection.release_connection(conn)
 
     @ExceptionLogger.handle_database_exception_async
     async def get_user_cache_batch(offset: int, limit = 1000) -> ResponseDict:

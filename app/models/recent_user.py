@@ -124,6 +124,8 @@ class RecentUserModel:
                 [region_id, account_id]
             )
             user = await cur.fetchone()
+            if user == None:
+                return JSONResponse.API_1020_UserNotFoundInDatabase
             sql_str = ''
             params = []
             i = 0
@@ -183,7 +185,7 @@ class RecentUserModel:
                     }
                 }
             else:
-                data = None
+                return JSONResponse.API_1020_UserNotFoundInDatabase
             return JSONResponse.get_success_response(data)
         except Exception as e:
             # 数据库回滚

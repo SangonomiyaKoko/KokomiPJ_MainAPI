@@ -51,6 +51,7 @@ class Recent_Update:
             # 用于更新user_info表的数据
             user_info = {
                 'account_id': account_id,
+                'region_id': region_id,
                 'is_active': 1,
                 'active_level': 0,
                 'is_public': 1,
@@ -137,7 +138,7 @@ class Recent_Update:
             await self.update_user_recent(user_recent)
             return
         new_user = False
-        if user_info_result['is_active'] == -1:
+        if user_info_result['update_time'] == None:
             new_user = True
         recent_db_path = Recent_DB.get_recent_db_path(account_id,region_id)
         if os.path.exists(recent_db_path) == False:
@@ -211,6 +212,7 @@ class Recent_Update:
         # 用于更新user_info表的数据
         user_info = {
             'account_id': account_id,
+            'region_id': region_id,
             'is_active': 1,
             'active_level': 0,
             'is_public': 1,

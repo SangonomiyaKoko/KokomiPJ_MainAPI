@@ -5,3 +5,9 @@ test_user_list = [
     [213712262,  4],    # 俄服，正常账号
 
 ]
+import sys
+
+data_dict = str([2023619512,2023619513,2023619514])
+print(len(data_dict))
+
+print("Size in bytes:", sys.getsizeof(data_dict))

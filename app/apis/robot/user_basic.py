@@ -51,6 +51,7 @@ async def get_user_name_and_clan(
     # 用于后台更新user_info表的数据
     user_info = {
         'account_id': account_id,
+        'region_id': region_id,
         'is_active': True,
         'active_level': 0,
         'is_public': True,
@@ -58,13 +59,13 @@ async def get_user_name_and_clan(
         'last_battle_time': 0
     }
     # 获取用户的username
-    user_basic_result: dict = await UserModel.get_user_basic(account_id, region_id)
+    user_basic_result: dict = await UserModel.get_user_name_by_id(account_id, region_id)
     if user_basic_result.get('code',None) != 1000:
         return user_basic_result
     user_basic['name'] = user_basic_result['data']['nickname']
 
     # 获取用户所在工会的clan_id
-    user_clan_result: dict = await UserModel.get_user_clan(account_id)
+    user_clan_result: dict = await UserModel.get_user_clan(account_id,region_id)
     if user_clan_result.get('code',None) != 1000:
         return user_clan_result
     valid_clan = True
@@ -102,7 +103,7 @@ async def get_user_name_and_clan(
         task_check_user_info.delay([user_info])
         return JSONResponse.API_1001_UserNotExist
     user_basic['name'] = basic_data[0]['data'][str(account_id)]['name']
-    task_check_user_basic.delay([(account_id,region_id,user_basic['name'])])
+    task_check_user_basic.delay([{'account_id':account_id,'region_id':region_id,'nickname':user_basic['name']}])
     if 'hidden_profile' in basic_data[0]['data'][str(account_id)]:
         # 隐藏战绩
         user_info['is_public'] = False
