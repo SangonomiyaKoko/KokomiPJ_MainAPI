@@ -59,5 +59,3 @@
 | 1017 | ClanInBlacklist           | 工会在黑名单内                           |
 | 1018 | RecentNotEnabled          | 用户 Recent 功能未启用                   |
 | 1019 | RecentsNotEnabled         | 用户 Recents 功能未启用                  |
-| 1020 | UserNotFoundInDatabase    | 所查询的用户不在数据库中，请先插入数据   |
-| 1021 | ClanNotFoundInDatabase    | 所查询的工会不在数据库中，请先插入数据   |

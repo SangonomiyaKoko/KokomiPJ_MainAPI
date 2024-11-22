@@ -143,7 +143,7 @@ class RecentUserModel:
                     }
                 }
             else:
-                return JSONResponse.API_1020_UserNotFoundInDatabase
+                return JSONResponse.API_1008_UserNotExistinDatabase
             return JSONResponse.get_success_response(data)
         except Exception as e:
             # 数据库回滚

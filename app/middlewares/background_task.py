@@ -148,7 +148,6 @@ def check_user_info(pool: PooledDB, user_data: dict):
     cur = None
     try:
         cur = conn.cursor(pymysql.cursors.DictCursor)
-        sql_list = []
         account_id = user_data['account_id']
         cur.execute(
             "SELECT is_active, active_level, is_public, total_battles, last_battle_time FROM user_info WHERE account_id = %s;", 
@@ -161,17 +160,15 @@ def check_user_info(pool: PooledDB, user_data: dict):
         sql_str = ''
         params = []
         for field in ['is_active', 'active_level', 'is_public', 'total_battles', 'last_battle_time']:
-            if user_data[field] != user[field]:
+            if (user_data[field] != None) and (user_data[field] != user[field]):
                 sql_str += f'{field} = %s, '
                 params.append(user_data[field])
         params = params + [account_id]
-        sql_list.append((
+        conn.begin()
+        cur.execute(
             f"UPDATE user_info SET {sql_str}updated_at = CURRENT_TIMESTAMP WHERE account_id = %s;", 
             params
-        ))
-        conn.begin()
-        for sql, params in sql_list:
-            cur.execute(sql, params)
+        )
         conn.commit()
         return JSONResponse.API_1000_Success
     except Exception as e:
