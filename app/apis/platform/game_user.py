@@ -17,9 +17,9 @@ class GameUser:
             gc.collect()
 
     @ExceptionLogger.handle_program_exception_async
-    async def get_user_info_data(account_id: int) -> ResponseDict:
+    async def get_user_info_data(account_id: int, region_id: int) -> ResponseDict:
         try:
-            result = await UserModel.get_user_info(account_id)
+            result = await UserModel.get_user_info(account_id, region_id)
             return result
         except Exception as e:
             raise e

@@ -154,7 +154,7 @@ async def get_user_max_number() -> ResponseDict:
     return result
 
 @router.get("/game/user/info/")
-async def get_user_info(account_id: int) -> ResponseDict:
+async def get_user_info(region: RegionList, account_id: int) -> ResponseDict:
     """获取user_info表中的数据
 
     用于recent相关更新用户数据使用
@@ -165,7 +165,12 @@ async def get_user_info(account_id: int) -> ResponseDict:
     返回:
     - ResponseDict
     """
-    result = await GameUser.get_user_info_data(account_id)
+    region_id = UtilityFunctions.get_region_id(region)
+    if not region_id:
+        return JSONResponse.API_1010_IllegalRegion
+    if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
+        return JSONResponse.API_1003_IllegalAccoutIDorRegionID
+    result = await GameUser.get_user_info_data(account_id,region_id)
     await record_api_call(result['status'])
     return result
 

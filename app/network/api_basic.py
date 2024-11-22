@@ -190,12 +190,12 @@ class BasicAPI:
         # 获取所有的结果，通过后台任务更新数据库
         delay_list = []
         for temp_data in result.get('data',None):
-            delay_list.append(
-                (temp_data['spa_id'],
-                region_id,
-                temp_data['name'])
-            )
-        task_check_user_basic.delay(delay_list)
+            user_basic = {
+                'account_id': temp_data['spa_id'],
+                'region_id': region_id,
+                'nickname': temp_data['name']
+            }
+            task_check_user_basic.delay(user_basic)
         search_data = []
         if check:
             for temp_data in result.get('data',None):
@@ -248,15 +248,14 @@ class BasicAPI:
         if result['code'] != 1000:
             return result
         # 获取所有的结果，通过后台任务更新数据库
-        delay_list = []
         for temp_data in result.get('data', None):
-            delay_list.append(
-                (temp_data['id'],
-                region_id,
-                temp_data['tag'],
-                ClanColor.CLAN_COLOR_INDEX_2.get(temp_data['hex_color'], 5))
-            )
-        task_check_clan_basic.delay(delay_list)
+            clan_basic = {
+                'clan_id': temp_data['id'],
+                'region_id': region_id,
+                'tag': temp_data['tag'],
+                'league': ClanColor.CLAN_COLOR_INDEX_2.get(temp_data['hex_color'], 5)
+            }
+            task_check_clan_basic.delay(clan_basic)
         search_data = []
         if check:
             for temp_data in result.get('data',None):
@@ -279,4 +278,3 @@ class BasicAPI:
                     })
         result['data'] = search_data
         return result
-            

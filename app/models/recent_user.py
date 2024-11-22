@@ -143,7 +143,7 @@ class RecentUserModel:
                     }
                 }
             else:
-                return JSONResponse.API_1008_UserNotExistinDatabase
+                return JSONResponse.API_1018_RecentNotEnabled
             return JSONResponse.get_success_response(data)
         except Exception as e:
             # 数据库回滚
