@@ -44,6 +44,10 @@ class UserRecentModel(UserBaseModel):
     recent_class: Optional[int] = Field(None, description='需要更新的字段')
     last_update_time: Optional[int] = Field(None, description='需要更新的字段')
 
+class UserInfoUpdateModel(BaseModel):
+    user_basic: UserBasicModel = Field(None, description='用户基础数据')
+    user_info: UserInfoModel = Field(None, description='用户详细数据')
+
 class UserRecentUpdateModel(BaseModel):
     user_basic: UserBasicModel = Field(None, description='用户基础数据')
     user_info: UserInfoModel = Field(None, description='用户详细数据')

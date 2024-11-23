@@ -5,8 +5,7 @@ from fastapi import APIRouter
 from .schemas import (
     RegionList, 
     LanguageList, 
-    UserInfoModel, 
-    UserBasicModel
+    UserInfoUpdateModel
 )
 from app.apis.platform import Search, Update, GameUser
 from app.utils import UtilityFunctions
@@ -174,25 +173,9 @@ async def get_user_info(region: RegionList, account_id: int) -> ResponseDict:
     await record_api_call(result['status'])
     return result
 
-@router.put("/game/user/basic/")
-async def post_user_info(user_basic: UserBasicModel) -> ResponseDict:
-    """更新user_basic表
-
-    如果username发生更新则更新，反之则更新update_time
-
-    参数:
-    - UserBasicModel
-
-    返回:
-    - ResponseDict
-    """
-    result = await GameUser.check_user_basic_data(user_basic.model_dump())
-    await record_api_call(result['status'])
-    return result
-
 @router.put("/game/user/info/")
-async def post_user_info(user_info: UserInfoModel) -> ResponseDict:
-    """更新user_info表
+async def post_user_info(user_data: UserInfoUpdateModel) -> ResponseDict:
+    """更新user_info和user_basic表
 
     如果数据发生改变则更新，反之则更新update_time
 
@@ -202,6 +185,11 @@ async def post_user_info(user_info: UserInfoModel) -> ResponseDict:
     返回:
     - ResponseDict
     """
-    result = await GameUser.check_user_info_data(user_info.model_dump())
+    user_data: dict = user_data.model_dump()
+    result = JSONResponse.API_1000_Success
+    if user_data.get('user_basic', None):
+        result = await GameUser.check_user_basic_data(user_data['user_basic'])
+    if user_data.get('user_info', None):
+        result = await GameUser.check_user_info_data(user_data['user_info'])
     await record_api_call(result['status'])
     return result
