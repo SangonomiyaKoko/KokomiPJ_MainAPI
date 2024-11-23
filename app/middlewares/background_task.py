@@ -201,7 +201,7 @@ def check_user_recent(pool: PooledDB, user_data: dict):
         account_id = user_data['account_id']
         region_id = user_data['region_id']
         cur.execute(
-            "SELECT recent_class, last_update_time "
+            "SELECT recent_class, UNIX_TIMESTAMP(last_update_at) AS last_update_time "
             "FROM recent WHERE region_id = %s and account_id = %s;", 
             [region_id, account_id]
         )
@@ -209,14 +209,19 @@ def check_user_recent(pool: PooledDB, user_data: dict):
         if user == None:
             conn.commit()
             return JSONResponse.API_1000_Success
-        if user_data['recent_class'] and user['recent_class'] != user_data['recent_class']:
+        if user_data['recent_class'] and (user['recent_class'] != user_data['recent_class']):
             cur.execute(
                 "UPDATE recent SET recent_class = %s WHERE region_id = %s and account_id = %s;",
                 [user_data['recent_class'], region_id, account_id]
             )
-        if user_data['last_update_time'] and user['last_update_time'] > user_data['last_update_time']:
+        if not user['last_update_time']:
             cur.execute(
-                "UPDATE recent SET last_update_time = %s WHERE region_id = %s and account_id = %s;",
+                "UPDATE recent SET last_update_at = FROM_UNIXTIME(%s) WHERE region_id = %s and account_id = %s;",
+                [user_data['last_update_time'], region_id, account_id]
+            )
+        elif user_data['last_update_time'] and (user['last_update_time'] > user_data['last_update_time']):
+            cur.execute(
+                "UPDATE recent SET last_update_at = FROM_UNIXTIME(%s) WHERE region_id = %s and account_id = %s;",
                 [user_data['last_update_time'], region_id, account_id]
             )
         

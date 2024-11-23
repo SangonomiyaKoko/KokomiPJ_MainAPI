@@ -193,6 +193,8 @@ class Recent_Update:
         user_active_level = user_info_result['active_level']
         update_interval_seconds = self.get_update_interval_time(region_id,user_active_level)
         current_timestamp = int(time.time())
+        update_interval_time = self.seconds_to_time(current_timestamp - user_update_time)
+        logger.debug(f'{region_id} - {account_id} | ├── 距离上次更新 {update_interval_time}')
         if current_timestamp - user_update_time > update_interval_seconds:
             # 请求并更新usr_info
             logger.debug(f'{region_id} - {account_id} | ├── 用户数据需要更新')
@@ -349,9 +351,9 @@ class Recent_Update:
         }
         update_result = await Recent_Network.update_user_basic_and_info_data(data)
         if update_result.get('code',None) != 1000:
-            logger.error(f"{region_id} - {account_id} | ├── 用户更新数据上传失败，Error: {update_result.get('message')}")
+            logger.error(f"{region_id} - {account_id} | ├── 更新数据上传失败，Error: {update_result.get('message')}")
         else:
-            logger.debug(f'{region_id} - {account_id} | ├── 用户更新数据上传成功')
+            logger.debug(f'{region_id} - {account_id} | ├── 更新数据上传成功')
 
     async def update_user_recent_data(
         account_id: int, 
@@ -360,16 +362,18 @@ class Recent_Update:
         user_info: dict = None,
         user_recent: dict = None
     ) -> None:
-        data = {
-            'user_basic': user_basic,
-            'user_info': user_info,
-            'user_recent': user_recent
-        }
+        data = {}
+        if user_basic:
+            data['user_basic'] = user_basic
+        if user_info:
+            data['user_info'] = user_info
+        if user_recent:
+            data['user_recent'] = user_recent
         update_result = await Recent_Network.update_user_recent(data)
         if update_result.get('code',None) != 1000:
-            logger.error(f"{region_id} - {account_id} | ├── 用户更新数据上传失败，Error: {update_result.get('message')}")
+            logger.error(f"{region_id} - {account_id} | ├── 更新数据上传失败，Error: {update_result.get('message')}")
         else:
-            logger.debug(f'{region_id} - {account_id} | ├── 用户更新数据上传成功')
+            logger.debug(f'{region_id} - {account_id} | ├── 更新数据上传成功')
 
     async def delete_user_recent(account_id: int, region_id: int):
         "删除用户的recent功能"

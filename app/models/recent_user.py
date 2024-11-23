@@ -125,7 +125,7 @@ class RecentUserModel:
             cur: Cursor = await conn.cursor()
 
             await cur.execute(
-                "SELECT u.is_active, u.active_level, u.is_public, u.total_battles, u.last_battle_at, "
+                "SELECT u.is_active, u.active_level, u.is_public, u.total_battles, UNIX_TIMESTAMP(u.last_battle_at) AS last_battle_time, "
                 "UNIX_TIMESTAMP(u.updated_at) AS update_time, r.recent_class, "
                 "UNIX_TIMESTAMP(r.last_query_at) AS last_query_time, UNIX_TIMESTAMP(r.last_update_at) AS last_update_time "
                 "FROM recent AS r "
