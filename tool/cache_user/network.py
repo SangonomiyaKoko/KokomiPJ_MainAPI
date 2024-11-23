@@ -98,6 +98,10 @@ class UserCache_Network:
                 return {'status': 'ok','code': 2002,'message': 'NetworkError','data': None}
             except httpx.TimeoutException:
                 return {'status': 'ok','code': 2003,'message': 'NetworkError','data': None}
+            except httpx.ConnectError:
+                return {'status': 'ok','code': 2004,'message': 'NetworkError','data': None}
+            except httpx.ReadError:
+                return {'status': 'ok','code': 2005,'message': 'NetworkError','data': None}
         
     @classmethod
     async def get_user_cache(self, offset: int, limit: int = 1000):

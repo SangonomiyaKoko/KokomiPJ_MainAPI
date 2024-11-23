@@ -18,21 +18,23 @@
 
 > 获取到数据中 code 及 message 的含义
 
-| Code | Message          | 描述                                             |
-| ---- | ---------------- | ------------------------------------------------ |
-| 1000 | Success          | 成功获取数据                                     |
-| 2000 | NetworkError     | 网络错误                                         |
-| 2001 | NetworkError     | 连接超时，请检查网络连接或目标服务器是否可用     |
-| 2002 | NetworkError     | 读取超时，服务器没有在规定时间内响应             |
-| 2003 | NetworkError     | 请求超时                                         |
-| 3000 | DatabaseError    | 数据库错误                                       |
-| 3001 | DatabaseError    | 数据库错误，SQL 语法错误或数据库对象不存在等     |
-| 3002 | DatabaseError    | 数据库错误，操作错误，如连接失败、超时等         |
-| 3003 | DatabaseError    | 数据库错误，数据完整性错误，例如违反唯一性约束等 |
-| 4000 | RedisError       | 缓存错误                                         |
-| 5000 | ProgramError     | 程序错误                                         |
-| 6000 | VersionError     | 当前接口版本不可用                               |
-| 7000 | InvalidParameter | 输入的参数有误                                   |
+| Code | Message          | 描述                                                 |
+| ---- | ---------------- | ---------------------------------------------------- |
+| 1000 | Success          | 成功获取数据                                         |
+| 2000 | NetworkError     | NetworkError，网络错误                               |
+| 2001 | NetworkError     | ConnectTimeout，请检查网络连接或目标服务器是否可用   |
+| 2002 | NetworkError     | ReadTimeout，服务器没有在规定时间内响应              |
+| 2003 | NetworkError     | TimeoutException                                     |
+| 2004 | NetworkError     | ConnectError，无法建立连接                           |
+| 2005 | NetworkError     | ReadError，无法从网络接收数据                        |
+| 3000 | DatabaseError    | DatabaseError，数据库错误                            |
+| 3001 | DatabaseError    | ProgrammingError，SQL 语法错误或数据库对象不存在等   |
+| 3002 | DatabaseError    | OperationalError，操作错误，如连接失败、超时等       |
+| 3003 | DatabaseError    | IntegrityError，数据完整性错误，例如违反唯一性约束等 |
+| 4000 | RedisError       | 缓存错误                                             |
+| 5000 | ProgramError     | 程序错误                                             |
+| 6000 | VersionError     | 当前版本不可用                                       |
+| 7000 | InvalidParameter | 输入的参数有误                                       |
 
 ## Return Code 2
 

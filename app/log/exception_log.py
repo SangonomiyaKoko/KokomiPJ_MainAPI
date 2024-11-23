@@ -21,6 +21,8 @@ class NerworkExceptionName:
     read_timeout = 'ReadTimeout'
     request_timeout = 'RequestTimeout'
     network_error = 'NetworkError'
+    connect_error = 'ConnectError'
+    read_error = 'ReadError'
 
 class DatabaseExceptionName:
     programming_error = 'ProgrammingError'
@@ -289,6 +291,24 @@ class ExceptionLogger:
                     error_args = str(args) + str(kwargs)
                 )
                 return JSONResponse.get_error_response(2003,'NetworkError',error_id)
+            except httpx.ConnectError:
+                error_id = generate_error_id()
+                write_error_info(
+                    error_id = error_id,
+                    error_type = ExceptionType.network,
+                    error_name = NerworkExceptionName.connect_error,
+                    error_args = str(args) + str(kwargs)
+                )
+                return JSONResponse.get_error_response(2004,'NetworkError',error_id)
+            except httpx.ReadError:
+                error_id = generate_error_id()
+                write_error_info(
+                    error_id = error_id,
+                    error_type = ExceptionType.network,
+                    error_name = NerworkExceptionName.read_error,
+                    error_args = str(args) + str(kwargs)
+                )
+                return JSONResponse.get_error_response(2005,'NetworkError',error_id)
             except httpx.HTTPStatusError as e:
                 error_id = generate_error_id()
                 write_error_info(
