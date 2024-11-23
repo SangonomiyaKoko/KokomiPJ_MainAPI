@@ -18,6 +18,7 @@ def check_user_basic(pool: PooledDB, user_data: dict):
     conn = pool.connection()
     cur = None
     try:
+        conn.begin()
         cur = conn.cursor(pymysql.cursors.DictCursor)
         account_id = user_data['account_id']
         region_id = user_data['region_id']
@@ -29,7 +30,6 @@ def check_user_basic(pool: PooledDB, user_data: dict):
         )
         user = cur.fetchone()
         if not user:
-            conn.begin()
             cur.execute(
                 "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
                 [account_id, region_id, UtilityFunctions.get_user_default_name(account_id)]
@@ -50,11 +50,9 @@ def check_user_basic(pool: PooledDB, user_data: dict):
                 "UPDATE user_basic SET username = %s WHERE region_id = %s AND account_id = %s",
                 [nickname, region_id, account_id]
             )
-            conn.commit()
         else:
             # 根据数据库的数据判断用户是否更改名称
             if user['username'] != nickname and user['update_time'] != None:
-                conn.begin()
                 cur.execute(
                     "UPDATE user_basic SET username = %s WHERE region_id = %s and account_id = %s;", 
                     [nickname, region_id, account_id]
@@ -63,14 +61,12 @@ def check_user_basic(pool: PooledDB, user_data: dict):
                     "INSERT INTO user_history (account_id, username, start_time, end_time) VALUES (%s, %s, %s, %s);", 
                     [account_id, user['username'], user['update_time'], int(time.time())]
                 )
-                conn.commit()
             elif user['username'] != nickname and user['update_time'] == None:
-                conn.begin()
                 cur.execute(
                     "UPDATE user_basic SET username = %s WHERE region_id = %s and account_id = %s;",
                     [nickname, region_id, account_id]
                 )
-                conn.commit()
+        conn.commit()
         return JSONResponse.API_1000_Success
     except Exception as e:
         raise e
@@ -147,6 +143,7 @@ def check_user_info(pool: PooledDB, user_data: dict):
     conn = pool.connection()
     cur = None
     try:
+        conn.begin()
         cur = conn.cursor(pymysql.cursors.DictCursor)
         account_id = user_data['account_id']
         cur.execute(
@@ -164,7 +161,6 @@ def check_user_info(pool: PooledDB, user_data: dict):
                 sql_str += f'{field} = %s, '
                 params.append(user_data[field])
         params = params + [account_id]
-        conn.begin()
         cur.execute(
             f"UPDATE user_info SET {sql_str}updated_at = CURRENT_TIMESTAMP WHERE account_id = %s;", 
             params

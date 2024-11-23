@@ -9,9 +9,11 @@ from app.response import JSONResponse, ResponseDict
 class RecentsUserModel:
     @ExceptionLogger.handle_database_exception_async
     async def get_recents_user_by_rid(region_id: int) -> ResponseDict:
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
         try:
+            conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
+            cur: Cursor = await conn.cursor()
+
             data = []
             await cur.execute(
                 "SELECT account_id FROM recents WHERE region_id = %s;",
@@ -20,12 +22,12 @@ class RecentsUserModel:
             users = await cur.fetchall()
             for user in users:
                 data.append(user[0])
+            
+            await conn.commit()
             return JSONResponse.get_success_response(data)
         except Exception as e:
-            # 数据库回滚
             await conn.rollback()
             raise e
         finally:
-            # 释放资源
             await cur.close()
             await MysqlConnection.release_connection(conn)

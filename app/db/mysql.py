@@ -7,7 +7,6 @@ from aiomysql.cursors import Cursor
 
 from app.core import EnvConfig
 from app.core import api_logger
-# from app.db import MySQLConnectionPool
 
 
 class MysqlConnection:
@@ -25,7 +24,7 @@ class MysqlConnection:
                 password=config.MYSQL_PASSWORD, 
                 db='kokomi',
                 pool_recycle=3600, # 设置连接的回收时间
-                autocommit=False  # 禁用隐式事务
+                autocommit=False   # 禁用隐式事务
                 # 由于禁用了隐式事务，必须确保事务被正确提交或者回滚！
                 # 如果未调用，事务将保持未提交状态，可能会导致死锁或连接超时问题
             )

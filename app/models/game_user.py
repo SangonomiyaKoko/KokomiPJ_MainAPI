@@ -9,28 +9,34 @@ from app.utils import UtilityFunctions
 
 class UserModel:
     # # 函数统一格式格式
-    # @ExceptionLogger.handle_database_exception_async
-    # async def func() -> ResponseDict:
-    #     '''方法介绍
+    @ExceptionLogger.handle_database_exception_async
+    async def func() -> ResponseDict:
+        '''方法介绍
 
-    #     方法描述
+        方法描述
 
-    #     参数:
-    #         params
+        参数:
+            params
         
-    #     返回:
-    #         - ResponseDict
-    #     '''
-    #     conn: Connection = await MysqlConnection.get_connection()
-    #     cur: Cursor = await conn.cursor()
-    #     try:
-    #         raise NotImplementedError
-    #     except Exception as e:
-    #         await conn.rollback()
-    #         raise e
-    #     finally:
-    #         await cur.close()
-    #         await MysqlConnection.release_connection(conn)
+        返回:
+            ResponseDict
+        '''
+        try:
+            conn: Connection = await MysqlConnection.get_connection()  # 获取连接
+            await conn.begin()  # 开启事务
+            cur: Cursor = await conn.cursor()  # 获取游标
+
+            # 在这里执行sql语句
+            await cur.execute()
+
+            await conn.commit()  # 提交事务
+            return JSONResponse.API_1000_Success  # 返回数据
+        except Exception as e:
+            await conn.rollback()  # 执行报错回滚事务
+            raise e  # 抛出异常
+        finally:
+            await cur.close()  # 关闭游标
+            await MysqlConnection.release_connection(conn)  # 释放连接
 
     @ExceptionLogger.handle_database_exception_async
     async def get_user_max_number() -> ResponseDict:
@@ -44,9 +50,11 @@ class UserModel:
         返回:
             - ResponseDict
         '''
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
         try:
+            conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
+            cur: Cursor = await conn.cursor()
+
             data = {
                 'max_id': 0
             }
@@ -55,6 +63,8 @@ class UserModel:
             )
             user = await cur.fetchone()
             data['max_id'] = user[0]
+
+            await conn.commit()
             return JSONResponse.get_success_response(data)
         except Exception as e:
             await conn.rollback()
@@ -77,10 +87,11 @@ class UserModel:
         返回:
             ResponseDict
         '''
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
         try:
+            conn: Connection = await MysqlConnection.get_connection()
             await conn.begin()
+            cur: Cursor = await conn.cursor()
+
             # 插入新用户
             if user[2] == None:
                 user[2] = UtilityFunctions.get_user_default_name(user[0])
@@ -122,6 +133,7 @@ class UserModel:
                     "UPDATE user_basic SET username = %s WHERE account_id = %s AND region_id = %s",
                     [user[2], user[0], user[1]]
                 )
+            
             await conn.commit()
             return JSONResponse.API_1000_Success
         except Exception as e:
@@ -145,9 +157,11 @@ class UserModel:
         返回:
             ResponseDict
         '''
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
         try:
+            conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
+            cur: Cursor = await conn.cursor()
+
             if users == [] or users == None:
                 return JSONResponse.API_1000_Success
             for user in users[1:]:
@@ -167,7 +181,6 @@ class UserModel:
             missing_users = await cur.fetchall()
             if missing_users == None:
                 return JSONResponse.API_1000_Success
-            await conn.begin()
             for user in missing_users:
                 # 插入新用户
                 if user[2] == None:
@@ -210,6 +223,7 @@ class UserModel:
                         "UPDATE user_basic SET username = %s WHERE account_id = %s AND region_id = %s",
                         [user[2], user[0], user[1]]
                     )
+            
             await conn.commit()
             return JSONResponse.API_1000_Success
         except Exception as e:
@@ -233,10 +247,11 @@ class UserModel:
         返回:
             ResponseDict
         '''
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
         try:
+            conn: Connection = await MysqlConnection.get_connection()
             await conn.begin()
+            cur: Cursor = await conn.cursor()
+
             for user in users:
                 # 插入新用户
                 if user[2] == None:
@@ -279,6 +294,7 @@ class UserModel:
                         "UPDATE user_basic SET username = %s WHERE account_id = %s AND region_id = %s",
                         [user[2], user[0], user[1]]
                     )
+            
             await conn.commit()
             return JSONResponse.API_1000_Success
         except Exception as e:
@@ -304,9 +320,11 @@ class UserModel:
         返回：
             ResponseDict
         '''
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
         try:
+            conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
+            cur: Cursor = await conn.cursor()
+
             data = {
                 'nickname': None,
                 'update_time': None
@@ -326,6 +344,8 @@ class UserModel:
             else:
                 data['nickname'] = user[0]
                 data['update_time'] = user[1]
+            
+            await conn.commit()
             return JSONResponse.get_success_response(data)
         except Exception as e:
             await conn.rollback()
@@ -346,9 +366,11 @@ class UserModel:
         返回：
             ResponseDict
         '''
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
         try:
+            conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
+            cur: Cursor = await conn.cursor()
+
             data =  {
                 'clan_id': None,
                 'updated_at': 0
@@ -368,6 +390,8 @@ class UserModel:
             else:
                 data['clan_id'] = user[0]
                 data['updated_at'] = user[1]
+            
+            await conn.commit()
             return JSONResponse.get_success_response(data)
         except Exception as e:
             await conn.rollback()
@@ -390,9 +414,11 @@ class UserModel:
         返回：
             ResponseDict
         '''
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
         try:
+            conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
+            cur: Cursor = await conn.cursor()
+
             await cur.execute(
                 "SELECT is_active, active_level, is_public, total_battles, last_battle_time, UNIX_TIMESTAMP(updated_at) AS update_time "
                 "FROM user_info WHERE account_id = %s;", 
@@ -422,6 +448,8 @@ class UserModel:
                     'last_battle_time': user[4],
                     'update_time': user[5]
                 }
+            
+            await conn.commit()
             return JSONResponse.get_success_response(data)
         except Exception as e:
             await conn.rollback()
@@ -444,9 +472,11 @@ class UserModel:
         返回值:
             ResponseDict
         '''
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
         try:
+            conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
+            cur: Cursor = await conn.cursor()
+
             data = []
             await cur.execute(
                 "SELECT b.region_id, b.account_id, i.is_active, i.active_level, "
@@ -479,6 +509,8 @@ class UserModel:
                     }
                 }
                 data.append(user)
+            
+            await conn.commit()
             return JSONResponse.get_success_response(data)
         except Exception as e:
             await conn.rollback()

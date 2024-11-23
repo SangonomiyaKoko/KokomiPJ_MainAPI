@@ -10,9 +10,11 @@ from app.utils import TimeFormat
 class RecentUserModel:
     @ExceptionLogger.handle_database_exception_async
     async def get_recent_user_by_rid(region_id: int) -> ResponseDict:
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
         try:
+            conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
+            cur: Cursor = await conn.cursor()
+
             data = []
             await cur.execute(
                 "SELECT account_id FROM recent WHERE region_id = %s;",
@@ -21,13 +23,13 @@ class RecentUserModel:
             users = await cur.fetchall()
             for user in users:
                 data.append(user[0])
+            
+            await conn.commit()
             return JSONResponse.get_success_response(data)
         except Exception as e:
-            # 数据库回滚
             await conn.rollback()
             raise e
         finally:
-            # 释放资源
             await cur.close()
             await MysqlConnection.release_connection(conn)
 
@@ -35,7 +37,9 @@ class RecentUserModel:
     async def check_recent_user(account_id: int, region_id: int) -> ResponseDict:
         try:
             conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
             cur: Cursor = await conn.cursor()
+
             data = {
                 'enabled': False
             }
@@ -46,21 +50,23 @@ class RecentUserModel:
             user = await cur.fetchone()
             if user[0]:
                 data['enabled'] = True
+            
+            await conn.commit()
             return JSONResponse.get_success_response(data)
         except Exception as e:
-            # 数据库回滚
             await conn.rollback()
             raise e
         finally:
-            # 释放资源
             await cur.close()
             await MysqlConnection.release_connection(conn)
 
     @ExceptionLogger.handle_database_exception_async
     async def add_recent_user(account_id: int, region_id: int, recent_class: int) -> ResponseDict:
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
         try:
+            conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
+            cur: Cursor = await conn.cursor()
+
             await cur.execute(
                 "SELECT recent_class FROM recent WHERE region_id = %s and account_id = %s;", 
                 [region_id, account_id]
@@ -73,50 +79,51 @@ class RecentUserModel:
                     "INSERT INTO recent (account_id, region_id, recent_class, last_query_time) VALUES (%s, %s, %s, %s);",
                     [account_id, region_id, recent_class, current_timestamp]
                 )
-                await conn.commit()
             else:
                 if user[0] <= recent_class:
                     await cur.execute(
                         "UPDATE recent SET recent_class = %s WHERE region_id = %s and account_id = %s;",
                         [recent_class, region_id, account_id]
                     )
-                    await conn.commit()
+            
+            await conn.commit()
             return JSONResponse.API_1000_Success
         except Exception as e:
-            # 数据库回滚
             await conn.rollback()
             raise e
         finally:
-            # 释放资源
             await cur.close()
             await MysqlConnection.release_connection(conn)
 
     @ExceptionLogger.handle_database_exception_async
     async def del_recent_user(account_id: int, region_id: int) -> ResponseDict:
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
         try:
+            conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
+            cur: Cursor = await conn.cursor()
+
             await cur.execute(
                 "DELETE FROM recent WHERE region_id = %s and account_id = %s;",
                 [region_id, account_id]
             )
+
             await conn.commit()
             return JSONResponse.API_1000_Success
         except Exception as e:
-            # 数据库回滚
             await conn.rollback()
             raise e
         finally:
-            # 释放资源
             await cur.close()
             await MysqlConnection.release_connection(conn)
 
     @ExceptionLogger.handle_database_exception_async
     async def get_user_recent_data(account_id: int, region_id: int) -> ResponseDict:
         '''获取用户recent表的数据'''
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
         try:
+            conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
+            cur: Cursor = await conn.cursor()
+
             await cur.execute(
                 "SELECT u.is_active, u.active_level, u.is_public, u.total_battles, u.last_battle_time, UNIX_TIMESTAMP(u.updated_at) AS update_time, "
                 "r.recent_class, r.last_query_time, r.last_update_time "
@@ -143,13 +150,14 @@ class RecentUserModel:
                     }
                 }
             else:
+                await conn.commit()
                 return JSONResponse.API_1018_RecentNotEnabled
+            
+            await conn.commit()
             return JSONResponse.get_success_response(data)
         except Exception as e:
-            # 数据库回滚
             await conn.rollback()
             raise e
         finally:
-            # 释放资源
             await cur.close()
             await MysqlConnection.release_connection(conn)

@@ -122,7 +122,7 @@ class Recent_Network:
         return result
     
     @classmethod
-    async def del_user_recent(self,account_id: int,region_id: int):
+    async def del_user_recent(self, account_id: int, region_id: int):
         if CLIENT_TYPE == 'slave':
             platform_api_url = SALVE_API_URL
         else:
@@ -143,34 +143,15 @@ class Recent_Network:
         return result
 
     @classmethod 
-    async def get_user_info_data(self, account_id: int):
+    async def get_user_info_data(self, account_id: int, region_id: int):
         if CLIENT_TYPE == 'slave':
             platform_api_url = SALVE_API_URL
         else:
             platform_api_url = MASTER_API_URL
-        url = f'{platform_api_url}/p/game/user/info/?account_id={account_id}'
+        region = REGION_LIST.get(region_id)
+        url = f'{platform_api_url}/p/game/user/{region}/{account_id}/info/'
         result = await self.fetch_data(url)
         return result
-    
-    @classmethod 
-    async def update_user_info_data(self, data: dict):
-        if CLIENT_TYPE == 'slave':
-            platform_api_url = SALVE_API_URL
-        else:
-            platform_api_url = MASTER_API_URL
-        url = f'{platform_api_url}/p/game/user/info/'
-        result = await self.fetch_data(url, method='put', data=data)
-        return result
-    
-    # @classmethod 
-    # async def update_user_basic_data(self, data: dict):
-    #     if CLIENT_TYPE == 'slave':
-    #         platform_api_url = SALVE_API_URL
-    #     else:
-    #         platform_api_url = MASTER_API_URL
-    #     url = f'{platform_api_url}/p/game/user/basic/'
-    #     result = await self.fetch_data(url, method='put', data=data)
-    #     return result
 
     @classmethod
     async def update_user_basic_and_info_data(self, data: dict):
@@ -178,7 +159,7 @@ class Recent_Network:
             platform_api_url = SALVE_API_URL
         else:
             platform_api_url = MASTER_API_URL
-        url = f'{platform_api_url}/p/game/user/basic-and-info/'
+        url = f'{platform_api_url}/p/game/user/info/'
         result = await self.fetch_data(url, method='put', data=data)
         return result
 

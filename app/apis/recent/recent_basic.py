@@ -14,14 +14,16 @@ class RecentBasic:
         try:
             data = {
                 'users': None,
-                'access': None
+                'access': {}
             }
             result = await RecentUserModel.get_recent_user_by_rid(region_id)
             if result.get('code', None) != 1000:
                 return result
-            ac_value = UserAccessToken.get_ac_value_by_rid(region_id)
             data['users'] = result['data']
-            data['access'] = ac_value
+            ac_value = UserAccessToken.get_ac_value_by_rid(region_id)
+            for ac_aid in ac_value.keys():
+                if ac_aid in result['data']:
+                    data['access'][ac_aid] = ac_value[ac_aid]
             return JSONResponse.get_success_response(data)            
         except Exception as e:
             raise e
@@ -103,12 +105,13 @@ class RecentBasic:
             'total_battles': 0,
             'last_battle_time': 0
         }
+        ac_value = UserAccessToken.get_ac_value_by_id(account_id,region_id)
         # 确保user在数据库中
         user_basic_result: dict = await UserModel.get_user_name_by_id(account_id, region_id)
         if user_basic_result.get('code',None) != 1000:
             return user_basic_result
         # 请求获取数据
-        basic_data = await BasicAPI.get_user_basic(account_id,region_id)
+        basic_data = await BasicAPI.get_user_basic(account_id,region_id,ac_value)
         for response in basic_data:
             if response['code'] != 1000 and response['code'] != 1001:
                 return response

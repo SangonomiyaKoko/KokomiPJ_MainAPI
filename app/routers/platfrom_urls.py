@@ -152,7 +152,7 @@ async def get_user_max_number() -> ResponseDict:
     await record_api_call(result['status'])
     return result
 
-@router.get("/game/user/info/")
+@router.get("/game/user/{region}/{account_id}/info/")
 async def get_user_info(region: RegionList, account_id: int) -> ResponseDict:
     """获取user_info表中的数据
 
@@ -186,6 +186,7 @@ async def post_user_info(user_data: UserInfoUpdateModel) -> ResponseDict:
     - ResponseDict
     """
     user_data: dict = user_data.model_dump()
+    print('TEST_RECENT: ',str(user_data))
     result = JSONResponse.API_1000_Success
     if user_data.get('user_basic', None):
         result = await GameUser.check_user_basic_data(user_data['user_basic'])

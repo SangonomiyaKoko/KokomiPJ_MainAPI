@@ -22,8 +22,8 @@ class ContinuousUserUpdater:
                 logger.error(f"获取RecentUser时发生错误，Error: {request_result.get('message')}")
                 continue
             for account_id in request_result['data']['users']:
-                if account_id in request_result['data']['access']:
-                    ac_value = request_result['data']['access'][account_id]
+                if str(account_id) in request_result['data']['access']:
+                    ac_value = request_result['data']['access'][str(account_id)]
                 else:
                     ac_value = None
                 logger.debug(f'{region_id} - {account_id} | ---------------------------------')

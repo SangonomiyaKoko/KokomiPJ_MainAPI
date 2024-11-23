@@ -23,9 +23,11 @@ class ClanModel:
             tag: 工会名称
             league: 工会段位（用于标记颜色）
         '''
-        conn: Connection = await MysqlConnection.get_connection()
-        cur: Cursor = await conn.cursor()
         try:
+            conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
+            cur: Cursor = await conn.cursor()
+
             data= {
                 'tag': None,
                 'league': None,
@@ -39,7 +41,6 @@ class ClanModel:
             if clan is None:
                 # 用户不存在，插入新用户
                 tag = UtilityFunctions.get_clan_default_name()
-                await conn.begin()
                 await cur.execute(
                     "INSERT INTO clan_basic (clan_id, region_id, tag) VALUES (%s, %s, %s);",
                     [clan_id, region_id, tag]
@@ -56,13 +57,14 @@ class ClanModel:
                     "INSERT INTO clan_season (clan_id) VALUES (%s);",
                     [clan_id]
                 )
-                await conn.commit()
                 data['tag'] = tag
                 data['league'] = 5
             else:
                 data['tag'] = clan[0]
                 data['league'] = clan[1]
                 data['updated_at'] = clan[2]
+            
+            await conn.commit()
             return JSONResponse.get_success_response(data)
         except Exception as e:
             await conn.rollback()

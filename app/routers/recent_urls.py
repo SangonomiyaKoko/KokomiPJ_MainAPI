@@ -97,7 +97,9 @@ async def postUserFeatureDatae(user_recent: UserRecentUpdateModel) -> ResponseDi
     返回:
     - ResponseDict
     """
-    result = await RecentBasic.update_recent(user_recent.model_dump())
+    user_data = user_recent.model_dump()
+    print('TEST_INFO: ',str(user_data))
+    result = await RecentBasic.update_recent(user_data)
     return result
 
 @router.delete("/features/user/{region}/{account_id}/")
