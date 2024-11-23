@@ -136,16 +136,6 @@ class Recent_Network:
         url = f'{platform_api_url}/r1/features/user/{region}/{account_id}/'
         result = await self.fetch_data(url,method='delete')
         return result
-    
-    @classmethod
-    async def update_user_recent(self,data:dict):
-        if CLIENT_TYPE == 'slave':
-            platform_api_url = SALVE_API_URL
-        else:
-            platform_api_url = MASTER_API_URL
-        url = f'{platform_api_url}/r1/features/user/'
-        result = await self.fetch_data(url, method='put', data=data)
-        return result
 
     @classmethod 
     async def get_user_info_data(self, account_id: int, region_id: int):
@@ -157,14 +147,14 @@ class Recent_Network:
         url = f'{platform_api_url}/p/game/user/{region}/{account_id}/info/'
         result = await self.fetch_data(url)
         return result
-
+    
     @classmethod
-    async def update_user_basic_and_info_data(self, data: dict):
+    async def update_user_data(self,data:dict):
         if CLIENT_TYPE == 'slave':
             platform_api_url = SALVE_API_URL
         else:
             platform_api_url = MASTER_API_URL
-        url = f'{platform_api_url}/p/game/user/info/'
+        url = f'{platform_api_url}/p/game/user/update/'
         result = await self.fetch_data(url, method='put', data=data)
         return result
 

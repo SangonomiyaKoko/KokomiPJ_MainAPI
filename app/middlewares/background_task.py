@@ -5,7 +5,7 @@ from dbutils.pooled_db import PooledDB
 
 from app.response import JSONResponse
 from app.log import ExceptionLogger
-from app.utils import UtilityFunctions
+from app.utils import UtilityFunctions, DataDecode
 
 
 @ExceptionLogger.handle_database_exception_sync
@@ -249,14 +249,33 @@ def check_user_ships(pool: PooledDB, user_data: dict):
         
         account_id = user_data['account_id']
         region_id = user_data['region_id']
-        for del_ship_id in user_data['delete_ship_list']:
+        cur.execute(
+            "SELECT battles_count, hash_value, ships_data, UNIX_TIMESTAMP(updated_at) AS update_time "
+            "FROM user_ships WHERE account_id = %s;", 
+            [account_id]
+        )
+        user = cur.fetchone()
+        if user is None:
+            # 正常来说这里不应该会遇到为空问题，因为先检查basic在检查info
+            conn.commit()
+            return JSONResponse.API_1008_UserNotExistinDatabase
+        old_decode_data = DataDecode.from_binary_data_dict(user['ships_data'])
+        delete_ship_list = []
+        replace_ship_dict = {}
+        for ship_id, ship_battles in user_data['ships_data'].items():
+            if ship_battles != old_decode_data[int(ship_id)]:
+                replace_ship_dict[int(ship_id)] = user_data['details_data'][ship_id]
+        for ship_id, _ in old_decode_data.items():
+            if str(ship_id) not in user_data['ships_data']:
+                delete_ship_list.append(ship_id)
+        for del_ship_id in delete_ship_list:
             table_name = f'user_ship_0{del_ship_id % 10}'
             cur.execute(
                 "DELETE FROM %s "
                 "WHERE ship_id = %s and region_id = %s and account_id = %s;",
                 [table_name, del_ship_id, region_id, account_id]
             )
-        for update_ship_id, ship_data in user_data['replace_ship_dict'].items():
+        for update_ship_id, ship_data in replace_ship_dict.items():
             table_name = f'user_ship_0{update_ship_id % 10}'
             cur.execute(
                 "UPDATE %s SET battles_count = %s, battle_type_1 = %s, battle_type_2 = %s, battle_type_3 = %s, wins = %s, "
@@ -278,7 +297,7 @@ def check_user_ships(pool: PooledDB, user_data: dict):
                 "UPDATE user_ships "
                 "SET battles_count = %s, hash_value = %s, ships_data = %s "
                 "WHERE account_id = %s;", 
-                [user_data['battles_count'], user_data['hash_value'], user_data['ships_data'], account_id]
+                [user_data['battles_count'], user_data['hash_value'], DataDecode.to_binary_data_dict(user_data['ships_data']), account_id]
             )
         else:
             cur.execute(

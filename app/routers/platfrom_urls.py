@@ -5,9 +5,11 @@ from fastapi import APIRouter
 from .schemas import (
     RegionList, 
     LanguageList, 
-    UserInfoUpdateModel
+    UserCacheModel,
+    UserInfoUpdateModel,
+    UserUpdateModel
 )
-from app.apis.platform import Search, Update, GameUser
+from app.apis.platform import Search, Update, GameUser, UserCache
 from app.utils import UtilityFunctions
 from app.response import JSONResponse, ResponseDict
 from app.middlewares import record_api_call
@@ -152,6 +154,38 @@ async def get_user_max_number() -> ResponseDict:
     await record_api_call(result['status'])
     return result
 
+
+@router.get("/game/users/cache/")
+async def getUserCache(offset: int, limit: int = 1000) -> ResponseDict:
+    """批量获取用户的Cache数据
+
+    从offset开始获取最大limit的数据
+
+    参数:
+    - offset: 偏移量
+    - limit: 最多返回值数量
+
+    返回:
+    - ResponseDict
+    """
+    result = await UserCache.get_user_cache_data_batch(offset, limit)
+    return result
+
+@router.put("/game/user/update/")
+async def updateUserCache(user_data: UserUpdateModel) -> ResponseDict:
+    """更新用户的数据
+
+    通过传入的数据更新数据库
+
+    参数:
+    - UserUpdateModel
+    
+    返回:
+    - ResponseDict
+    """
+    result = await GameUser.update_user_data(user_data.model_dump())
+    return result
+
 @router.get("/game/user/{region}/{account_id}/info/")
 async def get_user_info(region: RegionList, account_id: int) -> ResponseDict:
     """获取user_info表中的数据
@@ -173,24 +207,3 @@ async def get_user_info(region: RegionList, account_id: int) -> ResponseDict:
     await record_api_call(result['status'])
     return result
 
-@router.put("/game/user/info/")
-async def post_user_info(user_data: UserInfoUpdateModel) -> ResponseDict:
-    """更新user_info和user_basic表
-
-    如果数据发生改变则更新，反之则更新update_time
-
-    参数:
-    - UserInfoModel
-
-    返回:
-    - ResponseDict
-    """
-    user_data: dict = user_data.model_dump()
-    print('TEST_RECENT: ',str(user_data))
-    result = JSONResponse.API_1000_Success
-    if user_data.get('user_basic', None):
-        result = await GameUser.check_user_basic_data(user_data['user_basic'])
-    if user_data.get('user_info', None):
-        result = await GameUser.check_user_info_data(user_data['user_info'])
-    await record_api_call(result['status'])
-    return result

@@ -40,6 +40,9 @@ class UserInfoModel(UserBaseModel):
 class UserBasicModel(UserBaseModel):
     nickname: str = Field(..., description='用户名称')
 
+class RecentEnableModel(UserBaseDerivedModel):
+    recent_class: Optional[int] = Field(30, description='需要更新的字段')
+
 class UserRecentModel(UserBaseModel):
     recent_class: Optional[int] = Field(None, description='需要更新的字段')
     last_update_time: Optional[int] = Field(None, description='需要更新的字段')
@@ -48,17 +51,14 @@ class UserInfoUpdateModel(BaseModel):
     user_basic: UserBasicModel = Field(None, description='用户基础数据')
     user_info: UserInfoModel = Field(None, description='用户详细数据')
 
-class UserRecentUpdateModel(BaseModel):
-    user_basic: UserBasicModel = Field(None, description='用户基础数据')
-    user_info: UserInfoModel = Field(None, description='用户详细数据')
-    user_recent: UserRecentModel = Field(None, description='用户recent功能数据')
-
-class RecentEnableModel(UserBaseDerivedModel):
-    recent_class: Optional[int] = Field(30, description='需要更新的字段')
-
 class UserCacheModel(UserBaseModel):
     battles_count: int = Field(None, description='战斗总场次')
     hash_value: str = Field(None, description='缓存数据的哈希值')
-    ships_data: bytes = Field(None, description='二进制存储的用户船只数据')
-    delete_ship_list: list = Field(None, description='需要删除的船只数据')
-    replace_ship_dict: dict = Field(None, description='需要修改的船只数据')
+    ships_data: dict = Field(None, description='船只数据，简略')
+    details_data: dict = Field(None, description='船只数据，详细')
+    
+class UserUpdateModel(BaseModel):
+    user_basic: UserBasicModel = Field(None, description='用户基础数据')
+    user_info: UserInfoModel = Field(None, description='用户详细数据')
+    user_recent: UserRecentModel = Field(None, description='用户recent功能数据')
+    user_cache: UserCacheModel = Field(None, description='用户缓存数据')

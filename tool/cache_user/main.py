@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 import time
 import asyncio
-from log import log as recent_logger
+from log import log as logger
 
+from network import UserCache_Network
+from update import UserCache_Update
 
 
 class ContinuousUserCacheUpdater:
@@ -13,12 +15,44 @@ class ContinuousUserCacheUpdater:
     async def update_user(self):
         start_time = int(time.time())
         # 更新用户
-        recent_logger.debug(f'{1} - {1} | ---------------------------------')
+        # limit = 1000
+        # request_result = await UserCache_Network.get_user_cache_number()
+        # if request_result['code'] != 1000:
+        #     logger.error(f"获取MaxUserID时发生错误，Error: {request_result.get('message')}")
+        # max_id = request_result['data']['max_id']
+        # max_offset = (int(max_id / limit) + 1) * limit
+        # offset = 0
+        # while offset <= max_offset:
+        #     users_result = await UserCache_Network.get_cache_users(offset, limit)
+        #     if users_result['code'] != 1000:
+        #         logger.error(f"获取CacheUsers时发生错误，Error: {users_result.get('message')}")
+        #     for user in users_result['data']:
+        #         account_id = user['user_basic']['account_id']
+        #         region_id = user['user_basic']['region_id']
+        #         logger.info(f'{region_id} - {account_id} | ---------------------------------')
+        #     offset += limit
+        data = {
+            "user_basic": {
+                "region_id": 1,
+                "account_id": 2023619512,
+                "ac_value": None
+            },
+            "user_info": {
+                "is_active": 1,
+                "active_level": 4
+            },
+            "user_ships": {
+                "battles_count": None,
+                "hash_value": None,
+                "update_time": None
+            }
+        }
+        await UserCache_Update.main(data)
         end_time = int(time.time())
         # 避免测试时候的循环bug
         if end_time - start_time <= 50:
             sleep_time = 60 - (end_time - start_time)
-            recent_logger.info(f'更新线程休眠 {round(sleep_time,2)} s')
+            logger.info(f'更新线程休眠 {round(sleep_time,2)} s')
             await asyncio.sleep(sleep_time)
 
     async def continuous_update(self):
@@ -41,16 +75,16 @@ async def main():
         updater.stop()
 
 if __name__ == "__main__":
-    recent_logger.info('开始运行UserCache更新进程')
+    logger.info('开始运行UserCache更新进程')
     # 开始不间断更新
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        recent_logger.info('收到进程关闭信号')
+        logger.info('收到进程关闭信号')
     # 退出并释放资源
     wait_second = 3
     while wait_second > 0:
-        recent_logger.info(f'进程将在 {wait_second} s后关闭')
+        logger.info(f'进程将在 {wait_second} s后关闭')
         time.sleep(1)
         wait_second -= 1
-    recent_logger.info('UserCache更新进程已停止')
+    logger.info('UserCache更新进程已停止')

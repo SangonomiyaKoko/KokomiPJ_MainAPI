@@ -104,37 +104,25 @@ class UserCache_Network:
                 return {'status': 'ok','code': 2005,'message': 'NetworkError','data': None}
         
     @classmethod
-    async def get_user_cache(self, offset: int, limit: int = 1000):
+    async def get_user_cache_number(self):
+        "获取用户缓存的数量，用于确定offset边界"
         platform_api_url = API_URL
-        url = f'{platform_api_url}/r1/features/user/'
+        url = f'{platform_api_url}/p/game/users/number/'
+        result = await self.fetch_data(url)
+        return result
+    
+    @classmethod
+    async def get_cache_users(self, offset: int, limit: int):
+        "获取用户缓存的数量，用于确定offset边界"
+        platform_api_url = API_URL
+        url = f'{platform_api_url}/p/game/users/cache/?offset={offset}&limit={limit}'
         result = await self.fetch_data(url)
         return result
     
     @classmethod 
-    async def update_user_cache_data(self, data: dict):
+    async def update_user_data(self, data: dict):
         platform_api_url = API_URL
-        url = f'{platform_api_url}/p/game/user/info/'
-        result = await self.fetch_data(url, method='put', data=data)
-        return result
-    
-    @classmethod 
-    async def update_user_info_data(self, data: dict):
-        platform_api_url = API_URL
-        url = f'{platform_api_url}/p/game/user/info/'
-        result = await self.fetch_data(url, method='put', data=data)
-        return result
-    
-    # @classmethod 
-    # async def update_user_basic_data(self, data: dict):
-    #     platform_api_url = API_URL
-    #     url = f'{platform_api_url}/p/game/user/basic/'
-    #     result = await self.fetch_data(url, method='put', data=data)
-    #     return result
-
-    @classmethod
-    async def update_user_basic_and_info_data(self, data: dict):
-        platform_api_url = API_URL
-        url = f'{platform_api_url}/p/game/user/basic-and-info/'
+        url = f'{platform_api_url}/p/game/user/update/'
         result = await self.fetch_data(url, method='put', data=data)
         return result
 

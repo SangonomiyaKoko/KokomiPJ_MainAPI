@@ -480,7 +480,7 @@ class UserModel:
 
             data = []
             await cur.execute(
-                "SELECT b.region_id, b.account_id, i.is_active, i.active_level, "
+                "SELECT b.region_id, b.account_id, i.is_active, i.active_level, UNIX_TIMESTAMP(i.updated_at) AS info_update_time, "
                 "s.battles_count, s.hash_value, UNIX_TIMESTAMP(s.updated_at) AS update_time "
                 "FROM user_basic AS b "
                 "LEFT JOIN user_info AS i ON i.account_id = b.account_id "
@@ -491,7 +491,7 @@ class UserModel:
             rows = await cur.fetchall()
             for row in rows:
                 # 排除已注销账号的数据，避免浪费服务器资源
-                if not row[2]:
+                if row[4] and not row[2]:
                     continue
                 user = {
                     'user_basic': {
@@ -504,9 +504,9 @@ class UserModel:
                         'active_level': row[3]
                     },
                     'user_ships':{
-                        'battles_count': row[4],
-                        'hash_value': row[5],
-                        'update_time': row[6]
+                        'battles_count': row[5],
+                        'hash_value': row[6],
+                        'update_time': row[7]
                     }
                 }
                 data.append(user)

@@ -44,22 +44,6 @@ class RecentBasic:
         finally:
             gc.collect()
 
-    @classmethod
-    @ExceptionLogger.handle_program_exception_async
-    async def update_recent(self, user_data: dict) -> ResponseDict:
-        try:
-            if user_data.get('user_recent', None):
-                task_check_user_recent.delay(user_data['user_recent'])
-            if user_data.get('user_basic', None):
-                task_check_user_basic.delay(user_data['user_basic'])
-            if user_data.get('user_info', None):
-                task_check_user_info.delay(user_data['user_info'])
-            return JSONResponse.API_1000_Success
-        except Exception as e:
-            raise e
-        finally:
-            gc.collect()
-
     @ExceptionLogger.handle_program_exception_async
     async def del_recent(account_id: int,region_id: int) -> ResponseDict:
         try:

@@ -19,7 +19,8 @@ class UserCache:
     @ExceptionLogger.handle_program_exception_async
     async def update_user_cache_data(user_cache: dict) -> ResponseDict:
         try:
-            task_check_user_cache(user_cache)
+            print(user_cache)
+            # task_check_user_cache.delay(user_cache)
             return JSONResponse.API_1000_Success
         except Exception as e:
             raise e

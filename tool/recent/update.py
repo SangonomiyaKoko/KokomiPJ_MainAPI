@@ -41,8 +41,9 @@ class Recent_Update:
         user_update_time = result['data']['update_time']
         update_interval_seconds = self.get_update_interval_time(region_id,user_active_level)
         current_timestamp = int(time.time())
-        update_interval_time = self.seconds_to_time(current_timestamp - user_update_time)
-        logger.debug(f'{region_id} - {account_id} | ├── 距离上次更新 {update_interval_time}')
+        if user_update_time:
+            update_interval_time = self.seconds_to_time(current_timestamp - user_update_time)
+            logger.debug(f'{region_id} - {account_id} | ├── 距离上次更新 {update_interval_time}')
         if (current_timestamp - user_update_time) > update_interval_seconds:
             logger.debug(f'{region_id} - {account_id} | ├── 到达更新时间，开始更新任务')
             user_basic = {
@@ -69,7 +70,7 @@ class Recent_Update:
             if basic_data[0]['code'] == 1001:
                 # 用户数据不存在
                 user_info['is_active'] = 0
-                await self.update_user_info_data(account_id,region_id,None,user_info)
+                await self.update_user_data(account_id,region_id,None,user_info,None)
                 request_result = await Recent_Network.del_user_recent(account_id,region_id)
                 if request_result.get('code', None) != 1000:
                     logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {request_result.get('message')}")
@@ -83,7 +84,7 @@ class Recent_Update:
                     # 隐藏战绩
                     user_info['is_public'] = 0
                     user_info['active_level'] = self.get_active_level(user_info)
-                    await self.update_user_info_data(account_id,region_id,user_basic,user_info)
+                    await self.update_user_data(account_id,region_id,user_basic,user_info,None)
                     return
                 user_basic_data = basic_data[0]['data'][str(account_id)]['statistics']
                 if (
@@ -95,13 +96,13 @@ class Recent_Update:
                     user_info['total_battles'] = 0
                     user_info['last_battle_time'] = 0
                     user_info['active_level'] = self.get_active_level(user_info)
-                    await self.update_user_info_data(account_id,region_id,user_basic,user_info)
+                    await self.update_user_data(account_id,region_id,user_basic,user_info,None)
                     return
                 # 获取user_info的数据并更新数据库
                 user_info['total_battles'] = user_basic_data['basic']['leveling_points']
                 user_info['last_battle_time'] = user_basic_data['basic']['last_battle_time']
                 user_info['active_level'] = self.get_active_level(user_info)
-                await self.update_user_info_data(account_id,region_id,user_basic,user_info)
+                await self.update_user_data(account_id,region_id,user_basic,user_info,None)
                 return
         else:
             logger.debug(f'{region_id} - {account_id} | ├── 未到达更新时间，跳过更新')
@@ -137,7 +138,7 @@ class Recent_Update:
                 'region_id': region_id,
                 'recent_class': new_recent_class
             }
-            await self.update_user_recent_data(account_id,region_id,None,None,user_recent)
+            await self.update_user_data(account_id,region_id,None,None,user_recent)
             return
         new_user = False
         if user_info_result['update_time'] == None:
@@ -193,8 +194,9 @@ class Recent_Update:
         user_active_level = user_info_result['active_level']
         update_interval_seconds = self.get_update_interval_time(region_id,user_active_level)
         current_timestamp = int(time.time())
-        update_interval_time = self.seconds_to_time(current_timestamp - user_update_time)
-        logger.debug(f'{region_id} - {account_id} | ├── 距离上次更新 {update_interval_time}')
+        if user_update_time:
+            update_interval_time = self.seconds_to_time(current_timestamp - user_update_time)
+            logger.debug(f'{region_id} - {account_id} | ├── 距离上次更新 {update_interval_time}')
         if current_timestamp - user_update_time > update_interval_seconds:
             # 请求并更新usr_info
             logger.debug(f'{region_id} - {account_id} | ├── 用户数据需要更新')
@@ -234,7 +236,7 @@ class Recent_Update:
         if basic_data[0]['code'] == 1001:
             # 用户数据不存在
             user_info['is_active'] = 0
-            await self.update_user_recent_data(account_id,region_id,None,user_info,None)
+            await self.update_user_data(account_id,region_id,None,user_info,None)
             request_result = await Recent_Network.del_user_recent(account_id,region_id)
             if request_result.get('code', None) != 1000:
                 logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {request_result.get('message')}")
@@ -264,7 +266,7 @@ class Recent_Update:
                 'region_id': region_id,
                 'last_update_time': current_timestamp
             }
-            await self.update_user_recent_data(account_id,region_id,user_basic,user_info,user_recent)
+            await self.update_user_data(account_id,region_id,user_basic,user_info,user_recent)
             return
         user_basic_data = basic_data[0]['data'][str(account_id)]['statistics']
         if (
@@ -276,14 +278,14 @@ class Recent_Update:
             user_info['total_battles'] = 0
             user_info['last_battle_time'] = 0
             user_info['active_level'] = self.get_active_level(user_info)
-            await self.update_user_recent_data(account_id,region_id,user_basic,user_info,None)
+            await self.update_user_data(account_id,region_id,user_basic,user_info,None)
             await self.delete_user_recent(account_id, region_id)
             return
         # 获取user_info的数据并更新数据库
         user_info['total_battles'] = user_basic_data['basic']['leveling_points']
         user_info['last_battle_time'] = user_basic_data['basic']['last_battle_time']
         user_info['active_level'] = self.get_active_level(user_info)
-        await self.update_user_recent_data(account_id,region_id,user_basic,user_info,None)
+        await self.update_user_data(account_id,region_id,user_basic,user_info,None)
         if not new_user:
             user_db_info = Recent_DB.get_user_info_by_date(recent_db_path,date_1)
             if not user_db_info and user_info['total_battles'] == user_db_info[3]:
@@ -336,26 +338,10 @@ class Recent_Update:
             'region_id': region_id,
             'last_update_time': current_timestamp
         }
-        await self.update_user_recent_data(account_id,region_id,None,None,user_recent)
+        await self.update_user_data(account_id,region_id,None,None,user_recent)
         return
     
-    async def update_user_info_data(
-        account_id: int, 
-        region_id: int, 
-        user_basic: dict = None, 
-        user_info: dict = None
-    ) -> None:
-        data = {
-            'user_basic': user_basic,
-            'user_info': user_info
-        }
-        update_result = await Recent_Network.update_user_basic_and_info_data(data)
-        if update_result.get('code',None) != 1000:
-            logger.error(f"{region_id} - {account_id} | ├── 更新数据上传失败，Error: {update_result.get('message')}")
-        else:
-            logger.debug(f'{region_id} - {account_id} | ├── 更新数据上传成功')
-
-    async def update_user_recent_data(
+    async def update_user_data(
         account_id: int, 
         region_id: int, 
         user_basic: dict = None, 
@@ -369,7 +355,7 @@ class Recent_Update:
             data['user_info'] = user_info
         if user_recent:
             data['user_recent'] = user_recent
-        update_result = await Recent_Network.update_user_recent(data)
+        update_result = await Recent_Network.update_user_data(data)
         if update_result.get('code',None) != 1000:
             logger.error(f"{region_id} - {account_id} | ├── 更新数据上传失败，Error: {update_result.get('message')}")
         else:
