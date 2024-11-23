@@ -23,7 +23,9 @@ CREATE TABLE clan_basic (
 
     INDEX idx_tag (tag), -- 索引
 
-    UNIQUE INDEX idx_rid_cid (region_id, clan_id) -- 索引
+    UNIQUE INDEX idx_rid_cid (region_id, clan_id), -- 索引
+
+    FOREIGN KEY (region_id) REFERENCES region(region_id) ON DELETE CASCADE -- 外键
 );
 ```
 
@@ -43,7 +45,7 @@ CREATE TABLE clan_info (
     league           TINYINT      DEFAULT 4,    -- 段位 0紫金 1白金 2黄金 3白银 4青铜
     division         TINYINT      DEFAULT 2,    -- 分段 1 2 3
     division_rating  INT          DEFAULT 0,    -- 分段分数，示例：白金 1段 25分
-    last_battle_at   INT          DEFAULT 0,    -- 上次战斗结束时间，用于判断是否有更新数据
+    last_battle_at   TIMESTAMP    DEFAULT NULL, -- 上次战斗结束时间，用于判断是否有更新数据
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP    DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
@@ -73,7 +75,9 @@ CREATE TABLE clan_users (
 
     PRIMARY KEY (id), -- 主键
 
-    UNIQUE INDEX idx_cid (clan_id) -- 非唯一索引
+    UNIQUE INDEX idx_cid (clan_id), -- 非唯一索引
+
+    FOREIGN KEY (clan_id) REFERENCES clan_basic(clan_id) ON DELETE CASCADE -- 外键
 );
 ```
 
@@ -95,7 +99,11 @@ CREATE TABLE clan_history (
 
     INDEX idx_aid (account_id), -- 索引
 
-    UNIQUE INDEX idx_cid (clan_id) -- 唯一索引
+    UNIQUE INDEX idx_cid (clan_id), -- 唯一索引
+
+    FOREIGN KEY (account_id) REFERENCES user_basic(account_id) ON DELETE CASCADE, -- 外键
+
+    FOREIGN KEY (clan_id) REFERENCES clan_basic(clan_id) ON DELETE CASCADE -- 外键
 );
 ```
 
@@ -110,7 +118,7 @@ CREATE TABLE clan_season (
     clan_id          BIGINT       NOT NULL,     -- 11位的非连续数字
     -- 工会段位数据缓存，用于实现工会排行榜
     season           TINYINT      DEFAULT 0,    -- 当前赛季代码 1-27
-    last_battle_at   INT          DEFAULT 0,    -- 上次战斗结束时间，用于判断是否有更新数据
+    last_battle_at   TIMESTAMP    DEFAULT NULL, -- 上次战斗结束时间，用于判断是否有更新数据
     team_data_1      VARCHAR(255) DEFAULT NULL, -- 存储当前赛季的a队数据
     team_data_2      VARCHAR(255) DEFAULT NULL, -- 存储当前赛季的b队数据
     -- 记录数据创建的时间和更新时间
@@ -159,7 +167,7 @@ CREATE TABLE clan_battle_s27 (
     -- 相关id
     id               INT          AUTO_INCREMENT,
     -- 对局相关信息和ID
-    battle_time      INT          NOT NULL,     -- 战斗时间
+    battle_time      TIMESTAMP    NOT NULL,     -- 战斗时间
     clan_id          BIGINT       NOT NULL,     -- 10位的非连续数字
     region_id        TINYINT      NOT NULL,     -- 服务器id
     team_number      TINYINT      NOT NULL,     -- 队伍id
@@ -180,6 +188,8 @@ CREATE TABLE clan_battle_s27 (
 
     PRIMARY KEY (id), -- 主键
 
-    INDEX idx_cid (battle_time) -- 索引
+    INDEX idx_cid (battle_time), -- 索引
+
+    FOREIGN KEY (clan_id) REFERENCES clan_basic(clan_id) ON DELETE CASCADE -- 外键
 );
 ```

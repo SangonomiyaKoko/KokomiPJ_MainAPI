@@ -59,7 +59,7 @@ def check_user_basic(pool: PooledDB, user_data: dict):
                     [nickname, region_id, account_id]
                 )
                 cur.execute(
-                    "INSERT INTO user_history (account_id, username, start_time, end_time) VALUES (%s, %s, %s, %s);", 
+                    "INSERT INTO user_history (account_id, username, start_time, end_time) VALUES (%s, %s, FROM_UNIXTIME(%s), FROM_UNIXTIME(%s));", 
                     [account_id, user['username'], user['update_time'], int(time.time())]
                 )
             elif user['username'] != nickname and user['update_time'] == None:
@@ -152,7 +152,8 @@ def check_user_info(pool: PooledDB, user_data: dict):
 
         account_id = user_data['account_id']
         cur.execute(
-            "SELECT is_active, active_level, is_public, total_battles, last_battle_time FROM user_info WHERE account_id = %s;", 
+            "SELECT is_active, active_level, is_public, total_battles, UNIX_TIMESTAMP(last_battle_at) AS last_battle_time "
+            "FROM user_info WHERE account_id = %s;", 
             [account_id]
         )
         user = cur.fetchone()
@@ -164,7 +165,10 @@ def check_user_info(pool: PooledDB, user_data: dict):
         params = []
         for field in ['is_active', 'active_level', 'is_public', 'total_battles', 'last_battle_time']:
             if (user_data[field] != None) and (user_data[field] != user[field]):
-                sql_str += f'{field} = %s, '
+                if field != 'last_battle_time':
+                    sql_str += f'{field} = %s, '
+                else:
+                    sql_str += f'{field} = FROM_UNIXTIME(%s), '
                 params.append(user_data[field])
         params = params + [account_id]
         cur.execute(

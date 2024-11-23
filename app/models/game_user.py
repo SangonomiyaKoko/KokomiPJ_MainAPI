@@ -420,7 +420,8 @@ class UserModel:
             cur: Cursor = await conn.cursor()
 
             await cur.execute(
-                "SELECT is_active, active_level, is_public, total_battles, last_battle_time, UNIX_TIMESTAMP(updated_at) AS update_time "
+                "SELECT is_active, active_level, is_public, total_battles, "
+                "UNIX_TIMESTAMP(last_battle_at) AS last_battle_time, UNIX_TIMESTAMP(updated_at) AS update_time "
                 "FROM user_info WHERE account_id = %s;", 
                 [account_id]
             )

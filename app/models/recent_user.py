@@ -76,7 +76,7 @@ class RecentUserModel:
                 # 用户不存在，插入新用户
                 current_timestamp = TimeFormat.get_current_timestamp()
                 await cur.execute(
-                    "INSERT INTO recent (account_id, region_id, recent_class, last_query_time) VALUES (%s, %s, %s, %s);",
+                    "INSERT INTO recent (account_id, region_id, recent_class, last_query_time) VALUES (%s, %s, %s, FROM_UNIXTIME(%s));",
                     [account_id, region_id, recent_class, current_timestamp]
                 )
             else:
@@ -125,8 +125,9 @@ class RecentUserModel:
             cur: Cursor = await conn.cursor()
 
             await cur.execute(
-                "SELECT u.is_active, u.active_level, u.is_public, u.total_battles, u.last_battle_time, UNIX_TIMESTAMP(u.updated_at) AS update_time, "
-                "r.recent_class, r.last_query_time, r.last_update_time "
+                "SELECT u.is_active, u.active_level, u.is_public, u.total_battles, u.last_battle_time, "
+                "UNIX_TIMESTAMP(u.updated_at) AS update_time, r.recent_class, "
+                "UNIX_TIMESTAMP(r.last_query_at) AS last_query_time, UNIX_TIMESTAMP(r.last_update_at) AS last_update_time "
                 "FROM recent AS r "
                 "LEFT JOIN user_info AS u ON u.account_id = r.account_id "
                 "WHERE r.region_id = %s and r.account_id = %s;",

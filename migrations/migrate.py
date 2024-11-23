@@ -48,11 +48,11 @@ CREATE TABLE user_info (
     id               INT          AUTO_INCREMENT,
     account_id       BIGINT       NOT NULL,     -- 1-11位的非连续数字
     -- 关于用户活跃的信息，用于recent/recents/用户排行榜功能
-    is_active        TINYINT      DEFAULT 0,   -- 用于标记用户的有效性，0表示无效，1表示有效
+    is_active        TINYINT      DEFAULT 0,    -- 用于标记用户的有效性，0表示无效，1表示有效
     active_level     TINYINT      DEFAULT 0,    -- 人为设置的用户活跃的等级
     is_public        TINYINT      DEFAULT 0,    -- 用户是否隐藏战绩，0表示隐藏，1表示公开
     total_battles    INT          DEFAULT 0,    -- 用户总场次
-    last_battle_time INT          DEFAULT 0,    -- 用户最后战斗时间
+    last_battle_at   TIMESTAMP    DEFAULT NULL, -- 用户最后战斗时间
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP    DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
@@ -84,9 +84,9 @@ CREATE TABLE user_history (
     id               INT          AUTO_INCREMENT,
     account_id       BIGINT       NOT NULL,    -- 1-11位的非连续数字
     -- 用户历史名称的记录
-    username         VARCHAR(25)  NOT NULL,    -- 最大25个字符，编码：utf-8
-    start_time       INT          NOT NULL,    -- 使用该名称的开始时间
-    end_time         INT          NOT NULL,    -- 使用该名称的结束时间
+    username         VARCHAR(25)  NOT NULL,     -- 最大25个字符，编码：utf-8
+    start_time       TIMESTAMP    NOT NULL,     -- 使用该名称的开始时间
+    end_time         TIMESTAMP    NOT NULL,     -- 使用该名称的结束时间
     -- 记录数据创建的时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -301,7 +301,7 @@ CREATE TABLE clan_info (
     league           TINYINT      DEFAULT 4,    -- 段位 0紫金 1白金 2黄金 3白银 4青铜
     division         TINYINT      DEFAULT 2,    -- 分段 1 2 3
     division_rating  INT          DEFAULT 0,    -- 分段分数，示例：白金 1段 25分
-    last_battle_at   INT          DEFAULT 0,    -- 上次战斗结束时间，用于判断是否有更新数据
+    last_battle_at   TIMESTAMP    DEFAULT NULL, -- 上次战斗结束时间，用于判断是否有更新数据
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP    DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
@@ -350,7 +350,7 @@ CREATE TABLE clan_season (
     clan_id          BIGINT       NOT NULL,     -- 11位的非连续数字
     -- 工会段位数据缓存，用于实现工会排行榜
     season           TINYINT      DEFAULT 0,    -- 当前赛季代码 1-27
-    last_battle_at   INT          DEFAULT 0,    -- 上次战斗结束时间，用于判断是否有更新数据
+    last_battle_at   TIMESTAMP    DEFAULT NULL, -- 上次战斗结束时间，用于判断是否有更新数据
     team_data_1      VARCHAR(255) DEFAULT NULL, -- 存储当前赛季的a队数据
     team_data_2      VARCHAR(255) DEFAULT NULL, -- 存储当前赛季的b队数据
     -- 记录数据创建的时间和更新时间
