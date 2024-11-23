@@ -1,4 +1,5 @@
 import httpx
+import time
 import asyncio
 from typing import Optional
 from dataclasses import dataclass
@@ -170,6 +171,7 @@ class Recent_Network:
         region_id: int,
         ac_value: str = None
     ):
+        start_time = time.time()
         api_url = VORTEX_API_URL_LIST.get(region_id)
         urls = [
             f'{api_url}/api/accounts/{account_id}/' + (f'?ac={ac_value}' if ac_value else '')
@@ -180,7 +182,9 @@ class Recent_Network:
             for url in urls:
                 tasks.append(self.fetch_data(url))
             responses = await asyncio.gather(*tasks)
-            return responses
+        cost_time = time.time() - start_time
+        logger.debug(f'{region_id} - {account_id} | ├── GAME_API请求成功, 耗时: {round(cost_time,2)} s')
+        return responses
     
     @classmethod
     async def get_recent_data(
@@ -189,6 +193,7 @@ class Recent_Network:
         region_id: int,
         ac_value: str = None
     ):
+        start_time = time.time()
         api_url = VORTEX_API_URL_LIST.get(region_id)
         urls = [
             f'{api_url}/api/accounts/{account_id}/ships/pvp_solo/' + (f'?ac={ac_value}' if ac_value else ''),
@@ -202,6 +207,8 @@ class Recent_Network:
             for url in urls:
                 tasks.append(self.fetch_data(url))
             responses = await asyncio.gather(*tasks)
+        cost_time = time.time() - start_time
+        logger.debug(f'{region_id} - {account_id} | ├── GAME_API请求成功, 耗时: {round(cost_time,2)} s')
         error = None
         for response in responses:
             if response.get('code', None) != 1000:

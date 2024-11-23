@@ -26,7 +26,7 @@ class ContinuousUserUpdater:
                     ac_value = request_result['data']['access'][str(account_id)]
                 else:
                     ac_value = None
-                logger.debug(f'{region_id} - {account_id} | ---------------------------------')
+                logger.info(f'{region_id} - {account_id} | ---------------------------------')
                 await Recent_Update.main(account_id,region_id,ac_value)
         end_time = int(time.time())
         # 避免测试时候的循环bug
