@@ -5,7 +5,7 @@ from .access_token import UserAccessToken
 from app.db import MysqlConnection
 from app.log import ExceptionLogger
 from app.response import JSONResponse, ResponseDict
-from app.utils import TimeFormat, UtilityFunctions
+from app.utils import UtilityFunctions
 
 class UserModel:
     # # 函数统一格式格式
@@ -85,21 +85,42 @@ class UserModel:
             if user[2] == None:
                 user[2] = UtilityFunctions.get_user_default_name(user[0])
                 await cur.execute(
-                    "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);"
-                    "INSERT INTO user_info (account_id) VALUES (%s);"
-                    "INSERT INTO user_ships (account_id) VALUES (%s);"
+                    "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                    [user[0], user[1], user[2]]
+                )
+                await cur.execute(
+                    "INSERT INTO user_info (account_id) VALUES (%s);",
+                    [user[0]]
+                )
+                await cur.execute(
+                    "INSERT INTO user_ships (account_id) VALUES (%s);",
+                    [user[0]]
+                )
+                await cur.execute(
                     "INSERT INTO user_clan (account_id) VALUES (%s);",
-                    [user[0], user[1], user[2], user[0], user[0], user[0]]
+                    [user[0]]
                 )
             else:
                 # 如果不是默认的名称则更新updated_time
                 await cur.execute(
-                    "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);"
-                    "INSERT INTO user_info (account_id) VALUES (%s);"
-                    "INSERT INTO user_ships (account_id) VALUES (%s);"
-                    "INSERT INTO user_clan (account_id) VALUES (%s);"
-                    "UPDATE user_basic SET updated_at = CURRENT_TIMESTAMP WHERE account_id = %s AND region_id = %s",
-                    [user[0], user[1], user[2], user[0], user[0], user[0], user[0], user[1]]
+                    "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                    [user[0], user[1], UtilityFunctions.get_user_default_name(user[0])]
+                )
+                await cur.execute(
+                    "INSERT INTO user_info (account_id) VALUES (%s);",
+                    [user[0]]
+                )
+                await cur.execute(
+                    "INSERT INTO user_ships (account_id) VALUES (%s);",
+                    [user[0]]
+                )
+                await cur.execute(
+                    "INSERT INTO user_clan (account_id) VALUES (%s);",
+                    [user[0]]
+                )
+                await cur.execute(
+                    "UPDATE user_basic SET username = %s WHERE account_id = %s AND region_id = %s",
+                    [user[2], user[0], user[1]]
                 )
             await conn.commit()
             return JSONResponse.API_1000_Success
@@ -152,21 +173,42 @@ class UserModel:
                 if user[2] == None:
                     user[2] = UtilityFunctions.get_user_default_name(user[0])
                     await cur.execute(
-                        "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);"
-                        "INSERT INTO user_info (account_id) VALUES (%s);"
-                        "INSERT INTO user_ships (account_id) VALUES (%s);"
+                        "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                        [user[0], user[1], user[2]]
+                    )
+                    await cur.execute(
+                        "INSERT INTO user_info (account_id) VALUES (%s);",
+                        [user[0]]
+                    )
+                    await cur.execute(
+                        "INSERT INTO user_ships (account_id) VALUES (%s);",
+                        [user[0]]
+                    )
+                    await cur.execute(
                         "INSERT INTO user_clan (account_id) VALUES (%s);",
-                        [user[0], user[1], user[2], user[0], user[0], user[0]]
+                        [user[0]]
                     )
                 else:
                     # 如果不是默认的名称则更新updated_time
                     await cur.execute(
-                        "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);"
-                        "INSERT INTO user_info (account_id) VALUES (%s);"
-                        "INSERT INTO user_ships (account_id) VALUES (%s);"
-                        "INSERT INTO user_clan (account_id) VALUES (%s);"
-                        "UPDATE user_basic SET updated_at = CURRENT_TIMESTAMP WHERE account_id = %s AND region_id = %s",
-                        [user[0], user[1], user[2], user[0], user[0], user[0], user[0], user[1]]
+                        "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                        [user[0], user[1], UtilityFunctions.get_user_default_name(user[0])]
+                    )
+                    await cur.execute(
+                        "INSERT INTO user_info (account_id) VALUES (%s);",
+                        [user[0]]
+                    )
+                    await cur.execute(
+                        "INSERT INTO user_ships (account_id) VALUES (%s);",
+                        [user[0]]
+                    )
+                    await cur.execute(
+                        "INSERT INTO user_clan (account_id) VALUES (%s);",
+                        [user[0]]
+                    )
+                    await cur.execute(
+                        "UPDATE user_basic SET username = %s WHERE account_id = %s AND region_id = %s",
+                        [user[2], user[0], user[1]]
                     )
             await conn.commit()
             return JSONResponse.API_1000_Success
@@ -200,21 +242,42 @@ class UserModel:
                 if user[2] == None:
                     user[2] = UtilityFunctions.get_user_default_name(user[0])
                     await cur.execute(
-                        "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);"
-                        "INSERT INTO user_info (account_id) VALUES (%s);"
-                        "INSERT INTO user_ships (account_id) VALUES (%s);"
+                        "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                        [user[0], user[1], user[2]]
+                    )
+                    await cur.execute(
+                        "INSERT INTO user_info (account_id) VALUES (%s);",
+                        [user[0]]
+                    )
+                    await cur.execute(
+                        "INSERT INTO user_ships (account_id) VALUES (%s);",
+                        [user[0]]
+                    )
+                    await cur.execute(
                         "INSERT INTO user_clan (account_id) VALUES (%s);",
-                        [user[0], user[1], user[2], user[0], user[0], user[0]]
+                        [user[0]]
                     )
                 else:
                     # 如果不是默认的名称则更新updated_time
                     await cur.execute(
-                        "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);"
-                        "INSERT INTO user_info (account_id) VALUES (%s);"
-                        "INSERT INTO user_ships (account_id) VALUES (%s);"
-                        "INSERT INTO user_clan (account_id) VALUES (%s);"
-                        "UPDATE user_basic SET updated_at = CURRENT_TIMESTAMP WHERE account_id = %s AND region_id = %s",
-                        [user[0], user[1], user[2], user[0], user[0], user[0], user[0], user[1]]
+                        "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                        [user[0], user[1], UtilityFunctions.get_user_default_name(user[0])]
+                    )
+                    await cur.execute(
+                        "INSERT INTO user_info (account_id) VALUES (%s);",
+                        [user[0]]
+                    )
+                    await cur.execute(
+                        "INSERT INTO user_ships (account_id) VALUES (%s);",
+                        [user[0]]
+                    )
+                    await cur.execute(
+                        "INSERT INTO user_clan (account_id) VALUES (%s);",
+                        [user[0]]
+                    )
+                    await cur.execute(
+                        "UPDATE user_basic SET username = %s WHERE account_id = %s AND region_id = %s",
+                        [user[2], user[0], user[1]]
                     )
             await conn.commit()
             return JSONResponse.API_1000_Success

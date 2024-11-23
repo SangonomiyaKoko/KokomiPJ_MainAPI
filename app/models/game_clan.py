@@ -29,7 +29,7 @@ class ClanModel:
             data= {
                 'tag': None,
                 'league': None,
-                'updated_at': 0
+                'updated_at': None
             }
             await cur.execute(
                 "SELECT tag, league, UNIX_TIMESTAMP(updated_at) AS update_time FROM clan_basic WHERE region_id = %s and clan_id = %s;", 
@@ -41,10 +41,20 @@ class ClanModel:
                 tag = UtilityFunctions.get_clan_default_name()
                 await conn.begin()
                 await cur.execute(
-                    "INSERT INTO clan_basic (clan_id, region_id, tag) VALUES (%s, %s, %s);"
-                    "INSERT INTO clan_info (clan_id) VALUES (%s);"
+                    "INSERT INTO clan_basic (clan_id, region_id, tag) VALUES (%s, %s, %s);",
+                    [clan_id, region_id, tag]
+                )
+                await cur.execute(
+                    "INSERT INTO clan_info (clan_id) VALUES (%s);",
+                    [clan_id]
+                )
+                await cur.execute(
+                    "INSERT INTO clan_users (clan_id) VALUES (%s);",
+                    [clan_id]
+                )
+                await cur.execute(
                     "INSERT INTO clan_season (clan_id) VALUES (%s);",
-                    [clan_id, region_id, tag, clan_id, clan_id]
+                    [clan_id]
                 )
                 await conn.commit()
                 data['tag'] = tag
