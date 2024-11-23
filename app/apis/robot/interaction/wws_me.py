@@ -39,10 +39,10 @@ async def main(
             data['clan'] = user_and_clan_result['data']['clan']
         # TODO: 获取其他数据
         type_list = ['pvp_solo','pvp_div2','pvp_div3','rank_solo']
-        details_data = await DetailsAPI.get_user_detail(account_id,region_id,type_list,ac_value)
-        for response in details_data:
-            if response['code'] != 1000:
-                return response
+        # details_data = await DetailsAPI.get_user_detail(account_id,region_id,type_list,ac_value)
+        # for response in details_data:
+        #     if response['code'] != 1000:
+        #         return response
         # TODO: 数据处理
 
         # 返回结果

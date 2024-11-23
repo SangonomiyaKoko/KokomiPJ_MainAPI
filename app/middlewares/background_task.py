@@ -168,7 +168,7 @@ def check_user_info(pool: PooledDB, user_data: dict):
                 if field != 'last_battle_time':
                     sql_str += f'{field} = %s, '
                 else:
-                    sql_str += f'{field} = FROM_UNIXTIME(%s), '
+                    sql_str += f'last_battle_at = FROM_UNIXTIME(%s), '
                 params.append(user_data[field])
         params = params + [account_id]
         cur.execute(
