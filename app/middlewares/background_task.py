@@ -20,6 +20,7 @@ def check_user_basic(pool: PooledDB, user_data: dict):
     try:
         conn.begin()
         cur = conn.cursor(pymysql.cursors.DictCursor)
+
         account_id = user_data['account_id']
         region_id = user_data['region_id']
         nickname = user_data['nickname']
@@ -66,6 +67,7 @@ def check_user_basic(pool: PooledDB, user_data: dict):
                     "UPDATE user_basic SET username = %s WHERE region_id = %s and account_id = %s;",
                     [nickname, region_id, account_id]
                 )
+        
         conn.commit()
         return JSONResponse.API_1000_Success
     except Exception as e:
@@ -85,7 +87,9 @@ def check_clan_basic(pool: PooledDB, clan_data: dict):
     conn = pool.connection()
     cur = None
     try:
+        conn.begin()
         cur = conn.cursor(pymysql.cursors.DictCursor)
+
         clan_id = clan_data['clan_id']
         region_id = clan_data['region_id']
         tag = clan_data['tag']
@@ -95,7 +99,6 @@ def check_clan_basic(pool: PooledDB, clan_data: dict):
             [region_id, clan_id]
         )
         clan = cur.fetchone()
-        conn.begin()
         if clan is None:
             # 工会不存在，插入新数据
             cur.execute(
@@ -123,6 +126,7 @@ def check_clan_basic(pool: PooledDB, clan_data: dict):
                 "UPDATE clan_basic SET tag = %s, league = %s WHERE region_id = %s and clan_id = %s;",
                 [tag, league, region_id, clan_id]
             )
+        
         conn.commit()
         return JSONResponse.API_1000_Success
     except Exception as e:
@@ -145,6 +149,7 @@ def check_user_info(pool: PooledDB, user_data: dict):
     try:
         conn.begin()
         cur = conn.cursor(pymysql.cursors.DictCursor)
+
         account_id = user_data['account_id']
         cur.execute(
             "SELECT is_active, active_level, is_public, total_battles, last_battle_time FROM user_info WHERE account_id = %s;", 
@@ -153,6 +158,7 @@ def check_user_info(pool: PooledDB, user_data: dict):
         user = cur.fetchone()
         if user is None:
             # 正常来说这里不应该会遇到为空问题，因为先检查basic在检查info
+            conn.commit()
             return JSONResponse.API_1008_UserNotExistinDatabase
         sql_str = ''
         params = []
@@ -165,6 +171,7 @@ def check_user_info(pool: PooledDB, user_data: dict):
             f"UPDATE user_info SET {sql_str}updated_at = CURRENT_TIMESTAMP WHERE account_id = %s;", 
             params
         )
+
         conn.commit()
         return JSONResponse.API_1000_Success
     except Exception as e:
@@ -184,7 +191,9 @@ def check_user_recent(pool: PooledDB, user_data: dict):
     conn = pool.connection()
     cur = None
     try:
+        conn.begin()
         cur = conn.cursor(pymysql.cursors.DictCursor)
+
         account_id = user_data['account_id']
         region_id = user_data['region_id']
         cur.execute(
@@ -194,8 +203,8 @@ def check_user_recent(pool: PooledDB, user_data: dict):
         )
         user = cur.fetchone()
         if user == None:
+            conn.commit()
             return JSONResponse.API_1000_Success
-        conn.begin()
         if user_data['recent_class'] and user['recent_class'] != user_data['recent_class']:
             cur.execute(
                 "UPDATE recent SET recent_class = %s WHERE region_id = %s and account_id = %s;",
@@ -206,6 +215,7 @@ def check_user_recent(pool: PooledDB, user_data: dict):
                 "UPDATE recent SET last_update_time = %s WHERE region_id = %s and account_id = %s;",
                 [user_data['last_update_time'], region_id, account_id]
             )
+        
         conn.commit()
         return JSONResponse.API_1000_Success
     except Exception as e:
@@ -225,9 +235,11 @@ def check_user_ships(pool: PooledDB, user_data: dict):
     conn = pool.connection()
     cur = None
     try:
+        conn.begin()
+        cur = conn.cursor(pymysql.cursors.DictCursor)
+        
         account_id = user_data['account_id']
         region_id = user_data['region_id']
-        conn.begin()
         for del_ship_id in user_data['delete_ship_list']:
             table_name = f'user_ship_0{del_ship_id % 10}'
             cur.execute(
@@ -287,14 +299,16 @@ def update_user_clan(pool: PooledDB, user_data: dict):
     conn = pool.connection()
     cur = None
     try:
+        conn.begin()
         cur = conn.cursor(pymysql.cursors.DictCursor)
+
         account_id = user_data['account_id']
         clan_id = user_data['clan_id']
-        conn.begin()
         cur.execute(
             "UPDATE user_clan SET clan_id = %s WHERE account_id = %s;",
             [clan_id, account_id]
         )
+
         conn.commit()
         return JSONResponse.API_1000_Success
     except Exception as e:
