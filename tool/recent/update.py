@@ -148,9 +148,10 @@ class Update:
             Recent_DB.create_user_db(recent_db_path)
             new_user = True
         # 用于搜索recent数据库的主键
-        date_1 = time.strftime("%Y%m%d", time.localtime(current_timestamp))
-        date_2 = time.strftime("%Y%m%d", time.localtime(current_timestamp-24*60*60))
-        date_3 = time.strftime("%Y%m%d", time.localtime(current_timestamp-user_recent_result['recent_class']*24*60*60))
+        time_zone = REGION_UTC_LIST[region_id]
+        date_1 = time.strftime("%Y%m%d", time.gmtime(current_timestamp + time_zone * 3600))
+        date_2 = time.strftime("%Y%m%d", time.gmtime(current_timestamp + time_zone * 3600 - 24*60*60))
+        date_3 = time.strftime("%Y%m%d", time.gmtime(current_timestamp + time_zone * 3600 - user_recent_result['recent_class']*24*60*60))
 
         # 从数据库中读取数据
         user_db_path = Recent_DB.get_recent_db_path(account_id,region_id)
@@ -226,8 +227,8 @@ class Update:
             'last_battle_time': 0
         }
         current_timestamp = int(time.time())
-        date_1 = time.strftime("%Y%m%d", time.localtime(current_timestamp))
-        date_2 = time.strftime("%Y%m%d", time.localtime(current_timestamp-24*60*60))
+        date_1 = time.strftime("%Y%m%d", time.gmtime(current_timestamp + time_zone * 3600))
+        date_2 = time.strftime("%Y%m%d", time.gmtime(current_timestamp + time_zone * 3600 - 24*60*60))
         basic_data = await Network.get_basic_data(account_id,region_id,ac_value)
         for response in basic_data:
             if response['code'] != 1000 and response['code'] != 1001:
