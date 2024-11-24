@@ -3,9 +3,9 @@ import hashlib
 import traceback
 
 from log import log as logger
-from network import UserCache_Network
+from network import Network
 
-class UserCache_Update:
+class Update:
     @classmethod
     async def main(self, user_data: dict):
         '''UserCache更新入口函数
@@ -62,7 +62,7 @@ class UserCache_Update:
             'region_id': region_id,
             'battles_count': 0
         }
-        basic_data = await UserCache_Network.get_basic_data(account_id,region_id,ac_value)
+        basic_data = await Network.get_basic_data(account_id,region_id,ac_value)
         for response in basic_data:
             if response['code'] != 1000 and response['code'] != 1001:
                 logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {response.get('message')}")
@@ -101,15 +101,13 @@ class UserCache_Update:
         if user_data['user_ships']['battles_count'] == user_info['total_battles']:
             logger.debug(f'{region_id} - {account_id} | ├── 未有更新数据，跳过更新')
             return
-        user_ships_data = await UserCache_Network.get_cache_data(account_id,region_id,ac_value)
+        user_ships_data = await Network.get_cache_data(account_id,region_id,ac_value)
         if user_ships_data.get('code', None) != 1000:
             logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {user_ships_data.get('message')}")
             return
         new_user_data = user_ships_data['data']
         sorted_dict = dict(sorted(new_user_data['basic'].items()))
         new_hash_value = hashlib.sha256(str(sorted_dict).encode('utf-8')).hexdigest()
-        print(user_data['user_ships']['hash_value'])
-        print(new_hash_value)
         if user_data['user_ships']['hash_value'] == new_hash_value:
             logger.debug(f'{region_id} - {account_id} | ├── 未有更新数据，跳过更新')
             user_cache['battles_count'] = user_info['total_battles']
@@ -137,7 +135,7 @@ class UserCache_Update:
             data['user_info'] = user_info
         if user_cache:
             data['user_cache'] = user_cache
-        update_result = await UserCache_Network.update_user_data(data)
+        update_result = await Network.update_user_data(data)
         if update_result.get('code',None) != 1000:
             logger.error(f"{region_id} - {account_id} | ├── 更新数据上传失败，Error: {update_result.get('message')}")
         else:

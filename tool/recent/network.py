@@ -69,7 +69,7 @@ recent_json_index = [
     json_index('shots_by_tbomb',                37),
 ]
 
-class Recent_Network:
+class Network:
     async def fetch_data(url, method: str = 'get', data: Optional[dict] = None):
         async with httpx.AsyncClient() as client:
             try:

@@ -4,8 +4,8 @@ import time
 import asyncio
 from log import log as logger
 
-from network import UserCache_Network
-from update import UserCache_Update
+from network import Network
+from update import Update
 
 
 class ContinuousUserCacheUpdater:
@@ -16,21 +16,21 @@ class ContinuousUserCacheUpdater:
         start_time = int(time.time())
         # 更新用户
         limit = 1000
-        request_result = await UserCache_Network.get_user_cache_number()
+        request_result = await Network.get_user_cache_number()
         if request_result['code'] != 1000:
             logger.error(f"获取MaxUserID时发生错误，Error: {request_result.get('message')}")
         max_id = request_result['data']['max_id']
         max_offset = (int(max_id / limit) + 1) * limit
         offset = 0
         while offset <= max_offset:
-            users_result = await UserCache_Network.get_cache_users(offset, limit)
+            users_result = await Network.get_cache_users(offset, limit)
             if users_result['code'] != 1000:
                 logger.error(f"获取CacheUsers时发生错误，Error: {users_result.get('message')}")
             for user in users_result['data']:
                 account_id = user['user_basic']['account_id']
                 region_id = user['user_basic']['region_id']
                 logger.info(f'{region_id} - {account_id} | ---------------------------------')
-                await UserCache_Update.main(user)
+                await Update.main(user)
             offset += limit
         end_time = int(time.time())
         # 避免测试时候的循环bug

@@ -4,11 +4,11 @@ import traceback
 
 from log import log as logger
 from database import Recent_DB
-from network import Recent_Network
+from network import Network
 from config import REGION_UTC_LIST, CLIENT_TYPE
 
 
-class Recent_Update:
+class Update:
     @classmethod
     async def main(self, account_id: int, region_id: int, ac_value: str = None):
         '''Recent数据库更新入口函数
@@ -33,7 +33,7 @@ class Recent_Update:
             logger.debug(f'{region_id} - {account_id} | └── 本次更新完成, 耗时: {round(cost_time,2)} s')
     
     async def service_slave(self, account_id: int, region_id: int, ac_value: str) -> None:
-        result = await Recent_Network.get_user_info_data(account_id, region_id)
+        result = await Network.get_user_info_data(account_id, region_id)
         if result.get('code', None) != 1000:
             logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {result.get('message')}")
             return
@@ -61,7 +61,7 @@ class Recent_Update:
                 'total_battles': 0,
                 'last_battle_time': 0
             }
-            basic_data = await Recent_Network.get_basic_data(account_id,region_id,ac_value)
+            basic_data = await Network.get_basic_data(account_id,region_id,ac_value)
             for response in basic_data:
                 if response['code'] != 1000 and response['code'] != 1001:
                     logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {response.get('message')}")
@@ -71,7 +71,7 @@ class Recent_Update:
                 # 用户数据不存在
                 user_info['is_active'] = 0
                 await self.update_user_data(account_id,region_id,None,user_info,None)
-                request_result = await Recent_Network.del_user_recent(account_id,region_id)
+                request_result = await Network.del_user_recent(account_id,region_id)
                 if request_result.get('code', None) != 1000:
                     logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {request_result.get('message')}")
                 else:
@@ -109,7 +109,7 @@ class Recent_Update:
 
     async def service_master(self, account_id: int, region_id: int, ac_value: str) -> None:
         # 从数据库中获取user_recent和user_info数据
-        result = await Recent_Network.get_user_recent(account_id,region_id)
+        result = await Network.get_user_recent(account_id,region_id)
         if result.get('code', None) != 1000:
             logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {result.get('message')}")
             return
@@ -228,7 +228,7 @@ class Recent_Update:
         current_timestamp = int(time.time())
         date_1 = time.strftime("%Y%m%d", time.localtime(current_timestamp))
         date_2 = time.strftime("%Y%m%d", time.localtime(current_timestamp-24*60*60))
-        basic_data = await Recent_Network.get_basic_data(account_id,region_id,ac_value)
+        basic_data = await Network.get_basic_data(account_id,region_id,ac_value)
         for response in basic_data:
             if response['code'] != 1000 and response['code'] != 1001:
                 logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {response.get('message')}")
@@ -238,7 +238,7 @@ class Recent_Update:
             # 用户数据不存在
             user_info['is_active'] = 0
             await self.update_user_data(account_id,region_id,None,user_info,None)
-            request_result = await Recent_Network.del_user_recent(account_id,region_id)
+            request_result = await Network.del_user_recent(account_id,region_id)
             if request_result.get('code', None) != 1000:
                 logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {request_result.get('message')}")
             else:
@@ -292,7 +292,7 @@ class Recent_Update:
             if not user_db_info and user_info['total_battles'] == user_db_info[3]:
                 logger.debug(f'{region_id} - {account_id} | ├── 未有数据，暂不需要更新')
                 return
-        user_details_data = await Recent_Network.get_recent_data(account_id,region_id,ac_value)
+        user_details_data = await Network.get_recent_data(account_id,region_id,ac_value)
         if user_details_data.get('code', None) != 1000:
             return
         details_data = user_details_data['data']
@@ -356,7 +356,7 @@ class Recent_Update:
             data['user_info'] = user_info
         if user_recent:
             data['user_recent'] = user_recent
-        update_result = await Recent_Network.update_user_data(data)
+        update_result = await Network.update_user_data(data)
         if update_result.get('code',None) != 1000:
             logger.error(f"{region_id} - {account_id} | ├── 更新数据上传失败，Error: {update_result.get('message')}")
         else:
@@ -364,7 +364,7 @@ class Recent_Update:
 
     async def delete_user_recent(account_id: int, region_id: int):
         "删除用户的recent功能"
-        request_result = await Recent_Network.del_user_recent(account_id,region_id)
+        request_result = await Network.del_user_recent(account_id,region_id)
         if request_result.get('code', None) != 1000:
             logger.error(f"{region_id} - {account_id} | ├── 删除用户请求失败，Error: {request_result.get('message')}")
         else:

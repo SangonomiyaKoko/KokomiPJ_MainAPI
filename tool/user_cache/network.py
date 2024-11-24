@@ -13,62 +13,8 @@ VORTEX_API_URL_LIST = {
     4: 'http://vortex.korabli.su',
     5: 'http://vortex.wowsgame.cn'
 }
-REGION_LIST = {
-    1: 'asia',
-    2: 'eu',
-    3: 'na',
-    4: 'ru',
-    5: 'cn'
-}
 
-@dataclass
-class json_index:
-    keywords: str
-    index: int
-
-
-recent_json_index = [
-    json_index('battles_count',                  0),
-    json_index('wins',                           1),
-    json_index('losses',                         2),
-    json_index('damage_dealt',                   3),
-    json_index('ships_spotted',                  4),
-    json_index('frags',                          5),
-    json_index('survived',                       6),
-    json_index('scouting_damage',                7),
-    json_index('original_exp',                   8),
-    json_index('exp',                            9),
-    json_index('art_agro',                      10),
-    json_index('tpd_agro',                      11),
-    json_index('win_and_survived',              12),
-    json_index('control_dropped_points',        13),
-    json_index('control_captured_points',       14),
-    json_index('team_control_captured_points',  15),
-    json_index('team_control_dropped_points',   16),
-    json_index('planes_killed',                 17),
-    json_index('frags_by_ram',                  18),
-    json_index('frags_by_tpd',                  19),
-    json_index('frags_by_planes',               20),
-    json_index('frags_by_dbomb',                21),
-    json_index('frags_by_atba',                 22),
-    json_index('frags_by_main',                 23),
-    json_index('hits_by_main',                  24),
-    json_index('shots_by_main',                 25),
-    json_index('hits_by_skip',                  26),
-    json_index('shots_by_skip',                 27),
-    json_index('hits_by_atba',                  28),
-    json_index('shots_by_atba',                 29),
-    json_index('hits_by_rocket',                30),
-    json_index('shots_by_rocket',               31),
-    json_index('hits_by_bomb',                  32),
-    json_index('shots_by_bomb',                 33),
-    json_index('hits_by_tpd',                   34),
-    json_index('shots_by_tpd',                  35),
-    json_index('hits_by_tbomb',                 36),
-    json_index('shots_by_tbomb',                37),
-]
-
-class UserCache_Network:
+class Network:
     async def fetch_data(url, method: str = 'get', data: Optional[dict] = None):
         async with httpx.AsyncClient() as client:
             try:
