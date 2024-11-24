@@ -5,7 +5,7 @@ from .access_token import UserAccessToken
 from app.db import MysqlConnection
 from app.log import ExceptionLogger
 from app.response import JSONResponse, ResponseDict
-from app.utils import UtilityFunctions, DataDecode
+from app.utils import UtilityFunctions, DataDecode, TimeFormat
 
 class UserModel:
     # # 函数统一格式格式
@@ -144,85 +144,76 @@ class UserModel:
             await MysqlConnection.release_connection(conn)
 
     @ExceptionLogger.handle_database_exception_async
-    async def insert_missing_users(users) -> ResponseDict:
-        '''插入缺少的用户id
+    async def check_and_insert_missing_users(users: list) -> ResponseDict:
+        '''检查并插入缺失的用户id
 
-        检测用户输入的列表中，是否有数据库缺失的用户
-
-        如果有缺失的用户则写入数据库
-
-        参数:
-            users: [ [aid, rid, nickname],[...] ]
+        只支持同一服务器下的用户
         
+        参数:
+            user: [{...}]
+
         返回:
-            ResponseDict
+            ResponseDict    
         '''
         try:
             conn: Connection = await MysqlConnection.get_connection()
             await conn.begin()
             cur: Cursor = await conn.cursor()
 
-            if users == [] or users == None:
-                return JSONResponse.API_1000_Success
+            sql_str = ''
+            params = [users[0]['region_id'],users[0]['account_id']]
             for user in users[1:]:
-                sql_str = f"\n    UNION ALL SELECT {user[0]}, {user[1]}"
+                sql_str += ', %s'
+                params.append(user['account_id'])
             await cur.execute(
-                "WITH input_ids AS ( "
-                f"    SELECT %s AS user_id, %s AS region_id {sql_str} "
-                ") "
-                "SELECT input_ids.user_id, input_ids.region_id "
-                "FROM input_ids "
-                "LEFT JOIN user_basic "
-                "    ON input_ids.user_id = user_basic.account_id "
-                "    AND input_ids.region_id = user_basic.region_id "
-                "WHERE user_basic.account_id IS NULL;",
-                [user[0][0],user[0][1]]
+                "SELECT account_id, username, UNIX_TIMESTAMP(updated_at) AS update_time "
+                f"FROM user_basic WHERE region_id = %s AND account_id in ( %s{sql_str} );",
+                params
             )
-            missing_users = await cur.fetchall()
-            if missing_users == None:
-                return JSONResponse.API_1000_Success
-            for user in missing_users:
-                # 插入新用户
-                if user[2] == None:
-                    user[2] = UtilityFunctions.get_user_default_name(user[0])
+            exists_users = {}
+            rows = await cur.fetchall()
+            for row in rows:
+                exists_users[row[0]] = [row[1],row[2]]
+            for user in users:
+                account_id = user['account_id']
+                region_id = user['region_id']
+                nickname = user['nickname']
+                if account_id not in exists_users:
                     await cur.execute(
                         "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
-                        [user[0], user[1], user[2]]
+                        [account_id, region_id, UtilityFunctions.get_user_default_name(account_id)]
                     )
                     await cur.execute(
                         "INSERT INTO user_info (account_id) VALUES (%s);",
-                        [user[0]]
+                        [account_id]
                     )
                     await cur.execute(
                         "INSERT INTO user_ships (account_id) VALUES (%s);",
-                        [user[0]]
+                        [account_id]
                     )
                     await cur.execute(
                         "INSERT INTO user_clan (account_id) VALUES (%s);",
-                        [user[0]]
+                        [account_id]
+                    )
+                    await cur.execute(
+                        "UPDATE user_basic SET username = %s WHERE region_id = %s AND account_id = %s",
+                        [nickname, region_id, account_id]
                     )
                 else:
-                    # 如果不是默认的名称则更新updated_time
-                    await cur.execute(
-                        "INSERT INTO user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
-                        [user[0], user[1], UtilityFunctions.get_user_default_name(user[0])]
-                    )
-                    await cur.execute(
-                        "INSERT INTO user_info (account_id) VALUES (%s);",
-                        [user[0]]
-                    )
-                    await cur.execute(
-                        "INSERT INTO user_ships (account_id) VALUES (%s);",
-                        [user[0]]
-                    )
-                    await cur.execute(
-                        "INSERT INTO user_clan (account_id) VALUES (%s);",
-                        [user[0]]
-                    )
-                    await cur.execute(
-                        "UPDATE user_basic SET username = %s WHERE account_id = %s AND region_id = %s",
-                        [user[2], user[0], user[1]]
-                    )
+                    if exists_users[account_id] == None:
+                        await cur.execute(
+                            "UPDATE user_basic SET username = %s WHERE region_id = %s AND account_id = %s",
+                            [nickname, region_id, account_id]
+                        )
+                    elif nickname != exists_users[account_id][0]:
+                        await cur.execute(
+                            "UPDATE user_basic SET username = %s WHERE region_id = %s and account_id = %s;", 
+                            [nickname, region_id, account_id]
+                        )
+                        await cur.execute(
+                            "INSERT INTO user_history (account_id, username, start_time, end_time) VALUES (%s, %s, FROM_UNIXTIME(%s), FROM_UNIXTIME(%s));", 
+                            [account_id, user['username'], user['update_time'], TimeFormat.get_current_timestamp()]
+                        )
             
             await conn.commit()
             return JSONResponse.API_1000_Success

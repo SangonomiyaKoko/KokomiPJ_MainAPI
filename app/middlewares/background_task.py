@@ -62,7 +62,7 @@ def check_user_basic(pool: PooledDB, user_data: dict):
                     "INSERT INTO user_history (account_id, username, start_time, end_time) VALUES (%s, %s, FROM_UNIXTIME(%s), FROM_UNIXTIME(%s));", 
                     [account_id, user['username'], user['update_time'], int(time.time())]
                 )
-            elif user['username'] != nickname and user['update_time'] == None:
+            elif user['update_time'] == None:
                 cur.execute(
                     "UPDATE user_basic SET username = %s WHERE region_id = %s and account_id = %s;",
                     [nickname, region_id, account_id]
@@ -278,6 +278,37 @@ def update_user_ship(pool: PooledDB, user_data: dict):
                 [table_name] + [update_ship_id, region_id, account_id] + ship_data + [table_name] + [update_ship_id, region_id, account_id]
             )
         
+        conn.commit()
+        return JSONResponse.API_1000_Success
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        if cur:
+            cur.close()
+        conn.close()  # 归还连接到连接池
+
+@ExceptionLogger.handle_database_exception_sync
+def update_clan_users(pool: PooledDB, clan_id: int, user_data: list):
+    '''更新user_clan表'''
+    conn = pool.connection()
+    cur = None
+    try:
+        conn.begin()
+        cur = conn.cursor(pymysql.cursors.DictCursor)
+
+        conn.begin()
+        sql_str = ''
+        params = []
+        for aid in user_data[1:]:
+            sql_str += ', %s'
+            params.append(aid)
+        cur.execute(
+            "UPDATE user_clan "
+            "SET clan_id = %s "
+            f"WHERE account_id IN ( %s{sql_str} );", 
+            [clan_id] + [user_data[0]] + params
+        )
         conn.commit()
         return JSONResponse.API_1000_Success
     except Exception as e:

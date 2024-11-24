@@ -10,7 +10,8 @@ from .background_task import (
     check_user_recent,
     update_user_clan, 
     update_user_ship,
-    update_user_ships
+    update_user_ships,
+    update_clan_users
 )
 from app.core import EnvConfig
 
@@ -85,4 +86,9 @@ def task_update_user_ship(user_data: dict):
 @celery_app.task
 def task_check_user_recent(user_data: dict):
     result = check_user_recent(pool, user_data)
+    return result
+
+@celery_app.task
+def task_update_clan_users(clan_id: int, user_data: list):
+    result = update_clan_users(pool, clan_id, user_data)
     return result

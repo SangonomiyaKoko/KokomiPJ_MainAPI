@@ -7,7 +7,7 @@ from datetime import datetime, timezone, timedelta
 import brotli
 
 from config import MASTER_DB_PATH, REGION_UTC_LIST
-from network import Recent_Network
+from network import Network
 
 
 class Recent_DB:
@@ -216,66 +216,3 @@ class Recent_DB:
             conn.commit()
         cursor.close()
         conn.close()
-
-    def convert_timestamp_to_local_time(timestamp: int, utc_offset: int) -> str:
-        utc_time = datetime.fromtimestamp(timestamp, timezone.utc)
-        target_time = utc_time + timedelta(hours=utc_offset)
-        return target_time.strftime('%Y%m%d')
-
-    async def update(
-        self,
-        account_id: int,
-        region_id: int,
-        new: bool,
-        valid: bool,
-        leveling_points: int,
-        karma: int,
-        ac_value: str = None
-    ):
-        timestamp = int(time.time())
-        # 今天的日期
-        date_1 = self.convert_timestamp_to_local_time(timestamp,REGION_UTC_LIST.get(region_id))
-        # 昨天的日期
-        date_2 = self.convert_timestamp_to_local_time(timestamp-24*60*60,REGION_UTC_LIST.get(region_id))
-        db_path = self.get_recent_db_path(account_id,region_id)
-        responses = await Recent_Network.get_recent_data(account_id,region_id,ac_value)
-        for response in responses:
-            if response['code'] != 1000:
-                return response
-        result = Recent_Network.data_processing(account_id,responses)
-        if new is True:
-            Recent_DB.insert_database(
-                db_path=db_path,
-                date=date_2,
-                valid=valid,
-                update_time=timestamp,
-                level_point=leveling_points,
-                karma=karma,
-                battles_count=result['battles_count'],
-                table_name=f'day_{date_2}',
-                ship_info_data=result['ships']
-            )
-            Recent_DB.insert_database(
-                db_path=db_path,
-                date=date_1,
-                valid=valid,
-                update_time=timestamp,
-                level_point=leveling_points,
-                karma=karma,
-                battles_count=result['battles_count'],
-                table_name=f'day_{date_2}',
-                ship_info_data=None
-            )
-        else:
-            Recent_DB.insert_database(
-                db_path=db_path,
-                date=date_1,
-                valid=valid,
-                update_time=timestamp,
-                level_point=leveling_points,
-                karma=karma,
-                battles_count=result['battles_count'],
-                table_name=f'day_{date_1}',
-                ship_info_data=result['ships']
-            )
-        return {'status':'ok','message':'SUCCESS'}

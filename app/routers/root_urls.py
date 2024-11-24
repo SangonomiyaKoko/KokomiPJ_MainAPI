@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.response import ResponseDict
 from app.apis.root import RootData
+from app.middlewares import record_api_call
 
 router = APIRouter()
 
@@ -18,6 +19,7 @@ async def getUsersOverview() -> ResponseDict:
     - ResponseDict
     """
     result = await RootData.get_basic_user_overview()
+    await record_api_call(result['status'])
     return result
 
 @router.get("/clans/overview/")
@@ -33,6 +35,7 @@ async def getClansOverview() -> ResponseDict:
     - ResponseDict
     """
     result = await RootData.get_basic_user_overview()
+    await record_api_call(result['status'])
     return result
 
 @router.get("/recent/overview/")
@@ -48,6 +51,7 @@ async def getRecentOverview() -> ResponseDict:
     - ResponseDict
     """
     result = await RootData.get_recent_user_overview()
+    await record_api_call(result['status'])
     return result
 
 @router.get("/mysql/trx/")
@@ -63,6 +67,7 @@ async def getTrx() -> ResponseDict:
     - ResponseDict
     """
     result = await RootData.get_innodb_trx()
+    await record_api_call(result['status'])
     return result
 
 @router.get("/mysql/processlist/")
@@ -78,4 +83,5 @@ async def getProcessList() -> ResponseDict:
     - ResponseDict
     """
     result = await RootData.get_innodb_processlist()
+    await record_api_call(result['status'])
     return result

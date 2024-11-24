@@ -4,6 +4,7 @@ from .schemas import RegionList, RecentEnableModel
 from app.utils import UtilityFunctions
 from app.response import JSONResponse, ResponseDict
 from app.apis.recent import RecentBasic, RecentData
+from app.middlewares import record_api_call
 
 router = APIRouter()
 
@@ -26,6 +27,7 @@ async def get_recent_data_overview(region: RegionList,account_id: int) -> Respon
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
         return JSONResponse.API_1003_IllegalAccoutIDorRegionID
     result = await RecentData.get_data_overview(account_id,region_id)
+    await record_api_call(result['status'])
     return result 
 
 @router.get("/features/users/{region}/")
@@ -44,6 +46,7 @@ async def enabledFeatureUsers(region: RegionList) -> ResponseDict:
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
     result = await RecentBasic.get_recent(region_id)
+    await record_api_call(result['status'])
     return result 
 
 @router.get("/features/user/{region}/{account_id}/")
@@ -65,6 +68,7 @@ async def getUserFeatureData(region: RegionList,account_id: int) -> ResponseDict
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
         return JSONResponse.API_1003_IllegalAccoutIDorRegionID
     result = await RecentBasic.get_user_recent(account_id,region_id)
+    await record_api_call(result['status'])
     return result  
 
 @router.post("/features/user/")
@@ -85,6 +89,7 @@ async def enableFeature(enable_data: RecentEnableModel) -> ResponseDict:
     if UtilityFunctions.check_aid_and_rid(enable_data.account_id, region_id) == False:
         return JSONResponse.API_1003_IllegalAccoutIDorRegionID
     result = await RecentBasic.add_recent(enable_data.account_id,region_id,enable_data.recent_class)
+    await record_api_call(result['status'])
     return result
 
 @router.delete("/features/user/{region}/{account_id}/")
@@ -105,4 +110,5 @@ async def disableFeature(region: RegionList,account_id: int) -> ResponseDict:
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
         return JSONResponse.API_1003_IllegalAccoutIDorRegionID
     result = await RecentBasic.del_recent(account_id,region_id)
+    await record_api_call(result['status'])
     return result

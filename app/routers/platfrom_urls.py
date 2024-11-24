@@ -5,7 +5,8 @@ from fastapi import APIRouter
 from .schemas import (
     RegionList, 
     LanguageList, 
-    UserUpdateModel
+    UserUpdateModel,
+    ClanUsersModel
 )
 from app.apis.platform import Search, Update, GameUser, GameClan, UserCache
 from app.utils import UtilityFunctions
@@ -168,6 +169,7 @@ async def getClans(region: RegionList) -> ResponseDict:
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
     result = await GameClan.get_clan(region_id)
+    await record_api_call(result['status'])
     return result 
 
 
@@ -185,6 +187,7 @@ async def getUserCache(offset: int, limit: int = 1000) -> ResponseDict:
     - ResponseDict
     """
     result = await UserCache.get_user_cache_data_batch(offset, limit)
+    await record_api_call(result['status'])
     return result
 
 @router.put("/game/user/update/")
@@ -200,6 +203,23 @@ async def updateUserCache(user_data: UserUpdateModel) -> ResponseDict:
     - ResponseDict
     """
     result = await GameUser.update_user_data(user_data.model_dump())
+    await record_api_call(result['status'])
+    return result
+
+@router.put("/game/clan-users/update/")
+async def updateUserCache(user_data: ClanUsersModel) -> ResponseDict:
+    """更新工会用户的数据
+
+    通过传入的数据更新数据库
+
+    参数:
+    - ClanUsersModel
+    
+    返回:
+    - ResponseDict
+    """
+    result = await GameClan.update_clan_users_data(user_data.model_dump())
+    await record_api_call(result['status'])
     return result
 
 @router.get("/game/user/{region}/{account_id}/info/")

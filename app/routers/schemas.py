@@ -62,3 +62,8 @@ class UserUpdateModel(BaseModel):
     user_info: UserInfoModel = Field(None, description='用户详细数据')
     user_recent: UserRecentModel = Field(None, description='用户recent功能数据')
     user_cache: UserCacheModel = Field(None, description='用户缓存数据')
+
+class ClanUsersModel(BaseModel):
+    region_id: int = Field(..., description='服务器id')
+    clan_id: int = Field(..., description='工会id')
+    clan_users: list = Field(..., description='工会内用户')

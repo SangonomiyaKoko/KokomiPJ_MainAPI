@@ -31,7 +31,7 @@ class Network:
                 elif method == 'post':
                     res = await client.post(url, json=data, timeout=5)
                 elif method == 'put':
-                    res = await client.put(url, json=data, timeout=5)
+                    res = await client.put(url, json=data, timeout=60)
                 else:
                     return {'status': 'ok','code': 7000,'message': 'InvalidParameter','data': None}
                 requset_code = res.status_code
@@ -75,6 +75,13 @@ class Network:
         else:
             result = self.__clan_data_processing(clan_id, region_id, result)
             return {'status': 'ok', 'code': 1000, 'message': 'Success', 'data': result}
+    
+    @classmethod 
+    async def update_user_data(self, data: dict):
+        platform_api_url = API_URL
+        url = f'{platform_api_url}/p/game/clan-users/update/'
+        result = await self.fetch_data(url, method='put', data=data)
+        return result
     
     def __clan_data_processing(clan_id: int, region_id: int, response: dict):
         result = {
