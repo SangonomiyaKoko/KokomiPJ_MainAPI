@@ -345,10 +345,16 @@ def update_user_clan(pool: PooledDB, user_data: dict):
 
         account_id = user_data['account_id']
         clan_id = user_data['clan_id']
-        cur.execute(
-            "UPDATE user_clan SET clan_id = %s WHERE account_id = %s;",
-            [clan_id, account_id]
-        )
+        if clan_id:
+            cur.execute(
+                "UPDATE user_clan SET clan_id = %s WHERE account_id = %s;",
+                [clan_id, account_id]
+            )
+        else:
+            cur.execute(
+                "UPDATE user_clan SET updated_at = CURRENT_TIMESTAMP WHERE account_id = %s;",
+                [account_id]
+            )
 
         conn.commit()
         return JSONResponse.API_1000_Success

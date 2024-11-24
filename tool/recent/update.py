@@ -151,6 +151,7 @@ class Recent_Update:
         date_1 = time.strftime("%Y%m%d", time.localtime(current_timestamp))
         date_2 = time.strftime("%Y%m%d", time.localtime(current_timestamp-24*60*60))
         date_3 = time.strftime("%Y%m%d", time.localtime(current_timestamp-user_recent_result['recent_class']*24*60*60))
+
         # 从数据库中读取数据
         user_db_path = Recent_DB.get_recent_db_path(account_id,region_id)
         user_info_data = Recent_DB.get_user_info(user_db_path)
@@ -179,13 +180,13 @@ class Recent_Update:
         date_1_data = 0
         date_2_data = 0
         for user_info in user_info_data:
-            if user_info[0] == date_1:
+            if user_info[0] == int(date_1):
                 date_1_data = 1
-            if user_info[0] == date_2:
+            if user_info[0] == int(date_2):
                 date_2_data = 1
         if not date_1_data and date_2_data:
             if Recent_DB.copy_user_info(recent_db_path,date_1,date_2):
-                logger.info(f'{region_id} - {account_id} | ├── 用户跨日数据复制')
+                logger.debug(f'{region_id} - {account_id} | ├── 用户跨日数据复制')
                 return
         elif not date_1_data and not date_2_data:
             new_user = True
