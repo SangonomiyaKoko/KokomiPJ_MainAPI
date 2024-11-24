@@ -7,6 +7,30 @@ from app.log import ExceptionLogger
 from app.utils import UtilityFunctions
 
 class ClanModel:
+    async def get_clan_by_rid(region_id: int) -> ResponseDict:
+        try:
+            conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
+            cur: Cursor = await conn.cursor()
+
+            data = []
+            await cur.execute(
+                "SELECT clan_id FROM clan_basic WHERE region_id = %s;",
+                [region_id]
+            )
+            users = await cur.fetchall()
+            for user in users:
+                data.append(user[0])
+            
+            await conn.commit()
+            return JSONResponse.get_success_response(data)
+        except Exception as e:
+            await conn.rollback()
+            raise e
+        finally:
+            await cur.close()
+            await MysqlConnection.release_connection(conn)
+        
     @ExceptionLogger.handle_database_exception_async
     async def get_clan_tag_and_league(clan_id: int, region_id: int) -> ResponseDict:
         '''获取工会名称

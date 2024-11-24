@@ -1,19 +1,24 @@
 import httpx
 import asyncio
 from typing import Optional
-from dataclasses import dataclass
 
 from log import log as logger
 from config import API_URL
 
-VORTEX_API_URL_LIST = {
-    1: 'http://vortex.worldofwarships.asia',
-    2: 'http://vortex.worldofwarships.eu',
-    3: 'http://vortex.worldofwarships.com',
-    4: 'http://vortex.korabli.su',
-    5: 'http://vortex.wowsgame.cn'
+CLAN_API_URL_LIST = {
+    1: 'https://clans.worldofwarships.asia',
+    2: 'https://clans.worldofwarships.eu',
+    3: 'https://clans.worldofwarships.com',
+    4: 'https://clans.korabli.su',
+    5: 'https://clans.wowsgame.cn'
 }
-
+REGION_LIST = {
+    1: 'asia',
+    2: 'eu',
+    3: 'na',
+    4: 'ru',
+    5: 'cn'
+}
 
 class Network:
     async def fetch_data(url, method: str = 'get', data: Optional[dict] = None):
@@ -32,12 +37,12 @@ class Network:
                 requset_code = res.status_code
                 requset_result = res.json()
                 if requset_code == 200:
-                    if 'vortex' in url:
-                        return {'status': 'ok','code': 1000,'message': 'Success','data': requset_result['data']}
+                    if '//clans' in url:
+                        return {'status': 'ok','code': 1000,'message': 'Success','data': requset_result}
                     else:
                         return requset_result
-                if requset_code == 404:
-                    return {'status': 'ok','code': 1001,'message': 'UserNotExist','data' : None}
+                elif requset_code == 503 and 'clans' in url:
+                    return {'status': 'ok','code': 1002,'message': 'ClanNotExist','data' : None}
                 return {'status': 'ok','code': 2000,'message': 'NetworkError','data': None}
             except httpx.ConnectTimeout:
                 return {'status': 'ok','code': 2001,'message': 'NetworkError','data': None}
@@ -49,11 +54,41 @@ class Network:
                 return {'status': 'ok','code': 2004,'message': 'NetworkError','data': None}
             except httpx.ReadError:
                 return {'status': 'ok','code': 2005,'message': 'NetworkError','data': None}
+
+    @classmethod   
+    async def get_recent_users_by_rid(self, region_id: int):
+        platform_api_url = API_URL
+        region = REGION_LIST.get(region_id)
+        url = f'{platform_api_url}/p/game/clans/{region}/'
+        result = await self.fetch_data(url)
+        return result
         
     @classmethod
-    async def get_user_cache_number(self):
+    async def get_clan_data(self, region_id: int, clan_id: int):
         "获取用户缓存的数量，用于确定offset边界"
-        platform_api_url = API_URL
-        url = f'{platform_api_url}/p/game/users/number/'
+        api_url = CLAN_API_URL_LIST.get(region_id)
+        url = f'{api_url}/api/members/{clan_id}/'
         result = await self.fetch_data(url)
+        if result.get('code', None) != 1000:
+            logger.error(f"{region_id} - {clan_id} | ├── 网络请求失败，Error: {result.get('message')}")
+            return result
+        else:
+            result = self.__clan_data_processing(clan_id, region_id, result)
+            return {'status': 'ok', 'code': 1000, 'message': 'Success', 'data': result}
+    
+    def __clan_data_processing(clan_id: int, region_id: int, response: dict):
+        result = {
+            'clan_id': clan_id,
+            'region_id': region_id,
+            'clan_users': []
+        }
+        for user_data in response['data']['items']:
+            account_id = user_data['id']
+            nickname = user_data['name']
+            data = {
+                'account_id': account_id,
+                'region_id': region_id,
+                'nickname': nickname
+            }
+            result['clan_users'].append(data)
         return result

@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 import time
 import asyncio
-from log import log as recent_logger
+from log import log as logger
+from network import Network
+from update import Update
 
 
 
@@ -13,12 +15,19 @@ class ContinuousUserCacheUpdater:
     async def update_user(self):
         start_time = int(time.time())
         # 更新用户
-        recent_logger.debug(f'{1} - {1} | ---------------------------------')
+        for region_id in [1,2,3,4,5]:
+            request_result = await Network.get_recent_users_by_rid(region_id)
+            if request_result['code'] != 1000:
+                logger.error(f"获取RecentUser时发生错误，Error: {request_result.get('message')}")
+                continue
+            for clan_id in request_result['data']['clans']:
+                logger.info(f'{region_id} - {clan_id} | ---------------------------------')
+                await Update.main(clan_id,region_id)
         end_time = int(time.time())
         # 避免测试时候的循环bug
         if end_time - start_time <= 50:
             sleep_time = 60 - (end_time - start_time)
-            recent_logger.info(f'更新线程休眠 {round(sleep_time,2)} s')
+            logger.info(f'更新线程休眠 {round(sleep_time,2)} s')
             await asyncio.sleep(sleep_time)
 
     async def continuous_update(self):
@@ -41,16 +50,16 @@ async def main():
         updater.stop()
 
 if __name__ == "__main__":
-    recent_logger.info('开始运行UserCache更新进程')
+    logger.info('开始运行UserCache更新进程')
     # 开始不间断更新
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        recent_logger.info('收到进程关闭信号')
+        logger.info('收到进程关闭信号')
     # 退出并释放资源
     wait_second = 3
     while wait_second > 0:
-        recent_logger.info(f'进程将在 {wait_second} s后关闭')
+        logger.info(f'进程将在 {wait_second} s后关闭')
         time.sleep(1)
         wait_second -= 1
-    recent_logger.info('UserCache更新进程已停止')
+    logger.info('UserCache更新进程已停止')

@@ -5,11 +5,9 @@ from fastapi import APIRouter
 from .schemas import (
     RegionList, 
     LanguageList, 
-    UserCacheModel,
-    UserInfoUpdateModel,
     UserUpdateModel
 )
-from app.apis.platform import Search, Update, GameUser, UserCache
+from app.apis.platform import Search, Update, GameUser, GameClan, UserCache
 from app.utils import UtilityFunctions
 from app.response import JSONResponse, ResponseDict
 from app.middlewares import record_api_call
@@ -153,6 +151,24 @@ async def get_user_max_number() -> ResponseDict:
     result = await GameUser.get_user_max_number()
     await record_api_call(result['status'])
     return result
+
+@router.get("/game/clans/{region}/")
+async def getClans(region: RegionList) -> ResponseDict:
+    """获取服务器下所有工会的列表
+
+    用于遍历更新
+
+    参数:
+    - region: 服务器
+
+    返回:
+    - ResponseDict
+    """
+    region_id = UtilityFunctions.get_region_id(region)
+    if not region_id:
+        return JSONResponse.API_1010_IllegalRegion
+    result = await GameClan.get_clan(region_id)
+    return result 
 
 
 @router.get("/game/users/cache/")
