@@ -15,39 +15,23 @@ class ContinuousUserCacheUpdater:
     async def update_user(self):
         start_time = int(time.time())
         # 更新用户
-        # limit = 1000
-        # request_result = await UserCache_Network.get_user_cache_number()
-        # if request_result['code'] != 1000:
-        #     logger.error(f"获取MaxUserID时发生错误，Error: {request_result.get('message')}")
-        # max_id = request_result['data']['max_id']
-        # max_offset = (int(max_id / limit) + 1) * limit
-        # offset = 0
-        # while offset <= max_offset:
-        #     users_result = await UserCache_Network.get_cache_users(offset, limit)
-        #     if users_result['code'] != 1000:
-        #         logger.error(f"获取CacheUsers时发生错误，Error: {users_result.get('message')}")
-        #     for user in users_result['data']:
-        #         account_id = user['user_basic']['account_id']
-        #         region_id = user['user_basic']['region_id']
-        #         logger.info(f'{region_id} - {account_id} | ---------------------------------')
-        #     offset += limit
-        data = {
-            "user_basic": {
-                "region_id": 1,
-                "account_id": 2023619512,
-                "ac_value": None
-            },
-            "user_info": {
-                "is_active": 1,
-                "active_level": 4
-            },
-            "user_ships": {
-                "battles_count": None,
-                "hash_value": None,
-                "update_time": None
-            }
-        }
-        await UserCache_Update.main(data)
+        limit = 1000
+        request_result = await UserCache_Network.get_user_cache_number()
+        if request_result['code'] != 1000:
+            logger.error(f"获取MaxUserID时发生错误，Error: {request_result.get('message')}")
+        max_id = request_result['data']['max_id']
+        max_offset = (int(max_id / limit) + 1) * limit
+        offset = 0
+        while offset <= max_offset:
+            users_result = await UserCache_Network.get_cache_users(offset, limit)
+            if users_result['code'] != 1000:
+                logger.error(f"获取CacheUsers时发生错误，Error: {users_result.get('message')}")
+            for user in users_result['data']:
+                account_id = user['user_basic']['account_id']
+                region_id = user['user_basic']['region_id']
+                logger.info(f'{region_id} - {account_id} | ---------------------------------')
+                await UserCache_Update.main(user)
+            offset += limit
         end_time = int(time.time())
         # 避免测试时候的循环bug
         if end_time - start_time <= 50:

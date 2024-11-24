@@ -200,7 +200,7 @@ class UserCache_Network:
                 ship_data['wins'],
                 ship_data['damage_dealt'],
                 ship_data['frags'],
-                ship_data['exp'],
+                ship_data['original_exp'],
                 ship_data['survived'],
                 ship_data['scouting_damage'],
                 ship_data['art_agro'],

@@ -5,7 +5,7 @@ from .access_token import UserAccessToken
 from app.db import MysqlConnection
 from app.log import ExceptionLogger
 from app.response import JSONResponse, ResponseDict
-from app.utils import UtilityFunctions
+from app.utils import UtilityFunctions, DataDecode
 
 class UserModel:
     # # 函数统一格式格式
@@ -459,6 +459,47 @@ class UserModel:
             await cur.close()
             await MysqlConnection.release_connection(conn)
 
+    @ExceptionLogger.handle_database_exception_async
+    async def get_user_cache_data(account_id: int, region_id: int) -> ResponseDict:
+        '''获取用户的缓存数据'''
+        try:
+            conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
+            cur: Cursor = await conn.cursor()
+            
+            await cur.execute(
+                "SELECT battles_count, hash_value, ships_data, UNIX_TIMESTAMP(updated_at) AS update_time "
+                "FROM user_ships WHERE account_id = %s;", 
+                [account_id]
+            )
+            user = await cur.fetchone()
+            if user is None:
+                # 用户不存在
+                insert_result = await UserModel.insert_user([account_id,region_id,None])
+                if insert_result.get('code', None) != 1000:
+                    return insert_result
+                data = {
+                    'battles_count': None,
+                    'hash_value': None,
+                    'ships_data': None,
+                    'update_time': None
+                }
+            else:
+                data = {
+                    'battles_count': user[0],
+                    'hash_value': user[1],
+                    'ships_data': DataDecode.from_binary_data_dict(user[2]),
+                    'update_time': user[3]
+                }
+            
+            await conn.commit()
+            return JSONResponse.get_success_response(data)
+        except Exception as e:
+            await conn.rollback()
+            raise e
+        finally:
+            await cur.close()
+            await MysqlConnection.release_connection(conn)
 
     @ExceptionLogger.handle_database_exception_async
     async def get_user_cache_batch(offset: int, limit = 1000) -> ResponseDict:

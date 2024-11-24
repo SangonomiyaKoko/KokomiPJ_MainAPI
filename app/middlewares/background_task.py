@@ -167,9 +167,11 @@ def check_user_info(pool: PooledDB, user_data: dict):
             if (user_data[field] != None) and (user_data[field] != user[field]):
                 if field != 'last_battle_time':
                     sql_str += f'{field} = %s, '
+                    params.append(user_data[field])
                 else:
-                    sql_str += f'last_battle_at = FROM_UNIXTIME(%s), '
-                params.append(user_data[field])
+                    if user_data[field] != 0:
+                        sql_str += f'last_battle_at = FROM_UNIXTIME(%s), '
+                        params.append(user_data[field])
         params = params + [account_id]
         cur.execute(
             f"UPDATE user_info SET {sql_str}updated_at = CURRENT_TIMESTAMP WHERE account_id = %s;", 
@@ -235,7 +237,7 @@ def check_user_recent(pool: PooledDB, user_data: dict):
         conn.close()  # 归还连接到连接池
 
 @ExceptionLogger.handle_database_exception_sync
-def check_user_ships(pool: PooledDB, user_data: dict):
+def update_user_ship(pool: PooledDB, user_data: dict):
     '''检查并更新user_ships和user_ship表
 
     参数:
@@ -249,49 +251,59 @@ def check_user_ships(pool: PooledDB, user_data: dict):
         
         account_id = user_data['account_id']
         region_id = user_data['region_id']
-        cur.execute(
-            "SELECT battles_count, hash_value, ships_data, UNIX_TIMESTAMP(updated_at) AS update_time "
-            "FROM user_ships WHERE account_id = %s;", 
-            [account_id]
-        )
-        user = cur.fetchone()
-        if user is None:
-            # 正常来说这里不应该会遇到为空问题，因为先检查basic在检查info
-            conn.commit()
-            return JSONResponse.API_1008_UserNotExistinDatabase
-        old_decode_data = DataDecode.from_binary_data_dict(user['ships_data'])
-        delete_ship_list = []
-        replace_ship_dict = {}
-        for ship_id, ship_battles in user_data['ships_data'].items():
-            if ship_battles != old_decode_data[int(ship_id)]:
-                replace_ship_dict[int(ship_id)] = user_data['details_data'][ship_id]
-        for ship_id, _ in old_decode_data.items():
-            if str(ship_id) not in user_data['ships_data']:
-                delete_ship_list.append(ship_id)
+        delete_ship_list = user_data['delete_ship_list']
+        replace_ship_dict = user_data['replace_ship_dict']
+        table_name = user_data['table_name']
+
         for del_ship_id in delete_ship_list:
-            table_name = f'user_ship_0{del_ship_id % 10}'
             cur.execute(
-                "DELETE FROM %s "
-                "WHERE ship_id = %s and region_id = %s and account_id = %s;",
+                "DELETE FROM user_ship_0%s "
+                "WHERE ship_id = %s AND region_id = %s AND account_id = %s;",
                 [table_name, del_ship_id, region_id, account_id]
             )
         for update_ship_id, ship_data in replace_ship_dict.items():
-            table_name = f'user_ship_0{update_ship_id % 10}'
             cur.execute(
-                "UPDATE %s SET battles_count = %s, battle_type_1 = %s, battle_type_2 = %s, battle_type_3 = %s, wins = %s, "
+                "UPDATE user_ship_0%s SET battles_count = %s, battle_type_1 = %s, battle_type_2 = %s, battle_type_3 = %s, wins = %s, "
                 "damage_dealt = %s, frags = %s, exp = %s, survived = %s, scouting_damage = %s, art_agro = %s, "
-                "planes_killed = %s, max_exp = %s, max_damage_dealt = %s, max_frags = %s"
-                "WHERE ship_id = %s and region_id = %s and account_id = %s;",
+                "planes_killed = %s, max_exp = %s, max_damage_dealt = %s, max_frags = %s "
+                "WHERE ship_id = %s AND region_id = %s AND account_id = %s;",
                 [table_name] + ship_data + [update_ship_id, region_id, account_id]
             )
             cur.execute(
-                "INSERT INTO %s (ship_id, region_id, account_id, battles_count, battle_type_1, battle_type_2, "
+                "INSERT INTO user_ship_0%s (ship_id, region_id, account_id, battles_count, battle_type_1, battle_type_2, "
                 "battle_type_3, wins, damage_dealt, frags, exp, survived, scouting_damage, art_agro, planes_killed, "
                 "max_exp, max_damage_dealt, max_frags) "
                 "SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s "
-                "WHERE NOT EXISTS (SELECT 1 FROM %s WHERE ship_id = %s and region_id = %s and account_id = %s);",
+                "WHERE NOT EXISTS (SELECT 1 FROM user_ship_0%s WHERE ship_id = %s AND region_id = %s AND account_id = %s);",
                 [table_name] + [update_ship_id, region_id, account_id] + ship_data + [table_name] + [update_ship_id, region_id, account_id]
             )
+        
+        conn.commit()
+        return JSONResponse.API_1000_Success
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        if cur:
+            cur.close()
+        conn.close()  # 归还连接到连接池
+
+@ExceptionLogger.handle_database_exception_sync
+def update_user_ships(pool: PooledDB, user_data: dict):
+    '''检查并更新user_ships表
+
+    参数:
+        user_data [dict]
+    '''
+    conn = pool.connection()
+    cur = None
+    try:
+        conn.begin()
+        cur = conn.cursor(pymysql.cursors.DictCursor)
+        
+        account_id = user_data['account_id']
+
+        conn.begin()
         if user_data['hash_value']:
             cur.execute(
                 "UPDATE user_ships "
@@ -309,6 +321,7 @@ def check_user_ships(pool: PooledDB, user_data: dict):
         conn.commit()
         return JSONResponse.API_1000_Success
     except Exception as e:
+        conn.rollback()
         raise e
     finally:
         if cur:

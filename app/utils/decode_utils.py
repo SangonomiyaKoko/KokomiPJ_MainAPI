@@ -22,6 +22,8 @@ class DataDecode:
         # 存储合并后的二进制数据
         result = bytearray()
         for key, value in data_dict.items():
+            if type(key) == str:
+                key = int(key)
             # 获取每个键值对的二进制数据并合并
             result.extend(self.__to_binary_data(key, value))
         # 返回合并后的二进制数据

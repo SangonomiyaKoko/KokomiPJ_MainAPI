@@ -5,11 +5,12 @@ from celery.app.base import logger
 
 from .background_task import (
     check_user_basic, 
-    check_user_info,
     check_clan_basic, 
+    check_user_info,
+    check_user_recent,
     update_user_clan, 
-    check_user_ships,
-    check_user_recent
+    update_user_ship,
+    update_user_ships
 )
 from app.core import EnvConfig
 
@@ -72,8 +73,13 @@ def task_check_user_info(user_data: dict):
     return result
 
 @celery_app.task
-def task_check_user_cache(user_data: dict):
-    result = check_user_ships(pool,user_data)
+def task_update_user_ships(user_data: dict):
+    result = update_user_ships(pool,user_data)
+    return result
+
+@celery_app.task
+def task_update_user_ship(user_data: dict):
+    result = update_user_ship(pool,user_data)
     return result
 
 @celery_app.task

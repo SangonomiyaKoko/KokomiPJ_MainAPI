@@ -3,11 +3,11 @@ import gc
 from app.log import ExceptionLogger
 from app.response import ResponseDict, JSONResponse
 from app.models import UserModel
+from .user_cache import UserCache
 from app.middlewares.celery import (
     task_check_user_basic, 
     task_check_user_info,
-    task_check_user_recent,
-    task_check_user_cache
+    task_check_user_recent
 )
 
 class GameUser:
@@ -41,8 +41,7 @@ class GameUser:
             if user_data.get('user_info', None):
                 task_check_user_info.delay(user_data['user_info'])
             if user_data.get('user_cache', None):
-                print(user_data['user_cache'])
-                # task_check_user_cache.delay(user_data['user_cache'])
+                await UserCache.update_user_cache_data(user_data['user_cache'])
             return JSONResponse.API_1000_Success
         except Exception as e:
             raise e
