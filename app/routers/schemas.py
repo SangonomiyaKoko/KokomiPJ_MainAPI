@@ -22,6 +22,9 @@ class LanguageList(str, Enum):
     ja = 'ja'
     ru = 'ru'
 
+class AlgorithmList(str, Enum):
+    pr = 'pr'
+
 class UserBaseModel(BaseModel):
     region_id: int = Field(..., description='服务器id')
     account_id: int = Field(..., description='用户id')

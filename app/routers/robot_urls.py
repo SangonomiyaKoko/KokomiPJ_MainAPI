@@ -14,8 +14,7 @@ router = APIRouter()
 async def getUserBasic(
     region: RegionList,
     account_id: int,
-    language: LanguageList,
-    ac_value: Optional[str] = None
+    language: LanguageList
 ) -> ResponseDict:
     """
 
@@ -32,6 +31,6 @@ async def getUserBasic(
         return JSONResponse.API_1010_IllegalRegion
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
         return JSONResponse.API_1003_IllegalAccoutIDorRegionID
-    result = await wws_me.main(account_id,region_id,language,'pr',ac_value)
+    result = await wws_me.main(account_id,region_id,language,'pr')
     await record_api_call(result['status'])
     return result

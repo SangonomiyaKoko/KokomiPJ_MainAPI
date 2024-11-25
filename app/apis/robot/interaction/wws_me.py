@@ -2,14 +2,14 @@ from ..user_basic import get_user_name_and_clan
 from app.log import ExceptionLogger
 from app.network import DetailsAPI
 from app.response import JSONResponse
+from app.models import UserAccessToken
 
 @ExceptionLogger.handle_program_exception_async
 async def main(
     account_id: int, 
     region_id: int, 
     language: str, 
-    algo_type: str, 
-    ac_value: str
+    algo_type: str
 ):
     '''用于`wws me`功能的接口
 
@@ -27,6 +27,7 @@ async def main(
             'charts': {}
         }
         # 请求获取user和clan数据
+        ac_value = UserAccessToken.get_ac_value_by_id(account_id,region_id)
         user_and_clan_result = await get_user_name_and_clan(
             account_id=account_id,
             region_id=region_id,

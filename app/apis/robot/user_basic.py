@@ -15,7 +15,7 @@ from app.middlewares.celery import (
 async def get_user_name_and_clan(
     account_id: int,
     region_id: str,
-    ac_value: Optional[str]
+    ac_value: Optional[str] = None
 ) -> ResponseDict:
     '''获取用户的基本数据(name+clan)
 
