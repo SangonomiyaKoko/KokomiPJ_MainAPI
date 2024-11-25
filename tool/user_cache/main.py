@@ -31,8 +31,6 @@ class ContinuousUserCacheUpdater:
                 region_id = user['user_basic']['region_id']
                 logger.info(f'{region_id} - {account_id} | ---------------------------------')
                 await Update.main(user)
-                logger.info(f'更新线程休眠 3 s')
-                await asyncio.sleep(3)
             offset += limit
         end_time = int(time.time())
         # 避免测试时候的循环bug

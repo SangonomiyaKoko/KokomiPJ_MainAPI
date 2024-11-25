@@ -1,10 +1,10 @@
 # Kokomi 用户数据库设计
 
-## Region数据
+## Region 数据
 
 ### Table 1: Region
 
-用于储存id对应的地区（主要是为了减少数据库大小）， 内连后续表
+用于储存 id 对应的地区（主要是为了减少数据库大小）， 内连后续表
 
 ```sql
 CREATE TABLE region (
@@ -14,13 +14,13 @@ CREATE TABLE region (
     PRIMARY KEY (region_id)
 );
 
-INSERT INTO region 
-    (region_id, region_str) 
+INSERT INTO region
+    (region_id, region_str)
 VALUES
     (1, "asia"), (2, "eu"), (3, "na"), (4, "ru"), (5, "cn");
 ```
 
-#### region_id对应列表
+#### region_id 对应列表
 
 | region_id | region_str |
 | --------- | ---------- |
@@ -29,3 +29,23 @@ VALUES
 | 3         | na         |
 | 4         | ru         |
 | 5         | cn         |
+
+### Table 2: RegionSeason
+
+用于储存 id 对应的地区（主要是为了减少数据库大小）， 内连后续表
+
+```sql
+CREATE TABLE region_season (
+    region_id      TINYINT        NOT NULL,
+    season_number  TINYINT        NOT NULL,
+
+    PRIMARY KEY (region_id),
+
+    FOREIGN KEY (region_id) REFERENCES region(region_id) ON DELETE CASCADE -- 外键
+);
+
+INSERT INTO region
+    (region_id, season_number)
+VALUES
+    (1, 27), (2, 27), (3, 27), (4, 27), (5, 27);
+```

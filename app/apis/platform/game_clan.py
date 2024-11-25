@@ -35,3 +35,15 @@ class GameClan:
             raise e
         finally:
             gc.collect()
+
+    @ExceptionLogger.handle_program_exception_async
+    async def update_clan_info_data(clan_data: dict) -> ResponseDict:
+        try:
+            result = await ClanModel.update_clan_info_batch(clan_data['region_id'], clan_data['season_number'], clan_data['clan_list'])
+            if result.get('code', None) != 1000:
+                return result
+            return JSONResponse.get_success_response(result['data'])
+        except Exception as e:
+            raise e
+        finally:
+            gc.collect()

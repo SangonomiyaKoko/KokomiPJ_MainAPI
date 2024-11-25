@@ -1,6 +1,6 @@
 import httpx
-import asyncio
 from typing import Optional
+from datetime import datetime
 
 from log import log as logger
 from config import API_URL
@@ -115,12 +115,10 @@ class Network:
                 requset_code = res.status_code
                 requset_result = res.json()
                 if requset_code == 200:
-                    if '//clans.' in url:
+                    if '//clans' in url:
                         return {'status': 'ok','code': 1000,'message': 'Success','data': requset_result}
                     else:
                         return requset_result
-                if requset_code == 404:
-                    return {'status': 'ok','code': 1001,'message': 'UserNotExist','data' : None}
                 return {'status': 'ok','code': 2000,'message': 'NetworkError','data': None}
             except httpx.ConnectTimeout:
                 return {'status': 'ok','code': 2001,'message': 'NetworkError','data': None}
@@ -130,16 +128,29 @@ class Network:
                 return {'status': 'ok','code': 2003,'message': 'NetworkError','data': None}
 
     @classmethod
-    async def get_clan_rank(self, region_id: int):
+    async def get_clan_rank_data(self, region_id: int):
+        season_number = None
+        clan_data_list = []
         urls = clan_url_dict.get(region_id)
         for url in urls:
             result = await self.fetch_data(url)
-            
-        return result
+            if result.get('code', None) != 1000:
+                logger.error(f"{region_id} | ├── 网络请求失败，Error: {result.get('message')}")
+                continue
+            season, data = self.__clan_data_processing(result)
+            if season_number == None:
+                season_number = season
+            if season_number != season:
+                return []
+            clan_data_list = clan_data_list + data
+        return season_number, clan_data_list
 
     @classmethod
-    async def get_clan_cvc_data(self, clan_id: int, region_id: int):
-        ...
+    async def update_clan_data(self, clan_data: dict):
+        platform_api_url = API_URL
+        url = f'{platform_api_url}/p/game/clan/update/'
+        result = await self.fetch_data(url, method='put', data=clan_data)
+        return result
 
     def __clan_data_processing(response: dict) -> tuple:
         result = []
@@ -154,6 +165,6 @@ class Network:
                 'league': temp_data['league'],
                 'division': temp_data['division'],
                 'division_rating': temp_data['division_rating'],
-                'last_battle_at': temp_data['last_battle_at']
+                'last_battle_at': int(datetime.fromisoformat(temp_data['last_battle_at']).timestamp())
             })
-        return season_number, response
+        return season_number, result

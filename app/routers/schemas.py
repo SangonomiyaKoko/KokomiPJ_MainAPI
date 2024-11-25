@@ -68,6 +68,11 @@ class ClanUsersModel(ClanBaseModel):
     hash_value: str = Field(None, description='缓存数据的哈希值')
     user_list: list = Field(..., description='工会内用户id列表')
     clan_users: list = Field(..., description='工会内用户数据')
+
+class ClanUpdateModel(BaseModel):
+    region_id: int = Field(..., description='服务器id')
+    season_number: int = Field(..., description='工会战赛季')
+    clan_list: list = Field(None, description='工会列表')
     
 class UserUpdateModel(BaseModel):
     user_basic: UserBasicModel = Field(None, description='用户基础数据')
