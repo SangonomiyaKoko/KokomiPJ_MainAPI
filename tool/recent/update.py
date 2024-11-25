@@ -116,14 +116,24 @@ class Update:
         user_recent_result = result['data']['user_recent']
         user_info_result = result['data']['user_info']
         # 检查是否被丢弃
-        if user_recent_result['recent_class'] == 0 or user_info_result['is_active'] == 0:
+        if (
+            user_recent_result['recent_class'] == 0 or 
+            (
+                user_info_result['update_time'] and
+                user_info_result['is_active'] == 0
+            )
+        ):
             await self.delete_user_recent(account_id, region_id)
             return
         current_timestamp = int(time.time())
         # 检查recent表中的数据，判断用户是否需要数据降级
-        if current_timestamp - user_info_result['last_battle_time'] > 360*24*60*60:
+        if (
+            user_info_result['update_time'] and
+            user_info_result['is_active'] == 9
+        ):
             await self.delete_user_recent(account_id, region_id)
             return
+        # 长时间未查询，删除或者降级
         query_interval_seconds = current_timestamp - user_recent_result['last_query_time']
         if query_interval_seconds > 360*24*60*60:
             await self.delete_user_recent(account_id, region_id)
@@ -133,13 +143,14 @@ class Update:
                 new_recent_class = 30
             else:
                 new_recent_class = 60
-            user_recent = {
-                'account_id': account_id,
-                'region_id': region_id,
-                'recent_class': new_recent_class
-            }
-            await self.update_user_data(account_id,region_id,None,None,user_recent)
-            return
+            if user_recent_result['recent_class'] > new_recent_class:
+                user_recent = {
+                    'account_id': account_id,
+                    'region_id': region_id,
+                    'recent_class': new_recent_class
+                }
+                await self.update_user_data(account_id,region_id,None,None,user_recent)
+                return
         new_user = False
         if user_info_result['update_time'] == None:
             new_user = True
@@ -384,7 +395,7 @@ class Update:
         last_battle_time = user_info['last_battle_time']
         if not is_public:
             return 0
-        if total_battles == 0:
+        if total_battles == 0 or last_battle_time == 0:
             return 1
         current_timestamp = int(time.time())
         time_differences = [
@@ -404,7 +415,7 @@ class Update:
 
     def get_update_interval_time(region_id: int, active_level: int) -> int:
         "获取active_level对应的更新时间间隔"
-        special_time_dict = {
+        normal_time_dict = {
             0: 8*60*60,
             1: 8*60*60,
             2: 1*60*60,
@@ -416,7 +427,7 @@ class Update:
             8: 6*60*60,
             9: 8*60*60,
         }
-        normal_time_dict = {
+        special_time_dict = {
             0: 2*60*60,
             1: 2*60*60,
             2: 20*60,

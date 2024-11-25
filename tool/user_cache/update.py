@@ -154,7 +154,7 @@ class Update:
         last_battle_time = user_info['last_battle_time']
         if not is_public:
             return 0
-        if total_battles == 0:
+        if total_battles == 0 or last_battle_time == 0:
             return 1
         current_timestamp = int(time.time())
         time_differences = [
@@ -175,8 +175,8 @@ class Update:
     def get_update_interval_time(region_id: int, active_level: int):
         "获取active_level对应的更新时间间隔"
         normal_time_dict = {
-            0: 10*24*60*60,
-            1: 20*24*60*60,
+            0: 20*24*60*60,
+            1: 30*24*60*60,
             2: 1*24*60*60,
             3: 3*24*60*60,
             4: 5*24*60*60,
@@ -184,7 +184,7 @@ class Update:
             6: 10*24*60*60,
             7: 14*24*60*60,
             8: 20*24*60*60,
-            9: 25*24*60*60,
+            9: 30*24*60*60,
         }
         update_interval_seconds = normal_time_dict[active_level]
         return update_interval_seconds

@@ -145,7 +145,7 @@ class UtilityFunctions:
         last_battle_time = user_info['last_battle_time']
         if not is_public:
             return 0
-        if total_battles == 0:
+        if total_battles == 0 or last_battle_time == 0:
             return 1
         current_timestamp = TimeFormat.get_current_timestamp()
         time_differences = [
