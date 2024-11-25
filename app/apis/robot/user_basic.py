@@ -8,7 +8,8 @@ from app.middlewares.celery import (
     task_check_user_basic, 
     task_check_clan_basic, 
     task_update_user_clan, 
-    task_check_user_info
+    task_check_user_info,
+    task_update_clan_and_user
 )
 
 async def get_user_name_and_clan(
@@ -111,16 +112,18 @@ async def get_user_name_and_clan(
                 clan_basic['id'] = user_clan_data['clan_id']
                 clan_basic['tag'] = user_clan_data['clan']['tag']
                 clan_basic['league'] = UtilityFunctions.get_league_by_color(user_clan_data['clan']['color'])
-                task_check_clan_basic.delay({
+                task_update_clan_and_user(
+                    {
                     'clan_id': clan_basic['id'],
                     'region_id': region_id,
                     'tag': clan_basic['tag'],
                     'league': clan_basic['league']
-                })
-                task_update_user_clan.delay({
-                    'account_id': user_basic['id'],
-                    'clan_id': clan_basic['id']
-                })
+                    },
+                    {
+                        'account_id': user_basic['id'],
+                        'clan_id': clan_basic['id']
+                    }
+                )
             else:
                 task_update_user_clan.delay({
                     'account_id': user_basic['id'],
@@ -147,16 +150,18 @@ async def get_user_name_and_clan(
                 clan_basic['id'] = user_clan_data['clan_id']
                 clan_basic['tag'] = user_clan_data['clan']['tag']
                 clan_basic['league'] = UtilityFunctions.get_league_by_color(user_clan_data['clan']['color'])
-                task_check_clan_basic.delay({
+                task_update_clan_and_user(
+                    {
                     'clan_id': clan_basic['id'],
                     'region_id': region_id,
                     'tag': clan_basic['tag'],
                     'league': clan_basic['league']
-                })
-                task_update_user_clan.delay({
-                    'account_id': user_basic['id'],
-                    'clan_id': clan_basic['id']
-                })
+                    },
+                    {
+                        'account_id': user_basic['id'],
+                        'clan_id': clan_basic['id']
+                    }
+                )
             else:
                 task_update_user_clan.delay({
                     'account_id': user_basic['id'],

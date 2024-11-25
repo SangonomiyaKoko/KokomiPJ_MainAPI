@@ -5,7 +5,7 @@ from app.log import ExceptionLogger
 from app.response import JSONResponse, ResponseDict
 from app.models import RecentUserModel, RecentDatabaseModel, UserModel, UserAccessToken
 from app.utils import UtilityFunctions, TimeFormat
-from app.middlewares.celery import task_check_user_basic, task_check_user_info, task_check_user_recent
+from app.middlewares.celery import task_check_user_basic, task_check_user_info
 
 
 class RecentBasic:

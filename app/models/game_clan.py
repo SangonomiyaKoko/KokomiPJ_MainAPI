@@ -15,12 +15,20 @@ class ClanModel:
 
             data = []
             await cur.execute(
-                "SELECT clan_id FROM clan_basic WHERE region_id = %s;",
+                "SELECT b.clan_id, u.hash_value, UNIX_TIMESTAMP(u.updated_at) AS update_time "
+                "FROM clan_basic AS b "
+                "LEFT JOIN clan_users AS u "
+                "ON b.clan_id = u.clan_id "
+                "WHERE b.region_id = %s;",
                 [region_id]
             )
             users = await cur.fetchall()
             for user in users:
-                data.append(user[0])
+                data.append({
+                    'clan_id': user[0],
+                    'hash_value': user[1],
+                    'update_time': user[2]
+                })
             
             await conn.commit()
             return JSONResponse.get_success_response(data)

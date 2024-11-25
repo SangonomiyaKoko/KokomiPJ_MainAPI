@@ -20,9 +20,10 @@ class ContinuousUserCacheUpdater:
             if request_result['code'] != 1000:
                 logger.error(f"获取RecentUser时发生错误，Error: {request_result.get('message')}")
                 continue
-            for clan_id in request_result['data']['clans']:
+            for clan_data in request_result['data']['clans']:
+                clan_id = clan_data['clan_id']
                 logger.info(f'{region_id} - {clan_id} | ---------------------------------')
-                await Update.main(clan_id,region_id)
+                await Update.main(clan_id,region_id,clan_data)
         end_time = int(time.time())
         # 避免测试时候的循环bug
         if end_time - start_time <= 50:

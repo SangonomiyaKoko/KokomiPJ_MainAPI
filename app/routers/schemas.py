@@ -26,6 +26,10 @@ class UserBaseModel(BaseModel):
     region_id: int = Field(..., description='服务器id')
     account_id: int = Field(..., description='用户id')
 
+class ClanBaseModel(BaseModel):
+    region_id: int = Field(..., description='服务器id')
+    clan_id: int = Field(..., description='用户id')
+
 class UserBaseDerivedModel(BaseModel):
     region: RegionList = Field(..., description='服务器')
     account_id: int = Field(..., description='用户id')
@@ -56,14 +60,14 @@ class UserCacheModel(UserBaseModel):
     hash_value: str = Field(None, description='缓存数据的哈希值')
     ships_data: dict = Field(None, description='船只数据，简略')
     details_data: dict = Field(None, description='船只数据，详细')
+
+class ClanUsersModel(ClanBaseModel):
+    hash_value: str = Field(None, description='缓存数据的哈希值')
+    user_list: list = Field(..., description='工会内用户id列表')
+    clan_users: list = Field(..., description='工会内用户数据')
     
 class UserUpdateModel(BaseModel):
     user_basic: UserBasicModel = Field(None, description='用户基础数据')
     user_info: UserInfoModel = Field(None, description='用户详细数据')
     user_recent: UserRecentModel = Field(None, description='用户recent功能数据')
     user_cache: UserCacheModel = Field(None, description='用户缓存数据')
-
-class ClanUsersModel(BaseModel):
-    region_id: int = Field(..., description='服务器id')
-    clan_id: int = Field(..., description='工会id')
-    clan_users: list = Field(..., description='工会内用户')

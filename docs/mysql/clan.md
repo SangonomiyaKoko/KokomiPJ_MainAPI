@@ -91,7 +91,7 @@ CREATE TABLE clan_history (
     -- 记录某个用户进入或者离开某个工会
     account_id       BIGINT       NOT NULL,       -- 1-10位的非连续数字
     clan_id          BIGINT       NOT NULL,       -- 10位的非连续数字
-    action_type      TINYINT      NOT NULL,       -- 表示行为 1表示离开 2表示进入
+    action_type      TINYINT      NOT NULL,       -- 表示行为 1表示进入 2表示离开
     -- 记录数据创建的时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

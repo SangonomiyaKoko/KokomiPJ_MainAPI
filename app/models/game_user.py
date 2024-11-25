@@ -5,7 +5,7 @@ from .access_token import UserAccessToken
 from app.db import MysqlConnection
 from app.log import ExceptionLogger
 from app.response import JSONResponse, ResponseDict
-from app.utils import UtilityFunctions, DataDecode, TimeFormat
+from app.utils import UtilityFunctions, TimeFormat, BinaryParserUtils
 
 class UserModel:
     # # 函数统一格式格式
@@ -479,7 +479,7 @@ class UserModel:
                 data = {
                     'battles_count': user[0],
                     'hash_value': user[1],
-                    'ships_data': DataDecode.from_binary_data_dict(user[2]),
+                    'ships_data': BinaryParserUtils.from_user_binary_data_to_dict(user[2]),
                     'update_time': user[3]
                 }
             

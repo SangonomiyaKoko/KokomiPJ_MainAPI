@@ -5,7 +5,7 @@ from dbutils.pooled_db import PooledDB
 
 from app.response import JSONResponse
 from app.log import ExceptionLogger
-from app.utils import UtilityFunctions, DataDecode
+from app.utils import UtilityFunctions, BinaryGeneratorUtils, BinaryParserUtils
 
 
 @ExceptionLogger.handle_database_exception_sync
@@ -238,7 +238,7 @@ def check_user_recent(pool: PooledDB, user_data: dict):
 
 @ExceptionLogger.handle_database_exception_sync
 def update_user_ship(pool: PooledDB, user_data: dict):
-    '''检查并更新user_ships和user_ship表
+    '''检查并更新user_ship表
 
     参数:
         user_data [dict]
@@ -289,7 +289,63 @@ def update_user_ship(pool: PooledDB, user_data: dict):
         conn.close()  # 归还连接到连接池
 
 @ExceptionLogger.handle_database_exception_sync
-def update_clan_users(pool: PooledDB, clan_id: int, user_data: list):
+def update_clan_users(pool: PooledDB, clan_id: int, hash_value, user_data: list):
+    '''更新clan_users表'''
+    conn = pool.connection()
+    cur = None
+    try:
+        conn.begin()
+        cur = conn.cursor(pymysql.cursors.DictCursor)
+
+        cur.execute(
+            "SELECT hash_value, users_data, users_data, UNIX_TIMESTAMP(updated_at) AS update_time "
+            "FROM clan_users WHERE clan_id = %s;", 
+            [clan_id]
+        )
+        clan = cur.fetchone()
+        if clan is None:
+            conn.commit()
+            return JSONResponse.API_1009_ClanNotExistinDatabase
+        # 判断是否有工会人员变动
+        join_user_list = []
+        leave_user_list = []
+        if clan['update_time'] and clan['hash_value'] != hash_value:
+            old_user_list = BinaryParserUtils.from_clan_binary_data_to_list(clan['users_data'])
+            for account_id in user_data:
+                if account_id not in old_user_list:
+                    join_user_list.append(account_id)
+            for account_id in old_user_list:
+                if account_id not in user_data:
+                    leave_user_list.append(account_id)
+        cur.execute(
+            "UPDATE clan_users "
+            "SET hash_value = %s, users_data = %s "
+            "WHERE clan_id = %s",
+            [hash_value, BinaryGeneratorUtils.to_clan_binary_data_from_list(user_data),clan_id]
+        )
+        for account_id in join_user_list:
+            cur.execute(
+                "INSERT INTO clan_history (account_id, clan_id, action_type) VALUES (%s, %s, %s);",
+                [account_id, clan_id, 1]
+            )
+        for account_id in leave_user_list:
+            cur.execute(
+                "INSERT INTO clan_history (account_id, clan_id, action_type) VALUES (%s, %s, %s);",
+                [account_id, clan_id, 2]
+            )
+        
+        conn.commit()
+        return JSONResponse.API_1000_Success
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        if cur:
+            cur.close()
+        conn.close()  # 归还连接到连接池
+
+@ExceptionLogger.handle_database_exception_sync
+def update_users_clan(pool: PooledDB, clan_id: int, user_data: list):
     '''更新user_clan表'''
     conn = pool.connection()
     cur = None
@@ -297,7 +353,6 @@ def update_clan_users(pool: PooledDB, clan_id: int, user_data: list):
         conn.begin()
         cur = conn.cursor(pymysql.cursors.DictCursor)
 
-        conn.begin()
         sql_str = ''
         params = []
         for aid in user_data[1:]:
@@ -309,6 +364,7 @@ def update_clan_users(pool: PooledDB, clan_id: int, user_data: list):
             f"WHERE account_id IN ( %s{sql_str} );", 
             [clan_id] + [user_data[0]] + params
         )
+
         conn.commit()
         return JSONResponse.API_1000_Success
     except Exception as e:
@@ -333,14 +389,17 @@ def update_user_ships(pool: PooledDB, user_data: dict):
         cur = conn.cursor(pymysql.cursors.DictCursor)
         
         account_id = user_data['account_id']
-
-        conn.begin()
         if user_data['hash_value']:
             cur.execute(
                 "UPDATE user_ships "
                 "SET battles_count = %s, hash_value = %s, ships_data = %s "
                 "WHERE account_id = %s;", 
-                [user_data['battles_count'], user_data['hash_value'], DataDecode.to_binary_data_dict(user_data['ships_data']), account_id]
+                [
+                    user_data['battles_count'], 
+                    user_data['hash_value'], 
+                    BinaryGeneratorUtils.to_user_binary_data_from_dict(user_data['ships_data']), 
+                    account_id
+                ]
             )
         else:
             cur.execute(
@@ -349,6 +408,7 @@ def update_user_ships(pool: PooledDB, user_data: dict):
                 "WHERE account_id = %s;", 
                 [user_data['battles_count'], account_id]
             )
+
         conn.commit()
         return JSONResponse.API_1000_Success
     except Exception as e:

@@ -21,7 +21,7 @@ REGION_LIST = {
 }
 
 clan_url_dict = {
-    'asia': [
+    1: [
         'https://clans.worldofwarships.asia/api/ladder/structure/?realm=sg&league=0&division=1&offset=0&limit=1000',
         'https://clans.worldofwarships.asia/api/ladder/structure/?realm=sg&league=1&division=1&offset=0&limit=1000',
         'https://clans.worldofwarships.asia/api/ladder/structure/?realm=sg&league=1&division=2&offset=0&limit=1000',
@@ -36,7 +36,7 @@ clan_url_dict = {
         'https://clans.worldofwarships.asia/api/ladder/structure/?realm=sg&league=4&division=2&offset=0&limit=1000',
         'https://clans.worldofwarships.asia/api/ladder/structure/?realm=sg&league=4&division=3&offset=0&limit=1000'
     ],
-    'eu': [
+    2: [
         'https://clans.worldofwarships.asia/api/ladder/structure/?realm=eu&league=0&division=1&offset=0&limit=1000',
         'https://clans.worldofwarships.asia/api/ladder/structure/?realm=eu&league=1&division=1&offset=0&limit=1000',
         'https://clans.worldofwarships.asia/api/ladder/structure/?realm=eu&league=1&division=2&offset=0&limit=1000',
@@ -51,7 +51,7 @@ clan_url_dict = {
         'https://clans.worldofwarships.asia/api/ladder/structure/?realm=eu&league=4&division=2&offset=0&limit=1000',
         'https://clans.worldofwarships.asia/api/ladder/structure/?realm=eu&league=4&division=3&offset=0&limit=1000'
     ],
-    'na': [
+    3: [
         'https://clans.worldofwarships.asia/api/ladder/structure/?realm=us&league=0&division=1&offset=0&limit=1000',
         'https://clans.worldofwarships.asia/api/ladder/structure/?realm=us&league=1&division=1&offset=0&limit=1000',
         'https://clans.worldofwarships.asia/api/ladder/structure/?realm=us&league=1&division=2&offset=0&limit=1000',
@@ -66,7 +66,7 @@ clan_url_dict = {
         'https://clans.worldofwarships.asia/api/ladder/structure/?realm=us&league=4&division=2&offset=0&limit=1000',
         'https://clans.worldofwarships.asia/api/ladder/structure/?realm=us&league=4&division=3&offset=0&limit=1000'
     ],
-    'ru': [
+    4: [
         'https://clans.korabli.su/api/ladder/structure/?realm=ru&league=0&division=1&offset=0&limit=1000',
         'https://clans.korabli.su/api/ladder/structure/?realm=ru&league=1&division=1&offset=0&limit=1000',
         'https://clans.korabli.su/api/ladder/structure/?realm=ru&league=1&division=2&offset=0&limit=1000',
@@ -81,7 +81,7 @@ clan_url_dict = {
         'https://clans.korabli.su/api/ladder/structure/?realm=ru&league=4&division=2&offset=0&limit=1000',
         'https://clans.korabli.su/api/ladder/structure/?realm=ru&league=4&division=3&offset=0&limit=1000'
     ],
-    'cn': [
+    5: [
         'https://clans.wowsgame.cn/api/ladder/structure/?realm=cn360&league=0&division=1&offset=0&limit=1000',
         'https://clans.wowsgame.cn/api/ladder/structure/?realm=cn360&league=1&division=1&offset=0&limit=1000',
         'https://clans.wowsgame.cn/api/ladder/structure/?realm=cn360&league=1&division=2&offset=0&limit=1000',
@@ -115,8 +115,8 @@ class Network:
                 requset_code = res.status_code
                 requset_result = res.json()
                 if requset_code == 200:
-                    if 'vortex' in url:
-                        return {'status': 'ok','code': 1000,'message': 'Success','data': requset_result['data']}
+                    if '//clans.' in url:
+                        return {'status': 'ok','code': 1000,'message': 'Success','data': requset_result}
                     else:
                         return requset_result
                 if requset_code == 404:
@@ -130,12 +130,30 @@ class Network:
                 return {'status': 'ok','code': 2003,'message': 'NetworkError','data': None}
 
     @classmethod
-    async def get_user_cache(self, offset: int, limit: int = 1000):
-        platform_api_url = API_URL
-        url = f'{platform_api_url}/r1/features/user/'
-        result = await self.fetch_data(url)
+    async def get_clan_rank(self, region_id: int):
+        urls = clan_url_dict.get(region_id)
+        for url in urls:
+            result = await self.fetch_data(url)
+            
         return result
 
     @classmethod
     async def get_clan_cvc_data(self, clan_id: int, region_id: int):
         ...
+
+    def __clan_data_processing(response: dict) -> tuple:
+        result = []
+        season_number = None
+        for temp_data in response['data']:
+            if season_number == None:
+                season_number = temp_data['season_number']
+            result.append({
+                'id': temp_data['id'],
+                'tag': temp_data['tag'],
+                'public_rating': temp_data['public_rating'],
+                'league': temp_data['league'],
+                'division': temp_data['division'],
+                'division_rating': temp_data['division_rating'],
+                'last_battle_at': temp_data['last_battle_at']
+            })
+        return season_number, response

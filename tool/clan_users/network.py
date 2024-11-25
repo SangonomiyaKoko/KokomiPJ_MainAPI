@@ -87,7 +87,8 @@ class Network:
         result = {
             'clan_id': clan_id,
             'region_id': region_id,
-            'clan_users': []
+            'clan_users': [],
+            'user_list': []
         }
         for user_data in response['data']['items']:
             account_id = user_data['id']
@@ -97,5 +98,8 @@ class Network:
                 'region_id': region_id,
                 'nickname': nickname
             }
+            result['user_list'].append(account_id)
             result['clan_users'].append(data)
+        sorted_list = sorted(result['user_list'])
+        result['user_list'] = sorted_list
         return result

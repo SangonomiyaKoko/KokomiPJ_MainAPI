@@ -11,7 +11,8 @@ from .background_task import (
     update_user_clan, 
     update_user_ship,
     update_user_ships,
-    update_clan_users
+    update_clan_users,
+    update_users_clan
 )
 from app.core import EnvConfig
 
@@ -56,39 +57,78 @@ def close_mysql_pool(**kwargs):
 @celery_app.task
 def task_check_user_basic(user_data: dict):
     result = check_user_basic(pool,user_data)
-    return result
-    
+    if result.get('code', None) != 1000:
+        print(result)
+    return 'ok'
+
 @celery_app.task
 def task_check_clan_basic(clan_data: dict):
     result = check_clan_basic(pool,clan_data)
-    return result
+    if result.get('code', None) != 1000:
+        print(result)
+    return 'ok'
     
 @celery_app.task
 def task_update_user_clan(user_data: dict):
     result = update_user_clan(pool,user_data)
-    return result
+    if result.get('code', None) != 1000:
+        print(result)
+    return 'ok'
+
+@celery_app.task
+def task_update_clan_and_user(clan_data: dict, user_data: dict):
+    result = check_clan_basic(pool,clan_data)
+    if result.get('code', None) != 1000:
+        print(result)
+    result = update_user_clan(pool,user_data)
+    if result.get('code', None) != 1000:
+        print(result)
+    return 'ok'
     
 @celery_app.task
 def task_check_user_info(user_data: dict):
     result = check_user_info(pool,user_data)
-    return result
+    if result.get('code', None) != 1000:
+        print(result)
+    return 'ok'
+    
+@celery_app.task
+def task_check_user_basic_and_info(user_data: dict):
+    result = check_user_basic(pool,user_data)
+    if result.get('code', None) != 1000:
+        print(result)
+    result = check_user_info(pool,user_data)
+    if result.get('code', None) != 1000:
+        print(result)
+    return 'ok'
 
 @celery_app.task
 def task_update_user_ships(user_data: dict):
     result = update_user_ships(pool,user_data)
-    return result
+    if result.get('code', None) != 1000:
+        print(result)
+    return 'ok'
 
 @celery_app.task
 def task_update_user_ship(user_data: dict):
     result = update_user_ship(pool,user_data)
-    return result
+    if result.get('code', None) != 1000:
+        print(result)
+    return 'ok'
 
 @celery_app.task
 def task_check_user_recent(user_data: dict):
     result = check_user_recent(pool, user_data)
-    return result
+    if result.get('code', None) != 1000:
+        print(result)
+    return 'ok'
 
 @celery_app.task
-def task_update_clan_users(clan_id: int, user_data: list):
-    result = update_clan_users(pool, clan_id, user_data)
-    return result
+def task_update_clan_users(clan_id: int, hash_value: str, user_data: list):
+    result = update_users_clan(pool, clan_id, user_data)
+    if result.get('code', None) != 1000:
+        print(result)
+    result = update_clan_users(pool, clan_id, hash_value, user_data)
+    if result.get('code', None) != 1000:
+        print(result)
+    return 'ok'
