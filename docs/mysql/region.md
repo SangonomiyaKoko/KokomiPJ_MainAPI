@@ -47,5 +47,5 @@ CREATE TABLE region_season (
 INSERT INTO region
     (region_id, season_number)
 VALUES
-    (1, 27), (2, 27), (3, 27), (4, 27), (5, 27);
+    (1, 0), (2, 0), (3, 0), (4, 0), (5, 0);
 ```

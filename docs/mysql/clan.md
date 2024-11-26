@@ -99,7 +99,7 @@ CREATE TABLE clan_history (
 
     INDEX idx_aid (account_id), -- 索引
 
-    UNIQUE INDEX idx_cid (clan_id), -- 唯一索引
+    INDEX idx_cid (clan_id), -- 唯一索引
 
     FOREIGN KEY (account_id) REFERENCES user_basic(account_id) ON DELETE CASCADE, -- 外键
 
