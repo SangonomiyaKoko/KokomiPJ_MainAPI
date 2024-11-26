@@ -50,7 +50,7 @@ CREATE TABLE clan_basic (
     clan_id          BIGINT       NOT NULL UNIQUE,     -- 11位的非连续数字
     region_id        TINYINT      NOT NULL,
     -- 工会基础信息数据: tag league
-    tag              VARCHAR(5)   NOT NULL,     -- 最大5个字符，编码：utf-8
+    tag              VARCHAR(10)  NOT NULL,     -- 最大5个字符，编码：utf-8
     league           TINYINT      DEFAULT 5,    -- 当前段位 0紫金 1白金 2黄金 3白银 4青铜 5无
     -- 记录数据创建的时间和更新时间
     created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
