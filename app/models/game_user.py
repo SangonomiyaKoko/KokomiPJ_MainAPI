@@ -209,10 +209,10 @@ class UserModel:
                         await cur.execute(
                             "UPDATE user_basic SET username = %s WHERE region_id = %s and account_id = %s;", 
                             [nickname, region_id, account_id]
-                        )
+                        ) 
                         await cur.execute(
                             "INSERT INTO user_history (account_id, username, start_time, end_time) VALUES (%s, %s, FROM_UNIXTIME(%s), FROM_UNIXTIME(%s));", 
-                            [account_id, user['username'], user['update_time'], TimeFormat.get_current_timestamp()]
+                            [account_id, exists_users[account_id][0], exists_users[account_id][1], TimeFormat.get_current_timestamp()]
                         )
             
             await conn.commit()
