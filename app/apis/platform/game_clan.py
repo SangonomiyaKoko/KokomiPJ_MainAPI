@@ -26,6 +26,9 @@ class GameClan:
     @ExceptionLogger.handle_program_exception_async
     async def update_clan_data(self, clan_data: dict) -> ResponseDict:
         try:
+            if clan_data.get('clan_basic', None):
+                result = await self.update_clan_basic_data(clan_data['clan_basic'])
+                return result
             if clan_data.get('clan_info', None):
                 result = await self.update_clan_info_data(clan_data['clan_info'])
                 return result
@@ -33,6 +36,18 @@ class GameClan:
                 await self.update_clan_users_data(clan_data['clan_users'])
             if clan_data.get('clan_season', None):
                 await self.update_clan_season_data(clan_data['clan_season'])
+            return JSONResponse.API_1000_Success
+        except Exception as e:
+            raise e
+        finally:
+            gc.collect()
+
+    @ExceptionLogger.handle_program_exception_async
+    async def update_clan_basic_data(clan_basic: dict) -> ResponseDict:
+        try:
+            update_result = await ClanModel.update_clan_basic(clan_basic)
+            if update_result.get('code', None) != 1000:
+                return update_result
             return JSONResponse.API_1000_Success
         except Exception as e:
             raise e
@@ -56,7 +71,10 @@ class GameClan:
     @ExceptionLogger.handle_program_exception_async
     async def update_clan_season_data(clan_season: dict) -> ResponseDict:
         try:
-            ...
+            update_result = await ClanModel.update_clan_season(clan_season)
+            if update_result.get('code', None) != 1000:
+                return update_result
+            return JSONResponse.API_1000_Success
         except Exception as e:
             raise e
         finally:

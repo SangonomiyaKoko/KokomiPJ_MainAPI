@@ -69,7 +69,9 @@ class Network:
         api_url = CLAN_API_URL_LIST.get(region_id)
         url = f'{api_url}/api/members/{clan_id}/'
         result = await self.fetch_data(url)
-        if result.get('code', None) != 1000:
+        if result.get('code', None) == 1002:
+            return result
+        elif result.get('code', None) != 1000:
             logger.error(f"{region_id} - {clan_id} | ├── 网络请求失败，Error: {result.get('message')}")
             return result
         else:

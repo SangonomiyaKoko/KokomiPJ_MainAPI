@@ -28,7 +28,16 @@ class Update:
             logger.debug(f'{region_id} - {clan_id} | ├── 未到达更新时间，跳过更新')
             return
         result = await Network.get_clan_data(region_id, clan_id)
-        if result.get('code', None) != 1000:
+        if result.get('code', None) == 1002:
+            clan_basic = {
+                'clan_id': clan_id,
+                'region_id': region_id,
+                'is_active': 0
+            }
+            await self.update_user_data(clan_id,region_id,clan_basic,None)
+            logger.debug(f"{region_id} - {clan_id} | ├── 工会不存在，更新数据")
+            return
+        elif result.get('code', None) != 1000:
             logger.error(f"{region_id} - {clan_id} | ├── 网络请求失败，Error: {result.get('message')}")
             return
         clan_users = {
@@ -42,15 +51,19 @@ class Update:
         clan_users['hash_value'] = new_hash_value
         clan_users['user_list'] = result['data']['user_list']
         clan_users['clan_users'] = result['data']['clan_users']
-        await self.update_user_data(clan_id,region_id,clan_users)
+        await self.update_user_data(clan_id,region_id,None,clan_users)
         return
     
     async def update_user_data(
         clan_id: int, 
         region_id: int, 
-        clan_users: dict
+        clan_basic: dict = None,
+        clan_users: dict = None
     ) -> None:
-        update_result = await Network.update_user_data({'clan_users': clan_users})
+        if clan_basic:
+            update_result = await Network.update_user_data({'clan_basic': clan_basic})
+        if clan_users:
+            update_result = await Network.update_user_data({'clan_users': clan_users})
         if update_result.get('code',None) != 1000:
             logger.error(f"{region_id} - {clan_id} | ├── 更新数据上传失败，Error: {update_result.get('message')}")
         else:

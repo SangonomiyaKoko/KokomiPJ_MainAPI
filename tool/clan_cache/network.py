@@ -158,12 +158,13 @@ class Network:
     @classmethod
     async def get_clan_cvc_data(self, clan_id: int, region_id: int, season: int):
         api_url = CLAN_API_URL_LIST.get(region_id)
-        url = f'{api_url}/api/members/{clan_id}/?battle_type=cvc&season={season}'
+        url = f'{api_url}/api/members/{clan_id}/?battle_type=cvc'
         result = await self.fetch_data(url)
         if result.get('code', None) != 1000:
             return result
         else:
-            return self.__cvc_data_processing(season, result)
+            result = self.__cvc_data_processing(clan_id, region_id, season, result)
+            return {'status': 'ok', 'code': 1000, 'message': 'Success', 'data': result}
 
     @classmethod
     async def update_clan_data(self, clan_data: dict):
@@ -201,8 +202,8 @@ class Network:
                 2: None
             }
         }
-        for team_data in response['data']['ratings']:
-            if team_data['seaon_number'] != season:
+        for team_data in response['data']['clan_statistics']['ratings']:
+            if team_data['season_number'] != season:
                 continue
             team_number = team_data['team_number']
             result['team_data'][team_number] = {
@@ -217,15 +218,15 @@ class Network:
             }
             if team_data['stage']:
                 if team_data['stage']['type'] == 'promotion':
-                    result['team_data'][team_number]['stage_type'] = 1
+                    result['team_data'][team_number]['stage_type'] = '1'
                 else:
-                    result['team_data'][team_number]['stage_type'] = 2
+                    result['team_data'][team_number]['stage_type'] = '2'
                 stage_progress = []
                 for progress in team_data['stage']['progress']:
                     if progress == 'victory':
                         stage_progress.append(1)
                     else:
                         stage_progress.append(0)
-                result['team_data'][team_number]['stage_progress'] = stage_progress
+                result['team_data'][team_number]['stage_progress'] = str(stage_progress)
         return result
 

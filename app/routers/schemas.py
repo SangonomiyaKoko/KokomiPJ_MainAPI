@@ -79,6 +79,16 @@ class ClanSeasonUpdateModel(ClanBaseModel):
     last_battle_time: int = Field(..., description='最后战斗时间')
     team_data: dict = Field(..., description='工会队伍数据')
 
+class ClanBasicUpdateModel(ClanBaseModel):
+    is_active: int = Field(..., description='工会是否活跃')
+    season_number: int = Field(0, description='赛季代码')
+    last_battle_time: int = Field(None, description='最后战斗时间')
+    public_rating: int = Field(1100, description='工会赛季分数')
+    league: int = Field(4, description='工会段位')
+    division: int = Field(2, description='工会分段')
+    division_rating: int = Field(0, description='工会分段数据')
+    last_battle_at: int = Field(None, description='上次工会战结算时间')
+
 class ClanUpdateModel(BaseModel):
     clan_info: ClanInfoUpdateModel = Field(None, description='工会详细数据')
     clan_users: ClanUsersUpdateModel = Field(None, description='工会内用户数据')
