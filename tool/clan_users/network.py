@@ -37,11 +37,11 @@ class Network:
                 requset_code = res.status_code
                 requset_result = res.json()
                 if requset_code == 200:
-                    if '//clans' in url:
+                    if '//clans.' in url:
                         return {'status': 'ok','code': 1000,'message': 'Success','data': requset_result}
                     else:
                         return requset_result
-                elif requset_code == 503 and 'clans' in url:
+                elif requset_code == 503 and '//clans.' in url:
                     return {'status': 'ok','code': 1002,'message': 'ClanNotExist','data' : None}
                 return {'status': 'ok','code': 2000,'message': 'NetworkError','data': None}
             except httpx.ConnectTimeout:
@@ -79,7 +79,7 @@ class Network:
     @classmethod 
     async def update_user_data(self, data: dict):
         platform_api_url = API_URL
-        url = f'{platform_api_url}/p/game/clan-users/update/'
+        url = f'{platform_api_url}/p/game/clan/update/'
         result = await self.fetch_data(url, method='put', data=data)
         return result
     

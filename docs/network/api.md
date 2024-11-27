@@ -15,3 +15,9 @@
 ```url
 https://vortex.worldofwarships.eu/api/accounts/search/autocomplete/sangonomiya/
 ```
+
+```txt
+POST https://vortex.worldofwarships.asia/api/v2/graphql/glossary/version/
+
+[{"query":"query Version {\n  version\n}"}]
+```

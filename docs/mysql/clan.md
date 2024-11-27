@@ -152,8 +152,8 @@ team_data_2 = {
     'division_rating': 99,
     'public_rating': 1599,
     'stage': {
-        'type': 'promotion',    # 晋级赛/保级赛
-        'progress': ['victory', 'defeat']    # 结果 victory/defeat
+        'type': 'promotion',    # 晋级赛/保级赛，用1和2表示
+        'progress': ['victory', 'defeat']    # 结果 victory/defeat 其中用1和0表是
     }
 }
 ```
@@ -172,14 +172,14 @@ CREATE TABLE clan_battle_s27 (
     region_id        TINYINT      NOT NULL,     -- 服务器id
     team_number      TINYINT      NOT NULL,     -- 队伍id
     -- 对局结果
-    battle_result    VARCHAR(10)  NOT NULL,     -- 对局结果 胜利或者时报
-    battle_rating    INT          DEFAULT NULL, -- 对局分数 如果是晋级赛则会显示为0
+    battle_result    VARCHAR(10)  NOT NULL,     -- 对局结果 胜利或者失败
+    battle_rating    VARCHAR(10)  DEFAULT NULL, -- 对局分数 如果是晋级赛则会显示为0
     battle_stage     VARCHAR(10)  DEFAULT NULL, -- 对局结果 仅对于stage有效
     -- 对局结算的数据
-    league           TINYINT      NOT NULL,     -- 段位 0紫金 1白金 2黄金 3白银 4青铜
-    division         TINYINT      NOT NULL,     -- 分段 1 2 3
-    division_rating  INT          NOT NULL,     -- 分段分数，示例：白金 1段 25分
-    public_rating    INT          NOT NULL,     -- 工会评分 1199 - 3000
+    league           TINYINT      DEFAULT NULL, -- 段位 0紫金 1白金 2黄金 3白银 4青铜
+    division         TINYINT      DEFAULT NULL, -- 分段 1 2 3
+    division_rating  INT          DEFAULT NULL, -- 分段分数，示例：白金 1段 25分
+    public_rating    INT          DEFAULT NULL, -- 工会评分 1199 - 3000
     stage_type       VARCHAR(10)  DEFAULT NULL, -- 晋级赛/保级赛 默认为Null
     stage_progress   VARCHAR(50)  DEFAULT NULL, -- 晋级赛/保级赛的当前结果
     -- 记录数据创建的时间和更新时间

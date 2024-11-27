@@ -22,6 +22,23 @@ class GameClan:
         finally:
             gc.collect()
 
+    @classmethod
+    @ExceptionLogger.handle_program_exception_async
+    async def update_clan_data(self, clan_data: dict) -> ResponseDict:
+        try:
+            if clan_data.get('clan_info', None):
+                result = await self.update_clan_info_data(clan_data['clan_info'])
+                return result
+            if clan_data.get('clan_users', None):
+                await self.update_clan_users_data(clan_data['clan_users'])
+            if clan_data.get('clan_season', None):
+                await self.update_clan_season_data(clan_data['clan_season'])
+            return JSONResponse.API_1000_Success
+        except Exception as e:
+            raise e
+        finally:
+            gc.collect()
+
     @ExceptionLogger.handle_program_exception_async
     async def update_clan_users_data(clan_users_data: dict) -> ResponseDict:
         try:
@@ -31,6 +48,15 @@ class GameClan:
                 return check_user_exist
             task_update_clan_users.delay(clan_users_data['clan_id'], clan_users_data['hash_value'], clan_users_data['user_list'])
             return JSONResponse.API_1000_Success
+        except Exception as e:
+            raise e
+        finally:
+            gc.collect()
+    
+    @ExceptionLogger.handle_program_exception_async
+    async def update_clan_season_data(clan_season: dict) -> ResponseDict:
+        try:
+            ...
         except Exception as e:
             raise e
         finally:

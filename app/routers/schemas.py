@@ -64,15 +64,25 @@ class UserCacheModel(UserBaseModel):
     ships_data: dict = Field(None, description='船只数据，简略')
     details_data: dict = Field(None, description='船只数据，详细')
 
-class ClanUsersModel(ClanBaseModel):
+class ClanInfoUpdateModel(BaseModel):
+    region_id: int = Field(..., description='服务器id')
+    season_number: int = Field(..., description='工会战赛季')
+    clan_list: list = Field(None, description='工会列表')
+
+class ClanUsersUpdateModel(ClanBaseModel):
     hash_value: str = Field(None, description='缓存数据的哈希值')
     user_list: list = Field(..., description='工会内用户id列表')
     clan_users: list = Field(..., description='工会内用户数据')
 
+class ClanSeasonUpdateModel(ClanBaseModel):
+    season_number: int = Field(..., description='赛季代码')
+    last_battle_time: int = Field(..., description='最后战斗时间')
+    team_data: dict = Field(..., description='工会队伍数据')
+
 class ClanUpdateModel(BaseModel):
-    region_id: int = Field(..., description='服务器id')
-    season_number: int = Field(..., description='工会战赛季')
-    clan_list: list = Field(None, description='工会列表')
+    clan_info: ClanInfoUpdateModel = Field(None, description='工会详细数据')
+    clan_users: ClanUsersUpdateModel = Field(None, description='工会内用户数据')
+    clan_season: ClanSeasonUpdateModel = Field(None, description='工会赛季数据')
     
 class UserUpdateModel(BaseModel):
     user_basic: UserBasicModel = Field(None, description='用户基础数据')

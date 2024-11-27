@@ -24,7 +24,7 @@ class Update:
 
     async def service_master(self, clan_id: int, region_id: int, clan_data: dict):
         current_timestamp = int(time.time())
-        if clan_data['update_time'] and current_timestamp - clan_data['update_time'] <= 24*60*60:
+        if clan_data['update_time'] and current_timestamp - clan_data['update_time'] <= 2*60*60:
             logger.debug(f'{region_id} - {clan_id} | ├── 未到达更新时间，跳过更新')
             return
         result = await Network.get_clan_data(region_id, clan_id)
@@ -50,7 +50,7 @@ class Update:
         region_id: int, 
         clan_users: dict
     ) -> None:
-        update_result = await Network.update_user_data(clan_users)
+        update_result = await Network.update_user_data({'clan_users': clan_users})
         if update_result.get('code',None) != 1000:
             logger.error(f"{region_id} - {clan_id} | ├── 更新数据上传失败，Error: {update_result.get('message')}")
         else:

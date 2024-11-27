@@ -6,7 +6,6 @@ from .schemas import (
     RegionList, 
     LanguageList, 
     UserUpdateModel,
-    ClanUsersModel,
     ClanUpdateModel
 )
 from app.apis.platform import Search, Update, GameUser, GameClan, UserCache
@@ -207,22 +206,6 @@ async def updateUserCache(user_data: UserUpdateModel) -> ResponseDict:
     await record_api_call(result['status'])
     return result
 
-@router.put("/game/clan-users/update/")
-async def updateUserCache(user_data: ClanUsersModel) -> ResponseDict:
-    """更新工会用户的数据
-
-    通过传入的数据更新数据库
-
-    参数:
-    - ClanUsersModel
-    
-    返回:
-    - ResponseDict
-    """
-    result = await GameClan.update_clan_users_data(user_data.model_dump())
-    await record_api_call(result['status'])
-    return result
-
 @router.put("/game/clan/update/")
 async def updateUserCache(clan_data: ClanUpdateModel) -> ResponseDict:
     """更新工会的数据
@@ -235,7 +218,7 @@ async def updateUserCache(clan_data: ClanUpdateModel) -> ResponseDict:
     返回:
     - ResponseDict
     """
-    result = await GameClan.update_clan_info_data(clan_data.model_dump())
+    result = await GameClan.update_clan_data(clan_data.model_dump())
     await record_api_call(result['status'])
     return result
 

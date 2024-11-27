@@ -15,19 +15,23 @@ class ClanModel:
 
             data = []
             await cur.execute(
-                "SELECT b.clan_id, u.hash_value, UNIX_TIMESTAMP(u.updated_at) AS update_time "
+                "SELECT b.clan_id, i.is_active, UNIX_TIMESTAMP(i.updated_at) AS info_update_time, "
+                "u.hash_value, UNIX_TIMESTAMP(u.updated_at) AS users_update_time "
                 "FROM clan_basic AS b "
-                "LEFT JOIN clan_users AS u "
-                "ON b.clan_id = u.clan_id "
+                "LEFT JOIN clan_info AS i ON b.clan_id = i.clan_id "
+                "LEFT JOIN clan_users AS u ON b.clan_id = u.clan_id "
                 "WHERE b.region_id = %s;",
                 [region_id]
             )
             users = await cur.fetchall()
             for user in users:
+                # 排除不活跃的用户数据
+                if user[3] and not user[2]:
+                    continue
                 data.append({
                     'clan_id': user[0],
-                    'hash_value': user[1],
-                    'update_time': user[2]
+                    'hash_value': user[3],
+                    'update_time': user[4]
                 })
             
             await conn.commit()
@@ -105,6 +109,154 @@ class ClanModel:
             await cur.close()
             await MysqlConnection.release_connection(conn)
 
+    async def update_clan_season(clan_season: dict) -> ResponseDict:
+        try:
+            conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
+            cur: Cursor = await conn.cursor()
+
+            clan_id = clan_season['clan_id']
+            region_id = clan_season['region_id']
+            season_number = clan_season['season_number']
+            await cur.execute(
+                "SELECT season, UNIX_TIMESTAMP(last_battle_at) AS last_battle_time, team_data_1, team_data_2 "
+                "FROM clan_season WHERE clan_id = %s;",
+                [clan_id]
+            )
+            clan = await cur.fetchone()
+            if clan == None:
+                await conn.commit()
+                return JSONResponse.API_1009_ClanNotExistinDatabase
+            if clan[0] != season_number:
+                await cur.execute(
+                    "UPDATE clan_season SET season = %s, last_battle_at = FROM_UNIXTIME(%s), "
+                    "team_data_1 = %s, team_data_2 = %s WHERE clan_id = %s",
+                    [
+                        season_number,clan_season['last_battle_time'], 
+                        str(clan_season['team_data'][1]),str(clan_season['team_data'][2]),clan_id
+                    ]
+                )
+            if clan[1] != clan_season['last_battle_time']:
+                # 判断是否需要插入数据
+                insert_data_list = []
+                old_team_data = {
+                    1: eval(clan[2]) if clan[2] else None,
+                    2: eval(clan[3]) if clan[3] else None
+                }
+                new_team_data = clan_season['team_data']
+                for team_number in [1, 2]:
+                    if new_team_data[team_number] == None:
+                        continue
+                    if old_team_data[team_number]:
+                        battles = new_team_data[team_number]['battles_count'] - old_team_data[team_number]['battles_count']
+                        wins = new_team_data[team_number]['wins_count'] - old_team_data[team_number]['wins_count']
+                        if battles > 2 or battles <= 0:
+                            continue
+                        battle_time = new_team_data['last_battle_time']
+                        if battles == 1:
+                            temp_list = None
+                            temp_list = [battle_time, clan_id, region_id, team_number]
+                            if wins == 1:
+                                temp_list += ['victory']
+                            else:
+                                temp_list += ['defeat']
+                            battle_rating = new_team_data[team_number]['public_rating'] - old_team_data[team_number]['public_rating']
+                            if battle_rating > 0:
+                                temp_list += ['+'+str(battle_rating)]
+                            elif battle_rating < 0:
+                                temp_list += [str(battle_rating)]
+                            else:
+                                temp_list += [None]
+                            if (
+                                new_team_data[team_number]['stage_type'] and 
+                                new_team_data[team_number]['stage_progress'] != None
+                            ):
+                                if new_team_data[team_number]['stage_progress'][len(new_team_data[team_number]['stage_progress']) - 1] == 1:
+                                    temp_list += ['+★']
+                                else:
+                                    temp_list += ['+☆']
+                            else:
+                                temp_list += [None]
+                            temp_list += [
+                                new_team_data[team_number]['league'],
+                                new_team_data[team_number]['division'],
+                                new_team_data[team_number]['division_rating'],
+                                new_team_data[team_number]['public_rating'],
+                                str(new_team_data[team_number]['stage_type']),
+                                str(new_team_data[team_number]['stage_progress'])
+                            ]
+                            insert_data_list.append(temp_list)
+                        else:
+                            temp_list = [battle_time, clan_id, region_id, team_number]
+                            if wins == 2:
+                                insert_data_list.append(temp_list+['victory'])
+                                insert_data_list.append(temp_list+['victory'])
+                            elif wins == 1:
+                                insert_data_list.append(temp_list+['victory'])
+                                insert_data_list.append(temp_list+['defeat'])
+                            else:
+                                insert_data_list.append(temp_list+['defeat'])
+                                insert_data_list.append(temp_list+['defeat'])
+                    else:
+                        battles = new_team_data[team_number]['battles_count']
+                        wins = new_team_data[team_number]['wins_count']
+                        if battles > 2 and battles <= 0:
+                            continue
+                        battle_time = new_team_data['last_battle_time']
+                        if battles == 1:
+                            temp_list = None
+                            temp_list = [battle_time, clan_id, region_id, team_number]
+                            if wins == 1:
+                                temp_list += ['victory']
+                            else:
+                                temp_list += ['defeat']
+                            temp_list += [
+                                None, None,
+                                new_team_data[team_number]['league'],
+                                new_team_data[team_number]['division'],
+                                new_team_data[team_number]['division_rating'],
+                                new_team_data[team_number]['public_rating'],
+                                str(new_team_data[team_number]['stage_type']),
+                                str(new_team_data[team_number]['stage_progress'])
+                            ]
+                            insert_data_list.append(temp_list)
+                        else:
+                            temp_list = [battle_time, clan_id, region_id, team_number]
+                            if wins == 2:
+                                insert_data_list.append(temp_list+['victory'])
+                                insert_data_list.append(temp_list+['victory'])
+                            elif wins == 1:
+                                insert_data_list.append(temp_list+['victory'])
+                                insert_data_list.append(temp_list+['defeat'])
+                            else:
+                                insert_data_list.append(temp_list+['defeat'])
+                                insert_data_list.append(temp_list+['defeat'])
+                for insert_data in insert_data_list:
+                    if len(insert_data) == 13:
+                        await cur.execute(
+                            "INSERT INTO clan_season_s%s ( "
+                            "battle_time, clan_id, region_id, team_number, battle_result, battle_rating, battle_stage, "
+                            "league, division, division_rating, public_rating, stage_type, stage_progress"
+                            " ) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s );",
+                            insert_data
+                        )
+                    else:
+                        await cur.execute(
+                            "INSERT INTO clan_season_s%s ( "
+                            "battle_time, clan_id, region_id, team_number, battle_result "
+                            " ) VALUES ( %s, %s, %s, %s, %s );",
+                            [] + insert_data
+                        )
+            await conn.commit() 
+            return JSONResponse.API_1000_Success
+        except Exception as e:
+            await conn.rollback()
+            raise e
+        finally:
+            await cur.close()
+            await MysqlConnection.release_connection(conn)
+
+
     async def update_clan_info_batch(region_id: int, season_number: int, clan_data_list: list) -> ResponseDict:
         try:
             conn: Connection = await MysqlConnection.get_connection()
@@ -116,6 +268,12 @@ class ClanModel:
                 [region_id]
             )
             season_number_in_db = await cur.fetchone()
+            if season_number != season_number_in_db[0]:
+                # 数据在数据库中，但是赛季更改，直接写入数据
+                await cur.execute(
+                    "UPDATE region_season SET season_number = %s WHERE region_id = %s;",
+                    [season_number, region_id]
+                )
             sql_str = ''
             params = [region_id, clan_data_list[0]['id']]
             for clan_data in clan_data_list[1:]:
@@ -132,14 +290,10 @@ class ClanModel:
                 f"WHERE b.region_id = %s AND b.clan_id in ( %s{sql_str} );",
                 params
             )
-            need_update_clan = {
-                'region_id': region_id,
-                'season_number': season_number,
-                'clan_id_list': []
-            }
+            need_update_clan = []
             clans = await cur.fetchall()
             exists_clans = {}
-            current_timestamp = TimeFormat.get_current_timestamp
+            current_timestamp = TimeFormat.get_current_timestamp()
             for clan in clans:
                 exists_clans[clan[0]] = clan[1:]
             for clan_data in clan_data_list:
@@ -176,59 +330,41 @@ class ClanModel:
                             clan_data['division_rating'],clan_data['last_battle_at'],clan_id
                         ]
                     )
-                    need_update_clan['clan_id_list'].append(clan_id)
+                    need_update_clan.append(clan_id)
                 else:
-                    if season_number != season_number_in_db:
-                        # 数据在数据库中，但是赛季更改，直接写入数据
+                    # 数据在数据库中，且没有赛季更改，检验数据是否改变再决定是否更新数据
+                    if (
+                        not exists_clans[clan_id][2] or
+                        (current_timestamp - exists_clans[clan_id][2]) > 24*60*60 or 
+                        clan_data['tag'] != exists_clans[clan_id][0] or 
+                        clan_data['league'] != exists_clans[clan_id][1]
+                    ):
                         await cur.execute(
-                            "UPDATE region_season SET season_number = %s WHERE region_id = %s;",
-                            [season_number, region_id]
-                        )
-                        await cur.execute(
-                            "UPDATE clan_basic SET tag = %s, league = %s WHERE region_id = %s AND clan_id = %s",
+                            "UPDATE clan_basic SET tag = %s, league = %s, updated_at = CURRENT_TIMESTAMP "
+                            "WHERE region_id = %s AND clan_id = %s",
                             [clan_data['tag'],clan_data['league'],region_id,clan_id]
                         )
+                    if (
+                        season_number != exists_clans[clan_id][4] or
+                        clan_data['public_rating'] != exists_clans[clan_id][5] or
+                        clan_data['last_battle_at'] != exists_clans[clan_id][9]
+                    ):
                         await cur.execute(
-                            "UPDATE clan_info SET public_rating = %s, league = %s, "
+                            "UPDATE clan_info SET is_active = %s, public_rating = %s, league = %s, "
                             "division = %s, division_rating = %s, last_battle_at = FROM_UNIXTIME(%s) "
                             "WHERE clan_id = %s",
                             [
-                                clan_data['public_rating'],clan_data['league'],clan_data['division'],
+                                1, clan_data['public_rating'],clan_data['league'],clan_data['division'],
                                 clan_data['division_rating'],clan_data['last_battle_at'],clan_id
                             ]
                         )
-                        need_update_clan['clan_id_list'].append(clan_id)
-                    else:
-                        # 数据在数据库中，且没有赛季更改，检验数据是否改变再决定是否更新数据
-                        if (
-                            int(current_timestamp) - exists_clans[clan_id][2] > 2*24*60*60 or 
-                            clan_data['tag'] != exists_clans[clan_id][0] or 
-                            clan_data['league'] != exists_clans[clan_id][1]
-                        ):
-                            await cur.execute(
-                                "UPDATE clan_basic SET tag = %s, league = %s WHERE region_id = %s AND clan_id = %s",
-                                [clan_data['tag'],clan_data['league'],region_id,clan_id]
-                            )
-                        if (
-                            clan_data['public_rating'] != exists_clans[clan_id][5] or
-                            clan_data['last_battle_at'] != exists_clans[clan_id][9]
-                        ):
-                            await cur.execute(
-                                "UPDATE clan_info SET public_rating = %s, league = %s, "
-                                "division = %s, division_rating = %s, last_battle_at = FROM_UNIXTIME(%s) "
-                                "WHERE clan_id = %s",
-                                [
-                                    clan_data['public_rating'],clan_data['league'],clan_data['division'],
-                                    clan_data['division_rating'],clan_data['last_battle_at'],clan_id
-                                ]
-                            )
-                        if (
-                            exists_clans[clan_id][10] != season_number or
-                            not exists_clans[clan_id][9] or
-                            not exists_clans[clan_id][11] or
-                            exists_clans[clan_id][9] != exists_clans[clan_id][11]
-                        ):
-                            need_update_clan['clan_id_list'].append(clan_id)
+                    if (
+                        exists_clans[clan_id][10] != season_number or
+                        not exists_clans[clan_id][9] or
+                        not exists_clans[clan_id][11] or
+                        exists_clans[clan_id][9] != exists_clans[clan_id][11]
+                    ):
+                        need_update_clan.append(clan_id)
             await conn.commit()
             return JSONResponse.get_success_response(need_update_clan)
         except Exception as e:
