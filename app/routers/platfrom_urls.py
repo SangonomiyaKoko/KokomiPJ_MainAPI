@@ -221,25 +221,3 @@ async def updateUserCache(clan_data: ClanUpdateModel) -> ResponseDict:
     result = await GameClan.update_clan_data(clan_data.model_dump())
     await record_api_call(result['status'])
     return result
-
-@router.get("/game/user/{region}/{account_id}/info/")
-async def get_user_info(region: RegionList, account_id: int) -> ResponseDict:
-    """获取user_info表中的数据
-
-    用于recent相关更新用户数据使用
-
-    参数:
-    - account_id: 用户id
-
-    返回:
-    - ResponseDict
-    """
-    region_id = UtilityFunctions.get_region_id(region)
-    if not region_id:
-        return JSONResponse.API_1010_IllegalRegion
-    if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
-        return JSONResponse.API_1003_IllegalAccoutIDorRegionID
-    result = await GameUser.get_user_info_data(account_id,region_id)
-    await record_api_call(result['status'])
-    return result
-

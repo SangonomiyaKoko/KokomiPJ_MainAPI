@@ -4,9 +4,29 @@ from .schemas import RegionList, RecentEnableModel
 from app.utils import UtilityFunctions
 from app.response import JSONResponse, ResponseDict
 from app.apis.recent import RecentBasic, RecentData
+from app.apis.platform import GameUser
 from app.middlewares import record_api_call
 
 router = APIRouter()
+
+@router.get("/features/users/{region}/")
+async def enabledFeatureUsers(region: RegionList) -> ResponseDict:
+    """获取服务器下所有启用功能用户的列表
+
+    用于recent功能的遍历更新
+
+    参数:
+    - region: 服务器
+
+    返回:
+    - ResponseDict
+    """
+    region_id = UtilityFunctions.get_region_id(region)
+    if not region_id:
+        return JSONResponse.API_1010_IllegalRegion
+    result = await RecentBasic.get_recent(region_id)
+    await record_api_call(result['status'])
+    return result 
 
 @router.get("/features/user/{region}/{account_id}/overview/")
 async def get_recent_data_overview(region: RegionList,account_id: int) -> ResponseDict:
@@ -30,14 +50,14 @@ async def get_recent_data_overview(region: RegionList,account_id: int) -> Respon
     await record_api_call(result['status'])
     return result 
 
-@router.get("/features/users/{region}/")
-async def enabledFeatureUsers(region: RegionList) -> ResponseDict:
-    """获取服务器下所有启用功能用户的列表
+@router.get("/features/user/{region}/{account_id}/info/")
+async def get_user_info(region: RegionList, account_id: int) -> ResponseDict:
+    """获取user_info表中的数据
 
-    用于recent功能的遍历更新
+    用于recent相关更新用户数据使用
 
     参数:
-    - region: 服务器
+    - account_id: 用户id
 
     返回:
     - ResponseDict
@@ -45,9 +65,32 @@ async def enabledFeatureUsers(region: RegionList) -> ResponseDict:
     region_id = UtilityFunctions.get_region_id(region)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
-    result = await RecentBasic.get_recent(region_id)
+    if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
+        return JSONResponse.API_1003_IllegalAccoutIDorRegionID
+    result = await GameUser.get_user_info_data(account_id,region_id)
     await record_api_call(result['status'])
-    return result 
+    return result
+
+@router.get("/game/user/{region}/{account_id}/info/")
+async def get_user_info(region: RegionList, account_id: int) -> ResponseDict:
+    """获取user_info表中的数据
+
+    用于recent相关更新用户数据使用
+
+    参数:
+    - account_id: 用户id
+
+    返回:
+    - ResponseDict
+    """
+    region_id = UtilityFunctions.get_region_id(region)
+    if not region_id:
+        return JSONResponse.API_1010_IllegalRegion
+    if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
+        return JSONResponse.API_1003_IllegalAccoutIDorRegionID
+    result = await GameUser.get_user_info_data(account_id,region_id)
+    await record_api_call(result['status'])
+    return result
 
 @router.get("/features/user/{region}/{account_id}/")
 async def getUserFeatureData(region: RegionList,account_id: int) -> ResponseDict:

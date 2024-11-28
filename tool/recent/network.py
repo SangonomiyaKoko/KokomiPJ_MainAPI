@@ -144,7 +144,7 @@ class Network:
         else:
             platform_api_url = MASTER_API_URL
         region = REGION_LIST.get(region_id)
-        url = f'{platform_api_url}/p/game/user/{region}/{account_id}/info/'
+        url = f'{platform_api_url}/r1/features/user/{region}/{account_id}/info/'
         result = await self.fetch_data(url)
         return result
     
