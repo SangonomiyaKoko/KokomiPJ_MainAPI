@@ -34,13 +34,13 @@ class Update:
         if user_data['user_ships']['update_time'] != None:
             active_level = user_data['user_info']['active_level']
             update_interval_seconds = self.get_update_interval_time(user_data['user_basic']['region_id'],active_level)
-            current_timestamp = int(time.time())
-            if user_data['user_ships']['update_time']:
-                update_interval_time = self.seconds_to_time(current_timestamp - user_data['user_ships']['update_time'])
-                logger.debug(f'{region_id} - {account_id} | ├── 距离上次更新 {update_interval_time}')
-            if (current_timestamp - user_data['user_ships']['update_time']) < update_interval_seconds:
-                logger.debug(f'{region_id} - {account_id} | ├── 未到达更新时间，跳过更新')
-                return
+            # current_timestamp = int(time.time())
+            # if user_data['user_ships']['update_time']:
+            #     update_interval_time = self.seconds_to_time(current_timestamp - user_data['user_ships']['update_time'])
+            #     logger.debug(f'{region_id} - {account_id} | ├── 距离上次更新 {update_interval_time}')
+            # if (current_timestamp - user_data['user_ships']['update_time']) < update_interval_seconds:
+            #     logger.debug(f'{region_id} - {account_id} | ├── 未到达更新时间，跳过更新')
+            #     return
         # 需要更新，则请求数据用户数据
         user_basic = {
             'account_id': account_id,
@@ -102,9 +102,9 @@ class Update:
             user_info['total_battles'] = user_basic_data['basic']['leveling_points']
             user_info['last_battle_time'] = user_basic_data['basic']['last_battle_time']
             user_info['active_level'] = self.get_active_level(user_info)
-        if user_data['user_ships']['battles_count'] == user_info['total_battles']:
-            logger.debug(f'{region_id} - {account_id} | ├── 未有更新数据，跳过更新')
-            return
+        # if user_data['user_ships']['battles_count'] == user_info['total_battles']:
+        #     logger.debug(f'{region_id} - {account_id} | ├── 未有更新数据，跳过更新')
+        #     return
         user_ships_data = await Network.get_cache_data(account_id,region_id,ac_value)
         if user_ships_data.get('code', None) != 1000:
             logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {user_ships_data.get('message')}")
@@ -112,18 +112,24 @@ class Update:
         new_user_data = user_ships_data['data']
         sorted_dict = dict(sorted(new_user_data['basic'].items()))
         new_hash_value = hashlib.sha256(str(sorted_dict).encode('utf-8')).hexdigest()
-        if user_data['user_ships']['hash_value'] == new_hash_value:
-            logger.debug(f'{region_id} - {account_id} | ├── 未有更新数据，跳过更新')
-            user_cache['battles_count'] = user_info['total_battles']
-            await self.update_user_data(account_id,region_id,user_basic,user_info,user_cache)
-            return
-        else:
-            user_cache['battles_count'] = user_info['total_battles']
-            user_cache['hash_value'] = new_hash_value
-            user_cache['ships_data'] = sorted_dict
-            user_cache['details_data'] = new_user_data['details']
-            await self.update_user_data(account_id,region_id,user_basic,user_info,user_cache)
-            return
+        # if user_data['user_ships']['hash_value'] == new_hash_value:
+        #     logger.debug(f'{region_id} - {account_id} | ├── 未有更新数据，跳过更新')
+        #     user_cache['battles_count'] = user_info['total_battles']
+        #     await self.update_user_data(account_id,region_id,user_basic,user_info,user_cache)
+        #     return
+        # else:
+        #     user_cache['battles_count'] = user_info['total_battles']
+        #     user_cache['hash_value'] = new_hash_value
+        #     user_cache['ships_data'] = sorted_dict
+        #     user_cache['details_data'] = new_user_data['details']
+        #     await self.update_user_data(account_id,region_id,user_basic,user_info,user_cache)
+        #     return
+        user_cache['battles_count'] = user_info['total_battles']
+        user_cache['hash_value'] = new_hash_value
+        user_cache['ships_data'] = sorted_dict
+        user_cache['details_data'] = new_user_data['details']
+        await self.update_user_data(account_id,region_id,user_basic,user_info,user_cache)
+        return
     
     async def update_user_data(
         account_id: int, 

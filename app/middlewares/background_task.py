@@ -255,61 +255,13 @@ def update_user_ship(pool: PooledDB, user_data: dict):
         
         account_id = user_data['account_id']
         region_id = user_data['region_id']
-        table_name = user_data['table_name']
-        ship_id_list = []
         delete_ship_list = user_data['delete_ship_list']
         replace_ship_dict = user_data['replace_ship_dict']
-        for ship_id in delete_ship_list:
-            ship_id_list.append(ship_id)
-        for ship_id, _ in replace_ship_dict.items():
-            ship_id_list.append(ship_id)
-        
-        cur.execute(
-            "SELECT ship_id FROM ships.existing_ships"
-        )
-        not_exists_list = []
-        exists_list = []
-        rows = cur.fetchall()
-        for row in rows:
-            exists_list.append(row['ship_id'])
-        for ship_id in ship_id_list:
-            if ship_id not in exists_list:
-                not_exists_list.append(ship_id)
-        for ship_id in not_exists_list:
-            cur.exectue(
-                '''CREATE TABLE IF NOT EXISTS ships.ship_{ship_id} (
-                    id               INT          AUTO_INCREMENT,
-                    ship_id          BIGINT       NOT NULL,
-                    region_id        TINYINT      NOT NULL,
-                    account_id       BIGINT       NOT NULL,
-                    battles_count    INT          NULL,
-                    battle_type_1    INT          NULL,
-                    battle_type_2    INT          NULL,
-                    battle_type_3    INT          NULL,
-                    wins             INT          NULL,
-                    damage_dealt     BIGINT       NULL,
-                    frags            INT          NULL,
-                    exp              BIGINT       NULL,
-                    survived         INT          NULL,
-                    scouting_damage  BIGINT       NULL,
-                    art_agro         BIGINT       NULL,
-                    planes_killed    INT          NULL,
-                    max_exp          INT          NULL,
-                    max_damage_dealt INT          NULL,
-                    max_frags        INT          NULL,
-                    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                    PRIMARY KEY (id), 
-                    UNIQUE INDEX idx_sid_rid_aid (ship_id, region_id, account_id), 
-                    FOREIGN KEY (account_id) REFERENCES user_basic(account_id) ON DELETE CASCADE 
-                );'''
-            )
-
         for del_ship_id in delete_ship_list:
             cur.execute(
                 "DELETE FROM ships.ship_%s "
                 "WHERE ship_id = %s AND region_id = %s AND account_id = %s;",
-                [table_name, del_ship_id, region_id, account_id]
+                [int(del_ship_id), int(del_ship_id), region_id, account_id]
             )
         for update_ship_id, ship_data in replace_ship_dict.items():
             cur.execute(
@@ -317,15 +269,16 @@ def update_user_ship(pool: PooledDB, user_data: dict):
                 "damage_dealt = %s, frags = %s, exp = %s, survived = %s, scouting_damage = %s, art_agro = %s, "
                 "planes_killed = %s, max_exp = %s, max_damage_dealt = %s, max_frags = %s "
                 "WHERE ship_id = %s AND region_id = %s AND account_id = %s;",
-                [table_name] + ship_data + [update_ship_id, region_id, account_id]
+                [int(update_ship_id)] + ship_data + [int(update_ship_id), region_id, account_id]
             )
             cur.execute(
                 "INSERT INTO ships.ship_%s (ship_id, region_id, account_id, battles_count, battle_type_1, battle_type_2, "
                 "battle_type_3, wins, damage_dealt, frags, exp, survived, scouting_damage, art_agro, planes_killed, "
                 "max_exp, max_damage_dealt, max_frags) "
                 "SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s "
-                "WHERE NOT EXISTS (SELECT 1 FROM user_ship_0%s WHERE ship_id = %s AND region_id = %s AND account_id = %s);",
-                [table_name] + [update_ship_id, region_id, account_id] + ship_data + [table_name] + [update_ship_id, region_id, account_id]
+                "WHERE NOT EXISTS (SELECT 1 FROM ships.ship_%s WHERE ship_id = %s AND region_id = %s AND account_id = %s);",
+                [int(update_ship_id)] + [int(update_ship_id), region_id, account_id] + ship_data + [int(update_ship_id)] + \
+                [int(update_ship_id), region_id, account_id]
             )
         
         conn.commit()

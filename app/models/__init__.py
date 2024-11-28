@@ -4,6 +4,7 @@ from .recent_user import RecentUserModel
 from .recents_user import RecentsUserModel
 from .recent_data import RecentDatabaseModel
 from .access_token import UserAccessToken
+from .ships_cache import ShipsCacheModel
 from .root import RootModel
 
 __all__ = [
@@ -13,5 +14,6 @@ __all__ = [
     'RecentUserModel',
     'RecentsUserModel',
     'UserAccessToken',
-    'RecentDatabaseModel'
+    'RecentDatabaseModel',
+    'ShipsCacheModel'
 ]

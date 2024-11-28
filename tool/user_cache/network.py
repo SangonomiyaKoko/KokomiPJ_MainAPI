@@ -19,13 +19,13 @@ class Network:
         async with httpx.AsyncClient() as client:
             try:
                 if method == 'get':
-                    res = await client.get(url, timeout=5)
+                    res = await client.get(url, timeout=10)
                 elif method == 'delete':
-                    res = await client.delete(url, timeout=5)
+                    res = await client.delete(url, timeout=10)
                 elif method == 'post':
-                    res = await client.post(url, json=data, timeout=5)
+                    res = await client.post(url, json=data, timeout=10)
                 elif method == 'put':
-                    res = await client.put(url, json=data, timeout=5)
+                    res = await client.put(url, json=data, timeout=10)
                 else:
                     return {'status': 'ok','code': 7000,'message': 'InvalidParameter','data': None}
                 requset_code = res.status_code
