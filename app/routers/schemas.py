@@ -94,7 +94,6 @@ class ClanSeasonUpdateModel(ClanBaseModel):
 class ClanBasicUpdateModel(ClanBaseModel):
     is_active: int = Field(..., description='工会是否活跃')
     season_number: int = Field(0, description='赛季代码')
-    last_battle_time: int = Field(None, description='最后战斗时间')
     public_rating: int = Field(1100, description='工会赛季分数')
     league: int = Field(4, description='工会段位')
     division: int = Field(2, description='工会分段')
@@ -102,7 +101,8 @@ class ClanBasicUpdateModel(ClanBaseModel):
     last_battle_at: int = Field(None, description='上次工会战结算时间')
 
 class ClanUpdateModel(BaseModel):
-    clan_info: ClanInfoUpdateModel = Field(None, description='工会详细数据')
+    clan_basic: ClanBasicUpdateModel = Field(None, description='工会简略数据')
+    clan_info: ClanInfoUpdateModel = Field(None, description='工会批量更新详细数据')
     clan_users: ClanUsersUpdateModel = Field(None, description='工会内用户数据')
     clan_season: ClanSeasonUpdateModel = Field(None, description='工会赛季数据')
     

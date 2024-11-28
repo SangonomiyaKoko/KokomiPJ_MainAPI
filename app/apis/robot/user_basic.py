@@ -152,10 +152,10 @@ async def get_user_name_and_clan(
                 clan_basic['league'] = UtilityFunctions.get_league_by_color(user_clan_data['clan']['color'])
                 task_update_clan_and_user(
                     {
-                    'clan_id': clan_basic['id'],
-                    'region_id': region_id,
-                    'tag': clan_basic['tag'],
-                    'league': clan_basic['league']
+                        'clan_id': clan_basic['id'],
+                        'region_id': region_id,
+                        'tag': clan_basic['tag'],
+                        'league': clan_basic['league']
                     },
                     {
                         'account_id': user_basic['id'],

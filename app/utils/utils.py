@@ -74,7 +74,7 @@ class UtilityFunctions:
             return True
         return False
     
-    def check_cid_and_rif(clan_id: int, region_id: int) -> bool:
+    def check_cid_and_rid(clan_id: int, region_id: int) -> bool:
         "检查clan_id和region_id是否合法"
         if not (isinstance(clan_id, int) and isinstance(region_id, int)):
             return False

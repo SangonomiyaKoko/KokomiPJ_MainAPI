@@ -26,29 +26,26 @@ class Update:
             logger.debug(f'{region_id} | └── 本次更新完成, 耗时: {round(cost_time,2)} s')
 
     async def service_master(self, region_id: int):
-        # season_number, clan_data_list = await Network.get_clan_rank_data(region_id)
-        # logger.debug(f'{region_id} | ├── 当前赛季代码 {season_number}')
-        # logger.debug(f'{region_id} | ├── 当前工会数量 {len(clan_data_list)}')
-        # if len(clan_data_list) == 0:
-        #     return
-        # need_update_list = []
-        # chunk_size = 50  # 每次获取50个数据
-        # for i in range(0, len(clan_data_list), chunk_size):
-        #     chunk = clan_data_list[i:i + chunk_size]
-        #     if len(chunk) > 0:
-        #         data = {
-        #             'region_id': region_id,
-        #             'season_number': season_number,
-        #             'clan_list': chunk
-        #         }
-        #         update_result = await self.update_clan_info_data(i, region_id, data)
-        #         need_update_list = need_update_list + update_result
-        need_update_list = [451379]
+        season_number, clan_data_list = await Network.get_clan_rank_data(region_id)
+        logger.debug(f'{region_id} | ├── 当前赛季代码 {season_number}')
+        logger.debug(f'{region_id} | ├── 当前工会数量 {len(clan_data_list)}')
+        if len(clan_data_list) == 0:
+            return
+        need_update_list = []
+        chunk_size = 50  # 每次获取50个数据
+        for i in range(0, len(clan_data_list), chunk_size):
+            chunk = clan_data_list[i:i + chunk_size]
+            if len(chunk) > 0:
+                data = {
+                    'region_id': region_id,
+                    'season_number': season_number,
+                    'clan_list': chunk
+                }
+                update_result = await self.update_clan_info_data(i, region_id, data)
+                need_update_list = need_update_list + update_result
         season_number = 27
         logger.debug(f'{region_id} | ├── 需要更新用户数量 {len(need_update_list)}')
         for clan_id in need_update_list:
-            if clan_id != 451379:
-                continue
             clan_cvc_data = await Network.get_clan_cvc_data(clan_id,region_id,season_number)
             if clan_cvc_data.get('code', None) == 1002:
                 clan_basic = {

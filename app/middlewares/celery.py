@@ -12,6 +12,7 @@ from .background_task import (
     update_user_ship,
     update_user_ships,
     update_clan_users,
+    check_clan_info,
     update_users_clan
 )
 from app.core import EnvConfig
@@ -63,6 +64,24 @@ def task_check_user_basic(user_data: dict):
 @celery_app.task
 def task_check_clan_basic(clan_data: dict):
     result = check_clan_basic(pool,clan_data)
+    if result.get('code', None) != 1000:
+        print(result)
+    return 'ok'
+
+
+@celery_app.task
+def task_check_clan_info(clan_data: dict):
+    result = check_clan_info(pool,clan_data)
+    if result.get('code', None) != 1000:
+        print(result)
+    return 'ok'
+
+@celery_app.task
+def task_check_clan_basic_and_info(clan_basic: dict, clan_info: dict):
+    result = check_clan_basic(pool,clan_basic)
+    if result.get('code', None) != 1000:
+        print(result)
+    result = check_clan_info(pool,clan_info)
     if result.get('code', None) != 1000:
         print(result)
     return 'ok'

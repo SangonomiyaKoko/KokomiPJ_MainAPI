@@ -191,6 +191,74 @@ def check_user_info(pool: PooledDB, user_data: dict):
         conn.close()  # 归还连接到连接池
 
 @ExceptionLogger.handle_database_exception_sync
+def check_clan_info(pool: PooledDB, clan_data: dict):
+    '''检查并更新user_info表
+
+    参数:
+        user_list [dict]
+    
+    '''
+    conn = pool.connection()
+    cur = None
+    try:
+        conn.begin()
+        cur = conn.cursor(pymysql.cursors.DictCursor)
+
+        clan_id = clan_data['clan_id']
+        cur.execute(
+            "SELECT is_active, season, public_rating, league, division, division_rating, "
+            "UNIX_TIMESTAMP(last_battle_at) AS last_battle_time "
+            "FROM kokomi.clan_info WHERE clan_id = %s;", 
+            [clan_id]
+        )
+        clan = cur.fetchone()
+        if clan is None:
+            # 正常来说这里不应该会遇到为空问题，因为先检查basic在检查info
+            conn.commit()
+            return JSONResponse.API_1009_ClanNotExistinDatabase
+        if clan_data['is_active'] == False:
+            cur.execute(
+                "UPDATE kokomi.clan_info SET is_active = %s, updated_at = CURRENT_TIMESTAMP WHERE clan_id = %s;",
+                [0, clan_id]
+            )
+        else:
+            if (
+                clan_data['season_number'] != clan['season'] or
+                clan_data['public_rating'] != clan['public_rating'] or
+                clan_data['last_battle_at'] != clan['last_battle_time']
+            ):
+                if clan_data['last_battle_at']:
+                    cur.execute(
+                        "UPDATE kokomi.clan_info SET is_active = %s, season = %s, public_rating = %s, league = %s, "
+                        "division = %s, division_rating = %s, last_battle_at = FROM_UNIXTIME(%s) "
+                        "WHERE clan_id = %s",
+                        [
+                            1, clan_data['season_number'], clan_data['public_rating'],clan_data['league'],clan_data['division'],
+                            clan_data['division_rating'],clan_data['last_battle_at'],clan_id
+                        ]
+                    )
+                else:
+                    cur.execute(
+                        "UPDATE kokomi.clan_info SET is_active = %s, season = %s, public_rating = %s, league = %s, "
+                        "division = %s, division_rating = %s "
+                        "WHERE clan_id = %s",
+                        [
+                            1, clan_data['season_number'], clan_data['public_rating'],clan_data['league'],
+                            clan_data['division'], clan_data['division_rating'],clan_id
+                        ]
+                    )
+
+        conn.commit()
+        return JSONResponse.API_1000_Success
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        if cur:
+            cur.close()
+        conn.close()  # 归还连接到连接池
+
+@ExceptionLogger.handle_database_exception_sync
 def check_user_recent(pool: PooledDB, user_data: dict):
     '''检查并更新recent表
 

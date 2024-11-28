@@ -27,7 +27,7 @@ class ClanModel:
             users = await cur.fetchall()
             for user in users:
                 # 排除不活跃的用户数据
-                if user[3] and not user[2]:
+                if user[2] and not user[1]:
                     continue
                 data.append({
                     'clan_id': user[0],
@@ -297,7 +297,7 @@ class ClanModel:
             await cur.execute(
                 "SELECT b.clan_id, b.tag, b.league, UNIX_TIMESTAMP(b.updated_at) AS basic_update_time, "
                 "i.is_active, i.season, i.public_rating, i.league, i.division, i.division_rating, "
-                "UNIX_TIMESTAMP(i.last_battle_at) AS info_last_battle_time, "
+                "UNIX_TIMESTAMP(i.last_battle_at) AS info_last_battle_time "
                 "FROM kokomi.clan_basic AS b "
                 "LEFT JOIN kokomi.clan_info AS i ON b.clan_id = i.clan_id "
                 "WHERE b.region_id = %s AND b.clan_id = %s;",
@@ -307,9 +307,9 @@ class ClanModel:
             if clan == None:
                 await conn.commit()
                 return JSONResponse.API_1009_ClanNotExistinDatabase
-            if clan['is_active'] == 0:
+            if clan_data['is_active'] == 0:
                 await cur.execute(
-                    "UPDATE clan_info SET is_active = %s WHERE clan_id = %s;",
+                    "UPDATE kokomi.clan_info SET is_active = %s, updated_at = CURRENT_TIMESTAMP WHERE clan_id = %s;",
                     [0, clan_id]
                 )
             else:
@@ -321,7 +321,7 @@ class ClanModel:
                     clan_data['league'] != clan[2]
                 ):
                     await cur.execute(
-                        "UPDATE clan_basic SET tag = %s, league = %s, updated_at = CURRENT_TIMESTAMP "
+                        "UPDATE kokomi.clan_basic SET tag = %s, league = %s, updated_at = CURRENT_TIMESTAMP "
                         "WHERE region_id = %s AND clan_id = %s;",
                         [clan['tag'],clan['league'],region_id,clan_id]
                     )
@@ -331,12 +331,12 @@ class ClanModel:
                     clan_data['last_battle_at'] != clan[10]
                 ):
                     await cur.execute(
-                        "UPDATE kokomi.clan_info SET is_active = %s, public_rating = %s, league = %s, "
+                        "UPDATE kokomi.clan_info SET is_active = %s, season = %s, public_rating = %s, league = %s, "
                         "division = %s, division_rating = %s, last_battle_at = FROM_UNIXTIME(%s) "
                         "WHERE clan_id = %s",
                         [
-                            1, clan_data['public_rating'],clan_data['league'],clan_data['division'],
-                            clan_data['division_rating'],clan_data['last_battle_at'],clan_id
+                            1, clan_data['season_number'], clan_data['public_rating'],clan_data['league'],
+                            clan_data['division'], clan_data['division_rating'],clan_data['last_battle_at'],clan_id
                         ]
                     )
             await conn.commit()
@@ -427,7 +427,7 @@ class ClanModel:
                     # 数据在数据库中，且没有赛季更改，检验数据是否改变再决定是否更新数据
                     if (
                         not exists_clans[clan_id][2] or
-                        (current_timestamp - exists_clans[clan_id][2]) > 24*60*60 or 
+                        (current_timestamp - exists_clans[clan_id][2]) > 3*24*60*60 or 
                         clan_data['tag'] != exists_clans[clan_id][0] or 
                         clan_data['league'] != exists_clans[clan_id][1]
                     ):
@@ -442,11 +442,11 @@ class ClanModel:
                         clan_data['last_battle_at'] != exists_clans[clan_id][9]
                     ):
                         await cur.execute(
-                            "UPDATE kokomi.clan_info SET is_active = %s, public_rating = %s, league = %s, "
+                            "UPDATE kokomi.clan_info SET is_active = %s, season = %s, public_rating = %s, league = %s, "
                             "division = %s, division_rating = %s, last_battle_at = FROM_UNIXTIME(%s) "
                             "WHERE clan_id = %s",
                             [
-                                1, clan_data['public_rating'],clan_data['league'],clan_data['division'],
+                                1, season_number, clan_data['public_rating'],clan_data['league'],clan_data['division'],
                                 clan_data['division_rating'],clan_data['last_battle_at'],clan_id
                             ]
                         )
