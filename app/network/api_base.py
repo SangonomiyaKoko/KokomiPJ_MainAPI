@@ -3,7 +3,7 @@ import random
 from app.core.config import EnvConfig
 
 VORTEX_API_URL_LIST = {
-    1: '    ',
+    1: 'http://vortex.worldofwarships.asia',
     2: 'http://vortex.worldofwarships.eu',
     3: 'http://vortex.worldofwarships.com',
     4: 'http://vortex.korabli.su',

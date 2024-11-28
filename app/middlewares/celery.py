@@ -43,7 +43,6 @@ def init_mysql_pool(**kwargs):
         host=config.MYSQL_HOST,
         user=config.MYSQL_USERNAME,
         password=config.MYSQL_PASSWORD,
-        database='kokomi',
         charset='utf8mb4',
         connect_timeout=10
     )

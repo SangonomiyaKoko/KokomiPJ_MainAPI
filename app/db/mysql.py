@@ -42,19 +42,16 @@ class MysqlConnection:
             else:
                 await self.__init_connection(self)
             mysql_pool = self.__pool
-            query = """
-                SELECT COUNT(*)
-                FROM information_schema.tables
-                WHERE table_schema = %s
-            """
+            query = "SELECT @@GLOBAL.transaction_isolation;"
             async with mysql_pool.acquire() as conn:
                 conn: Connection
                 async with conn.cursor() as cur:
                     cur: Cursor
-                    await cur.execute(query, ('kokomi',))
+                    await cur.execute(query)
                     result = await cur.fetchone()
                     if result != None:
                         api_logger.info('The MySQL connection was successfully tested')
+                        api_logger.info(f'MYSQL global transaction isolation: {result[0]}')
                     else:
                         api_logger.warning('Failed to test the MySQL connection')
         except Exception as e:
