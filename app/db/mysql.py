@@ -22,7 +22,6 @@ class MysqlConnection:
                 port=config.MYSQL_PORT, 
                 user=config.MYSQL_USERNAME, 
                 password=config.MYSQL_PASSWORD, 
-                db='kokomi',
                 pool_recycle=3600, # 设置连接的回收时间
                 autocommit=False   # 禁用隐式事务
                 # 由于禁用了隐式事务，必须确保事务被正确提交或者回滚！

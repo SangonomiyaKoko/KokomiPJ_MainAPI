@@ -109,8 +109,8 @@ class RootModel:
             data = {}
             await cur.execute(
                 "SELECT r.region_str, COALESCE(COUNT(u.region_id), 0) AS count "
-                "FROM region AS r "
-                "LEFT JOIN user_basic AS u ON r.region_id = u.region_id "
+                "FROM kokomi.region AS r "
+                "LEFT JOIN kokomi.user_basic AS u ON r.region_id = u.region_id "
                 "WHERE r.region_id BETWEEN 1 AND 5 "
                 "GROUP BY r.region_id, r.region_str;"
             )
@@ -138,8 +138,8 @@ class RootModel:
             data = {}
             await cur.execute(
                 "SELECT r.region_str, COALESCE(COUNT(u.region_id), 0) AS count "
-                "FROM region AS r "
-                "LEFT JOIN user_basic AS u ON r.region_id = u.region_id "
+                "FROM kokomi.region AS r "
+                "LEFT JOIN kokomi.clan_basic AS u ON r.region_id = u.region_id "
                 "WHERE r.region_id BETWEEN 1 AND 5 "
                 "GROUP BY r.region_id, r.region_str;"
             )
@@ -167,8 +167,8 @@ class RootModel:
             data = {}
             await cur.execute(
                 "SELECT r.region_str, COALESCE(COUNT(u.region_id), 0) AS count "
-                "FROM region AS r "
-                "LEFT JOIN recent AS u ON r.region_id = u.region_id "
+                "FROM kokomi.region AS r "
+                "LEFT JOIN kokomi.recent AS u ON r.region_id = u.region_id "
                 "WHERE r.region_id BETWEEN 1 AND 5 "
                 "GROUP BY r.region_id, r.region_str;"
             )

@@ -34,7 +34,7 @@ async def getClansOverview() -> ResponseDict:
     返回:
     - ResponseDict
     """
-    result = await RootData.get_basic_user_overview()
+    result = await RootData.get_basic_clan_overview()
     await record_api_call(result['status'])
     return result
 

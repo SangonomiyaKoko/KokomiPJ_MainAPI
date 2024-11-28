@@ -16,7 +16,7 @@ class RecentsUserModel:
 
             data = []
             await cur.execute(
-                "SELECT account_id FROM recents WHERE region_id = %s;",
+                "SELECT account_id FROM kokomi.recents WHERE region_id = %s;",
                 [region_id]
             )
             users = await cur.fetchall()

@@ -17,7 +17,7 @@ class RecentUserModel:
 
             data = []
             await cur.execute(
-                "SELECT account_id FROM recent WHERE region_id = %s;",
+                "SELECT account_id FROM kokomi.recent WHERE region_id = %s;",
                 [region_id]
             )
             users = await cur.fetchall()
@@ -44,7 +44,7 @@ class RecentUserModel:
                 'enabled': False
             }
             await cur.execute(
-                "SELECT EXISTS(SELECT 1 FROM recent WHERE region_id = %s and account_id = %s) AS is_exists_user;",
+                "SELECT EXISTS(SELECT 1 FROM kokomi.recent WHERE region_id = %s and account_id = %s) AS is_exists_user;",
                 [region_id, account_id]
             )
             user = await cur.fetchone()
@@ -68,7 +68,7 @@ class RecentUserModel:
             cur: Cursor = await conn.cursor()
 
             await cur.execute(
-                "SELECT recent_class FROM recent WHERE region_id = %s and account_id = %s;", 
+                "SELECT recent_class FROM kokomi.recent WHERE region_id = %s and account_id = %s;", 
                 [region_id, account_id]
             )
             user = await cur.fetchone()
@@ -76,13 +76,13 @@ class RecentUserModel:
                 # 用户不存在，插入新用户
                 current_timestamp = TimeFormat.get_current_timestamp()
                 await cur.execute(
-                    "INSERT INTO recent (account_id, region_id, recent_class, last_query_at) VALUES (%s, %s, %s, FROM_UNIXTIME(%s));",
+                    "INSERT INTO kokomi.recent (account_id, region_id, recent_class, last_query_at) VALUES (%s, %s, %s, FROM_UNIXTIME(%s));",
                     [account_id, region_id, recent_class, current_timestamp]
                 )
             else:
                 if user[0] <= recent_class:
                     await cur.execute(
-                        "UPDATE recent SET recent_class = %s WHERE region_id = %s and account_id = %s;",
+                        "UPDATE kokomi.recent SET recent_class = %s WHERE region_id = %s and account_id = %s;",
                         [recent_class, region_id, account_id]
                     )
             
@@ -103,7 +103,7 @@ class RecentUserModel:
             cur: Cursor = await conn.cursor()
 
             await cur.execute(
-                "DELETE FROM recent WHERE region_id = %s and account_id = %s;",
+                "DELETE FROM kokomi.recent WHERE region_id = %s and account_id = %s;",
                 [region_id, account_id]
             )
 
@@ -128,8 +128,8 @@ class RecentUserModel:
                 "SELECT u.is_active, u.active_level, u.is_public, u.total_battles, UNIX_TIMESTAMP(u.last_battle_at) AS last_battle_time, "
                 "UNIX_TIMESTAMP(u.updated_at) AS update_time, r.recent_class, "
                 "UNIX_TIMESTAMP(r.last_query_at) AS last_query_time, UNIX_TIMESTAMP(r.last_update_at) AS last_update_time "
-                "FROM recent AS r "
-                "LEFT JOIN user_info AS u ON u.account_id = r.account_id "
+                "FROM kokomi.recent AS r "
+                "LEFT JOIN kokomi.user_info AS u ON u.account_id = r.account_id "
                 "WHERE r.region_id = %s and r.account_id = %s;",
                 [region_id, account_id]
             )

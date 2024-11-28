@@ -71,6 +71,7 @@ def check_user_basic(pool: PooledDB, user_data: dict):
         conn.commit()
         return JSONResponse.API_1000_Success
     except Exception as e:
+        conn.rollback()
         raise e
     finally:
         if cur:
@@ -130,6 +131,7 @@ def check_clan_basic(pool: PooledDB, clan_data: dict):
         conn.commit()
         return JSONResponse.API_1000_Success
     except Exception as e:
+        conn.rollback()
         raise e
     finally:
         if cur:
@@ -181,6 +183,7 @@ def check_user_info(pool: PooledDB, user_data: dict):
         conn.commit()
         return JSONResponse.API_1000_Success
     except Exception as e:
+        conn.rollback()
         raise e
     finally:
         if cur:
@@ -230,6 +233,7 @@ def check_user_recent(pool: PooledDB, user_data: dict):
         conn.commit()
         return JSONResponse.API_1000_Success
     except Exception as e:
+        conn.rollback()
         raise e
     finally:
         if cur:
@@ -496,6 +500,7 @@ def update_user_clan(pool: PooledDB, user_data: dict):
         conn.commit()
         return JSONResponse.API_1000_Success
     except Exception as e:
+        conn.rollback()
         raise e
     finally:
         if cur:

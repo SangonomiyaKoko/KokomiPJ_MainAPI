@@ -25,6 +25,18 @@ class LanguageList(str, Enum):
 class AlgorithmList(str, Enum):
     pr = 'pr'
 
+class GameTypeList(str, Enum):
+    card = 'card'
+    overall = 'overall'
+    lifetime = 'lifetime'
+    pvp = 'pvp'
+    solo = 'pvp_solo'
+    div2 = 'pvp_div2'
+    div3 = 'pvp_div3'
+    rank = 'rank'
+    oper = 'oper'
+    clan = 'clan'
+
 class UserBaseModel(BaseModel):
     region_id: int = Field(..., description='服务器id')
     account_id: int = Field(..., description='用户id')

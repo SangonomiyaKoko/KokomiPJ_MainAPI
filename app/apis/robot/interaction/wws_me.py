@@ -21,10 +21,7 @@ async def main(
         data = {
             'user': {},
             'clan': {},
-            'overview':{},
-            'match_type': {},
-            'ship_type': {},
-            'charts': {}
+            'statistics': {}
         }
         # 请求获取user和clan数据
         ac_value = UserAccessToken.get_ac_value_by_id(account_id,region_id)

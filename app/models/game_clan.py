@@ -18,9 +18,9 @@ class ClanModel:
             await cur.execute(
                 "SELECT b.clan_id, i.is_active, UNIX_TIMESTAMP(i.updated_at) AS info_update_time, "
                 "u.hash_value, UNIX_TIMESTAMP(u.updated_at) AS users_update_time "
-                "FROM clan_basic AS b "
-                "LEFT JOIN clan_info AS i ON b.clan_id = i.clan_id "
-                "LEFT JOIN clan_users AS u ON b.clan_id = u.clan_id "
+                "FROM kokomi.clan_basic AS b "
+                "LEFT JOIN kokomi.clan_info AS i ON b.clan_id = i.clan_id "
+                "LEFT JOIN kokomi.clan_users AS u ON b.clan_id = u.clan_id "
                 "WHERE b.region_id = %s;",
                 [region_id]
             )
@@ -71,7 +71,7 @@ class ClanModel:
                 'updated_at': None
             }
             await cur.execute(
-                "SELECT tag, league, UNIX_TIMESTAMP(updated_at) AS update_time FROM clan_basic WHERE region_id = %s and clan_id = %s;", 
+                "SELECT tag, league, UNIX_TIMESTAMP(updated_at) AS update_time FROM kokomi.clan_basic WHERE region_id = %s and clan_id = %s;", 
                 [region_id, clan_id]
             )
             clan = await cur.fetchone()
@@ -79,19 +79,19 @@ class ClanModel:
                 # 用户不存在，插入新用户
                 tag = UtilityFunctions.get_clan_default_name()
                 await cur.execute(
-                    "INSERT INTO clan_basic (clan_id, region_id, tag) VALUES (%s, %s, %s);",
+                    "INSERT INTO kokomi.clan_basic (clan_id, region_id, tag) VALUES (%s, %s, %s);",
                     [clan_id, region_id, tag]
                 )
                 await cur.execute(
-                    "INSERT INTO clan_info (clan_id) VALUES (%s);",
+                    "INSERT INTO kokomi.clan_info (clan_id) VALUES (%s);",
                     [clan_id]
                 )
                 await cur.execute(
-                    "INSERT INTO clan_users (clan_id) VALUES (%s);",
+                    "INSERT INTO kokomi.clan_users (clan_id) VALUES (%s);",
                     [clan_id]
                 )
                 await cur.execute(
-                    "INSERT INTO clan_season (clan_id) VALUES (%s);",
+                    "INSERT INTO kokomi.clan_season (clan_id) VALUES (%s);",
                     [clan_id]
                 )
                 data['tag'] = tag
@@ -125,7 +125,7 @@ class ClanModel:
             team_data_2 = clan_season['team_data']['2']
             await cur.execute(
                 "SELECT season, UNIX_TIMESTAMP(last_battle_at) AS last_battle_time, team_data_1, team_data_2 "
-                "FROM clan_season WHERE clan_id = %s;",
+                "FROM kokomi.clan_season WHERE clan_id = %s;",
                 [clan_id]
             )
             clan = await cur.fetchone()
@@ -134,7 +134,7 @@ class ClanModel:
                 return JSONResponse.API_1009_ClanNotExistinDatabase
             if clan[0] != season_number:
                 await cur.execute(
-                    "UPDATE clan_season SET season = %s, last_battle_at = FROM_UNIXTIME(%s), "
+                    "UPDATE kokomi.clan_season SET season = %s, last_battle_at = FROM_UNIXTIME(%s), "
                     "team_data_1 = %s, team_data_2 = %s WHERE clan_id = %s",
                     [
                         season_number,last_battle_time, 
@@ -146,7 +146,7 @@ class ClanModel:
             #if clan[1] != last_battle_time:
             if clan[1] == last_battle_time:
                 await cur.execute(
-                    "UPDATE clan_season SET season = %s, last_battle_at = FROM_UNIXTIME(%s), "
+                    "UPDATE kokomi.clan_season SET season = %s, last_battle_at = FROM_UNIXTIME(%s), "
                     "team_data_1 = %s, team_data_2 = %s WHERE clan_id = %s",
                     [
                         season_number,last_battle_time, 
@@ -253,7 +253,7 @@ class ClanModel:
                 for insert_data in insert_data_list:
                     if len(insert_data) == 13:
                         await cur.execute(
-                            "INSERT INTO clan_battle_s%s ( "
+                            "INSERT INTO kokomi.clan_battle_s%s ( "
                             "battle_time, clan_id, region_id, team_number, battle_result, battle_rating, battle_stage, "
                             "league, division, division_rating, public_rating, stage_type, stage_progress"
                             " ) VALUES ( FROM_UNIXTIME(%s), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s );",
@@ -261,7 +261,7 @@ class ClanModel:
                         )
                     else:
                         await cur.execute(
-                            "INSERT INTO clan_battle_s%s ( "
+                            "INSERT INTO kokomi.clan_battle_s%s ( "
                             "battle_time, clan_id, region_id, team_number, battle_result "
                             " ) VALUES ( FROM_UNIXTIME(%s), %s, %s, %s, %s );",
                             [season_number] + insert_data
@@ -298,8 +298,8 @@ class ClanModel:
                 "SELECT b.clan_id, b.tag, b.league, UNIX_TIMESTAMP(b.updated_at) AS basic_update_time, "
                 "i.is_active, i.season, i.public_rating, i.league, i.division, i.division_rating, "
                 "UNIX_TIMESTAMP(i.last_battle_at) AS info_last_battle_time, "
-                "FROM clan_basic AS b "
-                "LEFT JOIN clan_info AS i ON b.clan_id = i.clan_id "
+                "FROM kokomi.clan_basic AS b "
+                "LEFT JOIN kokomi.clan_info AS i ON b.clan_id = i.clan_id "
                 "WHERE b.region_id = %s AND b.clan_id = %s;",
                 [region_id, clan_id]
             )
@@ -331,7 +331,7 @@ class ClanModel:
                     clan_data['last_battle_at'] != clan[10]
                 ):
                     await cur.execute(
-                        "UPDATE clan_info SET is_active = %s, public_rating = %s, league = %s, "
+                        "UPDATE kokomi.clan_info SET is_active = %s, public_rating = %s, league = %s, "
                         "division = %s, division_rating = %s, last_battle_at = FROM_UNIXTIME(%s) "
                         "WHERE clan_id = %s",
                         [
@@ -356,14 +356,14 @@ class ClanModel:
             cur: Cursor = await conn.cursor()
 
             await cur.execute(
-                "SELECT season_number FROM region_season WHERE region_id = %s;",
+                "SELECT kokomi.season_number FROM region_season WHERE region_id = %s;",
                 [region_id]
             )
             season_number_in_db = await cur.fetchone()
             if season_number != season_number_in_db[0]:
                 # 数据在数据库中，但是赛季更改，直接写入数据
                 await cur.execute(
-                    "UPDATE region_season SET season_number = %s WHERE region_id = %s;",
+                    "UPDATE kokomi.region_season SET season_number = %s WHERE region_id = %s;",
                     [season_number, region_id]
                 )
             sql_str = ''
@@ -376,9 +376,9 @@ class ClanModel:
                 "i.is_active, i.season, i.public_rating, i.league, i.division, i.division_rating, "
                 "UNIX_TIMESTAMP(i.last_battle_at) AS info_last_battle_time, "
                 "s.season, UNIX_TIMESTAMP(s.last_battle_at) AS season_last_battle_time "
-                "FROM clan_basic AS b "
-                "LEFT JOIN clan_info AS i ON b.clan_id = i.clan_id "
-                "LEFT JOIN clan_season AS s ON b.clan_id = s.clan_id "
+                "FROM kokomi.clan_basic AS b "
+                "LEFT JOIN kokomi.clan_info AS i ON b.clan_id = i.clan_id "
+                "LEFT JOIN kokomi.clan_season AS s ON b.clan_id = s.clan_id "
                 f"WHERE b.region_id = %s AND b.clan_id in ( %s{sql_str} );",
                 params
             )
@@ -394,27 +394,27 @@ class ClanModel:
                 if clan_id not in exists_clans:
                     # 用户不存在于数据库中，直接写入
                     await cur.execute(
-                        "INSERT INTO clan_basic (clan_id, region_id, tag) VALUES (%s, %s, %s);",
+                        "INSERT INTO kokomi.clan_basic (clan_id, region_id, tag) VALUES (%s, %s, %s);",
                         [clan_id, region_id, clan_data['tag']]
                     )
                     await cur.execute(
-                        "INSERT INTO clan_info (clan_id) VALUES (%s);",
+                        "INSERT INTO kokomi.clan_info (clan_id) VALUES (%s);",
                         [clan_id]
                     )
                     await cur.execute(
-                        "INSERT INTO clan_users (clan_id) VALUES (%s);",
+                        "INSERT INTO kokomi.clan_users (clan_id) VALUES (%s);",
                         [clan_id]
                     )
                     await cur.execute(
-                        "INSERT INTO clan_season (clan_id) VALUES (%s);",
+                        "INSERT INTO kokomi.clan_season (clan_id) VALUES (%s);",
                         [clan_id]
                     )
                     await cur.execute(
-                        "UPDATE clan_basic SET tag = %s, league = %s WHERE region_id = %s AND clan_id = %s",
+                        "UPDATE kokomi.clan_basic SET tag = %s, league = %s WHERE region_id = %s AND clan_id = %s",
                         [clan_data['tag'],clan_data['league'],region_id,clan_id]
                     )
                     await cur.execute(
-                        "UPDATE clan_info SET is_active = %s, season = %s, public_rating = %s, league = %s, "
+                        "UPDATE kokomi.clan_info SET is_active = %s, season = %s, public_rating = %s, league = %s, "
                         "division = %s, division_rating = %s, last_battle_at = FROM_UNIXTIME(%s) "
                         "WHERE clan_id = %s",
                         [
@@ -432,7 +432,7 @@ class ClanModel:
                         clan_data['league'] != exists_clans[clan_id][1]
                     ):
                         await cur.execute(
-                            "UPDATE clan_basic SET tag = %s, league = %s, updated_at = CURRENT_TIMESTAMP "
+                            "UPDATE kokomi.clan_basic SET tag = %s, league = %s, updated_at = CURRENT_TIMESTAMP "
                             "WHERE region_id = %s AND clan_id = %s",
                             [clan_data['tag'],clan_data['league'],region_id,clan_id]
                         )
@@ -442,7 +442,7 @@ class ClanModel:
                         clan_data['last_battle_at'] != exists_clans[clan_id][9]
                     ):
                         await cur.execute(
-                            "UPDATE clan_info SET is_active = %s, public_rating = %s, league = %s, "
+                            "UPDATE kokomi.clan_info SET is_active = %s, public_rating = %s, league = %s, "
                             "division = %s, division_rating = %s, last_battle_at = FROM_UNIXTIME(%s) "
                             "WHERE clan_id = %s",
                             [
