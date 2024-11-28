@@ -6,7 +6,11 @@ from .api_base import BaseUrl
 from app.log import ExceptionLogger
 from app.response import JSONResponse
 from app.const import ClanColor
-from app.middlewares.celery import task_check_clan_basic, task_check_user_basic
+from app.middlewares.celery import (
+    task_check_clan_basic, 
+    task_check_user_basic, 
+    task_check_user_basic_and_info
+)
 
 
 class BasicAPI:
@@ -195,7 +199,30 @@ class BasicAPI:
                 'region_id': region_id,
                 'nickname': temp_data['name']
             }
-            task_check_user_basic.delay(user_basic)
+            if temp_data['hidden'] == True:
+                user_info = {
+                    'account_id': temp_data['spa_id'],
+                    'region_id': region_id,
+                    'is_active': True,
+                    'active_level': 0,
+                    'is_public': False,
+                    'total_battles': 0,
+                    'last_battle_time': 0
+                }
+                task_check_user_basic_and_info.delay(user_basic,user_info)
+            elif temp_data['statistics'] == {}:
+                user_info = {
+                    'account_id': temp_data['spa_id'],
+                    'region_id': region_id,
+                    'is_active': False,
+                    'active_level': 0,
+                    'is_public': True,
+                    'total_battles': 0,
+                    'last_battle_time': 0
+                }
+                task_check_user_basic_and_info.delay(user_basic,user_info)
+            else:
+                task_check_user_basic.delay(user_basic)
         search_data = []
         if check:
             for temp_data in result.get('data',None):

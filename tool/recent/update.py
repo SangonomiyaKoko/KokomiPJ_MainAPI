@@ -89,9 +89,13 @@ class Update:
                 user_basic_data = basic_data[0]['data'][str(account_id)]['statistics']
                 if (
                     user_basic_data == {} or
-                    user_basic_data['basic'] == {} or
-                    user_basic_data['basic']['leveling_points'] == 0
+                    user_basic_data['basic'] == {}
                 ):
+                    # 用户没有数据
+                    user_info['is_active'] = 0
+                    await self.update_user_data(account_id,region_id,user_basic,user_info,None)
+                    return
+                if user_basic_data['basic']['leveling_points'] == 0:
                     # 用户没有数据
                     user_info['total_battles'] = 0
                     user_info['last_battle_time'] = 0
@@ -284,9 +288,14 @@ class Update:
         user_basic_data = basic_data[0]['data'][str(account_id)]['statistics']
         if (
             user_basic_data == {} or
-            user_basic_data['basic'] == {} or
-            user_basic_data['basic']['leveling_points'] == 0
+            user_basic_data['basic'] == {}
         ):
+            # 用户没有数据
+            user_info['is_active'] = 0
+            await self.update_user_data(account_id,region_id,user_basic,user_info,None)
+            await self.delete_user_recent(account_id, region_id)
+            return
+        if user_basic_data['basic']['leveling_points'] == 0:
             # 用户没有数据
             user_info['total_battles'] = 0
             user_info['last_battle_time'] = 0

@@ -83,19 +83,20 @@ def task_update_clan_and_user(clan_data: dict, user_data: dict):
     if result.get('code', None) != 1000:
         print(result)
     return 'ok'
-    
+
 @celery_app.task
-def task_check_user_info(user_data: dict):
-    result = check_user_info(pool,user_data)
+def task_check_user_basic_and_info(user_basic: dict, user_info: dict):
+    result = check_user_basic(pool,user_basic)
+    if result.get('code', None) != 1000:
+        print(result)
+    result = check_user_info(pool,user_info)
     if result.get('code', None) != 1000:
         print(result)
     return 'ok'
+
     
 @celery_app.task
-def task_check_user_basic_and_info(user_data: dict):
-    result = check_user_basic(pool,user_data)
-    if result.get('code', None) != 1000:
-        print(result)
+def task_check_user_info(user_data: dict):
     result = check_user_info(pool,user_data)
     if result.get('code', None) != 1000:
         print(result)
