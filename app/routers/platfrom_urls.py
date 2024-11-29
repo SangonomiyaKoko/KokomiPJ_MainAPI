@@ -8,7 +8,10 @@ from .schemas import (
     UserUpdateModel,
     ClanUpdateModel
 )
-from app.apis.platform import Search, Update, GameUser, GameClan, UserCache
+from app.apis.platform import (
+    Search, Update, GameUser, 
+    GameClan, UserCache, ClanCache
+)
 from app.utils import UtilityFunctions
 from app.response import JSONResponse, ResponseDict
 from app.middlewares import record_api_call
@@ -137,44 +140,8 @@ async def updateShipName(region: RegionList) -> ResponseDict:
     await record_api_call(result['status'])
     return result
 
-@router.get("/game/users/number/")
-async def get_user_max_number() -> ResponseDict:
-    """获取user表中id最大值
-
-    用于user表的遍历更新
-
-    参数:
-    - None
-
-    返回:
-    - ResponseDict
-    """
-    result = await GameUser.get_user_max_number()
-    await record_api_call(result['status'])
-    return result
-
-@router.get("/game/clans/{region}/")
-async def getClans(region: RegionList) -> ResponseDict:
-    """获取服务器下所有工会的列表
-
-    用于遍历更新
-
-    参数:
-    - region: 服务器
-
-    返回:
-    - ResponseDict
-    """
-    region_id = UtilityFunctions.get_region_id(region)
-    if not region_id:
-        return JSONResponse.API_1010_IllegalRegion
-    result = await GameClan.get_clan(region_id)
-    await record_api_call(result['status'])
-    return result 
-
-
 @router.get("/game/users/cache/")
-async def getUserCache(offset: int, limit: int = 1000) -> ResponseDict:
+async def getUserCache(offset: Optional[int] = None, limit: Optional[int] = None) -> ResponseDict:
     """批量获取用户的Cache数据
 
     从offset开始获取最大limit的数据
@@ -186,7 +153,30 @@ async def getUserCache(offset: int, limit: int = 1000) -> ResponseDict:
     返回:
     - ResponseDict
     """
-    result = await UserCache.get_user_cache_data_batch(offset, limit)
+    if offset == None:
+        result = await UserCache.get_user_max_number()
+    else:
+        result = await UserCache.get_user_cache_data_batch(offset, limit)
+    await record_api_call(result['status'])
+    return result
+
+@router.get("/game/clans/cache/")
+async def getClanCache(offset: Optional[int] = None, limit: Optional[int] = None) -> ResponseDict:
+    """批量获取工会的Cache数据
+
+    从offset开始获取最大limit的数据
+
+    参数:
+    - offset: 偏移量
+    - limit: 最多返回值数量
+
+    返回:
+    - ResponseDict
+    """
+    if offset == None:
+        result = await ClanCache.get_clan_max_number()
+    else:
+        result = await ClanCache.get_clan_cache_data_batch(offset, limit)
     await record_api_call(result['status'])
     return result
 

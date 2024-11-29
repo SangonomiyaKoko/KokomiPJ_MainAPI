@@ -44,7 +44,7 @@ CREATE TABLE region_season (
     FOREIGN KEY (region_id) REFERENCES region(region_id) ON DELETE CASCADE -- 外键
 );
 
-INSERT INTO region
+INSERT INTO region_season
     (region_id, season_number)
 VALUES
     (1, 0), (2, 0), (3, 0), (4, 0), (5, 0);

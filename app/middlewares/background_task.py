@@ -328,25 +328,24 @@ def update_user_ship(pool: PooledDB, user_data: dict):
         for del_ship_id in delete_ship_list:
             cur.execute(
                 "DELETE FROM ships.ship_%s "
-                "WHERE ship_id = %s AND region_id = %s AND account_id = %s;",
-                [int(del_ship_id), int(del_ship_id), region_id, account_id]
+                "WHERE region_id = %s AND account_id = %s;",
+                [int(del_ship_id), region_id, account_id]
             )
         for update_ship_id, ship_data in replace_ship_dict.items():
             cur.execute(
                 "UPDATE ships.ship_%s SET battles_count = %s, battle_type_1 = %s, battle_type_2 = %s, battle_type_3 = %s, wins = %s, "
                 "damage_dealt = %s, frags = %s, exp = %s, survived = %s, scouting_damage = %s, art_agro = %s, "
                 "planes_killed = %s, max_exp = %s, max_damage_dealt = %s, max_frags = %s "
-                "WHERE ship_id = %s AND region_id = %s AND account_id = %s;",
-                [int(update_ship_id)] + ship_data + [int(update_ship_id), region_id, account_id]
+                "WHERE region_id = %s AND account_id = %s;",
+                [int(update_ship_id)] + ship_data + [region_id, account_id]
             )
             cur.execute(
-                "INSERT INTO ships.ship_%s (ship_id, region_id, account_id, battles_count, battle_type_1, battle_type_2, "
+                "INSERT INTO ships.ship_%s (account_id, region_id, battles_count, battle_type_1, battle_type_2, "
                 "battle_type_3, wins, damage_dealt, frags, exp, survived, scouting_damage, art_agro, planes_killed, "
                 "max_exp, max_damage_dealt, max_frags) "
-                "SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s "
-                "WHERE NOT EXISTS (SELECT 1 FROM ships.ship_%s WHERE ship_id = %s AND region_id = %s AND account_id = %s);",
-                [int(update_ship_id)] + [int(update_ship_id), region_id, account_id] + ship_data + [int(update_ship_id)] + \
-                [int(update_ship_id), region_id, account_id]
+                "SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s "
+                "WHERE NOT EXISTS (SELECT 1 FROM ships.ship_%s WHERE region_id = %s AND account_id = %s);",
+                [int(update_ship_id)] + [account_id, region_id] + ship_data + [int(update_ship_id)] + [region_id, account_id]
             )
         
         conn.commit()

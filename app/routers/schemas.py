@@ -93,6 +93,7 @@ class ClanSeasonUpdateModel(ClanBaseModel):
 
 class ClanBasicUpdateModel(ClanBaseModel):
     is_active: int = Field(..., description='工会是否活跃')
+    tag: str = Field(None, description='工会名称')
     season_number: int = Field(0, description='赛季代码')
     public_rating: int = Field(1100, description='工会赛季分数')
     league: int = Field(4, description='工会段位')

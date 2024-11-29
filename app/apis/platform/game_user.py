@@ -11,15 +11,6 @@ from app.middlewares.celery import (
 )
 
 class GameUser:
-    @ExceptionLogger.handle_program_exception_async
-    async def get_user_max_number() -> ResponseDict:
-        try:
-            result = await UserModel.get_user_max_number()
-            return result
-        except Exception as e:
-            raise e
-        finally:
-            gc.collect()
 
     @ExceptionLogger.handle_program_exception_async
     async def get_user_info_data(account_id: int, region_id: int) -> ResponseDict:

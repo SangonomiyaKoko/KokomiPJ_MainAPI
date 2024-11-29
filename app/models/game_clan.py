@@ -7,6 +7,100 @@ from app.log import ExceptionLogger
 from app.utils import UtilityFunctions, TimeFormat
 
 class ClanModel:
+
+    @ExceptionLogger.handle_database_exception_async
+    async def get_clan_max_number() -> ResponseDict:
+        '''获取数据库中id的最大值
+
+        获取id的最大值，用于数据库遍历更新时确定边界
+
+        参数:
+            - None
+        
+        返回:
+            - ResponseDict
+        '''
+        try:
+            conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
+            cur: Cursor = await conn.cursor()
+
+            data = {
+                'max_id': 0
+            }
+            await cur.execute(
+                "SELECT MAX(id) AS max_id FROM kokomi.clan_basic;"
+            )
+            user = await cur.fetchone()
+            data['max_id'] = user[0]
+
+            await conn.commit()
+            return JSONResponse.get_success_response(data)
+        except Exception as e:
+            await conn.rollback()
+            raise e
+        finally:
+            await cur.close()
+            await MysqlConnection.release_connection(conn)
+
+    @ExceptionLogger.handle_database_exception_async
+    async def get_clan_cache_batch(offset: int, limit = 1000) -> ResponseDict:
+        '''批量获取用户缓存的数据
+
+        获取用户缓存数据，用于缓存的更新
+
+        参数:
+            offset: 从哪个id开始读取
+            limit: 每次读取多少条数据
+        
+        返回值:
+            ResponseDict
+        '''
+        try:
+            conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
+            cur: Cursor = await conn.cursor()
+
+            data = []
+            await cur.execute(
+                "SELECT b.clan_id, b.region_id, i.is_active, UNIX_TIMESTAMP(i.updated_at) AS info_update_time, "
+                "u.hash_value, UNIX_TIMESTAMP(u.updated_at) AS users_update_time "
+                "FROM kokomi.clan_basic AS b "
+                "LEFT JOIN kokomi.clan_info AS i ON b.clan_id = i.clan_id "
+                "LEFT JOIN kokomi.clan_users AS u ON b.clan_id = u.clan_id "
+                "ORDER BY b.id LIMIT %s OFFSET %s;", 
+                [limit, offset]
+            )
+            rows = await cur.fetchall()
+            for row in rows:
+                # 排除已注销账号的数据，避免浪费服务器资源
+                if row[3] and not row[2]:
+                    continue
+                user = {
+                    'clan_basic': {
+                        'region_id': row[1],
+                        'clan_id': row[0]
+                    },
+                    'clan_info': {
+                        'is_active': row[2],
+                        'update_time': row[3]
+                    },
+                    'clan_users':{
+                        'hash_value': row[4],
+                        'update_time': row[5]
+                    }
+                }
+                data.append(user)
+            
+            await conn.commit()
+            return JSONResponse.get_success_response(data)
+        except Exception as e:
+            await conn.rollback()
+            raise e
+        finally:
+            await cur.close()
+            await MysqlConnection.release_connection(conn)
+
     @ExceptionLogger.handle_database_exception_async
     async def get_clan_by_rid(region_id: int) -> ResponseDict:
         try:
@@ -317,13 +411,13 @@ class ClanModel:
                 if (
                     not clan[3] or 
                     current_timestamp - clan[3] > 2*24*60*60 or
-                    clan_data['tag'] != clan[1] or
+                    (clan_data['tag'] and clan_data['tag'] != clan[1]) or
                     clan_data['league'] != clan[2]
                 ):
                     await cur.execute(
                         "UPDATE kokomi.clan_basic SET tag = %s, league = %s, updated_at = CURRENT_TIMESTAMP "
                         "WHERE region_id = %s AND clan_id = %s;",
-                        [clan['tag'],clan['league'],region_id,clan_id]
+                        [clan_data['tag'],clan_data['league'],region_id,clan_id]
                     )
                 if (
                     clan_data['season_number'] != clan[5] or

@@ -53,7 +53,7 @@ class Network:
     async def get_user_cache_number(self):
         "获取用户缓存的数量，用于确定offset边界"
         platform_api_url = API_URL
-        url = f'{platform_api_url}/p/game/users/number/'
+        url = f'{platform_api_url}/p/game/users/cache/'
         result = await self.fetch_data(url)
         return result
     

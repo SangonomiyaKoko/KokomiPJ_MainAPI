@@ -15,23 +15,23 @@ class ContinuousUserCacheUpdater:
     async def update_user(self):
         start_time = int(time.time())
         # 更新用户
-        clan_id = 2000015803
-        region_id = 1
-        clan_data = {
-            "clan_id": 2000015803,
-            "hash_value": None,
-            "update_time": None
-        }
-        await Update.main(clan_id,region_id,clan_data)
-        # for region_id in [1,2,3,4,5]:
-        #     request_result = await Network.get_recent_users_by_rid(region_id)
-        #     if request_result['code'] != 1000:
-        #         logger.error(f"获取RecentUser时发生错误，Error: {request_result.get('message')}")
-        #         continue
-        #     for clan_data in request_result['data']['clans']:
-        #         clan_id = clan_data['clan_id']
-        #         logger.info(f'{region_id} - {clan_id} | ---------------------------------')
-        #         await Update.main(clan_id,region_id,clan_data)
+        
+        limit = 1000
+        request_result = await Network.get_clan_cache_number()
+        if request_result['code'] != 1000:
+            logger.error(f"获取MaxClanID时发生错误，Error: {request_result.get('message')}")
+        max_id = request_result['data']['max_id']
+        max_offset = (int(max_id / limit) + 1) * limit
+        offset = 0
+        while offset <= max_offset:
+            clans_result = await Network.get_cache_clans(offset, limit)
+            if clans_result['code'] != 1000:
+                logger.error(f"获取CacheClans时发生错误，Error: {clans_result.get('message')}")
+            for clan in clans_result['data']:
+                clan_id = clan['clan_basic']['clan_id']
+                region_id = clan['clan_basic']['region_id']
+                logger.info(f'{region_id} - {clan_id} | ---------------------------------')
+                await Update.main(clan_id, region_id, clan)
         end_time = int(time.time())
         # 避免测试时候的循环bug
         if end_time - start_time <= 50:

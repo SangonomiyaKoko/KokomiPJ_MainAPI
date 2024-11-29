@@ -1,14 +1,24 @@
 import gc
+
 from app.log import ExceptionLogger
 from app.response import ResponseDict, JSONResponse
 from app.models import UserModel, ShipsCacheModel
 from app.middlewares.celery import (
-    task_update_user_ship, 
-    task_update_user_ships
+    task_update_user_cache
 )
 
 
 class UserCache:
+    @ExceptionLogger.handle_program_exception_async
+    async def get_user_max_number() -> ResponseDict:
+        try:
+            result = await UserModel.get_user_max_number()
+            return result
+        except Exception as e:
+            raise e
+        finally:
+            gc.collect()
+
     @ExceptionLogger.handle_program_exception_async
     async def get_user_cache_data_batch(offset: int, limit: int = 1000) -> ResponseDict:
         try:
@@ -30,6 +40,7 @@ class UserCache:
             ship_id_set = set()
             delete_ship_list = []
             replace_ship_dict = {}
+            ship_data = None
             if user_data['hash_value'] and user_data['ships_data']:
                 for ship_id, ship_battles in user_data['ships_data'].items():
                     if (
@@ -52,9 +63,9 @@ class UserCache:
                 if check_ship_id_result.get('code', None) != 1000:
                     return check_ship_id_result
                 if delete_ship_list != [] or replace_ship_dict != {}:
-                    task_update_user_ship.delay(data)
+                    ship_data = data
             del user_data['details_data']
-            task_update_user_ships.delay(user_data)
+            task_update_user_cache.delay(user_data, ship_data)
             return JSONResponse.API_1000_Success
         except Exception as e:
             raise e

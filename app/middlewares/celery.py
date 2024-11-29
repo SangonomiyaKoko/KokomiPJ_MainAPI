@@ -122,17 +122,17 @@ def task_check_user_info(user_data: dict):
     return 'ok'
 
 @celery_app.task
-def task_update_user_ships(user_data: dict):
-    result = update_user_ships(pool,user_data)
-    if result.get('code', None) != 1000:
-        print(result)
-    return 'ok'
-
-@celery_app.task
-def task_update_user_ship(user_data: dict):
-    result = update_user_ship(pool,user_data)
-    if result.get('code', None) != 1000:
-        print(result)
+def task_update_user_cache(ships_data: dict, ship_data: dict):
+    if ship_data:
+        result = update_user_ship(pool,ship_data)
+        if result.get('code', None) != 1000:
+            print(result)
+            return 'error'
+    if ships_data:
+        result = update_user_ships(pool,ships_data)
+        if result.get('code', None) != 1000:
+            print(result)
+            return 'error'
     return 'ok'
 
 @celery_app.task
@@ -147,7 +147,9 @@ def task_update_clan_users(clan_id: int, hash_value: str, user_data: list):
     result = update_users_clan(pool, clan_id, user_data)
     if result.get('code', None) != 1000:
         print(result)
+        return 'error'
     result = update_clan_users(pool, clan_id, hash_value, user_data)
     if result.get('code', None) != 1000:
         print(result)
+        return 'error'
     return 'ok'
