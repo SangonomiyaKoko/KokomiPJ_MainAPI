@@ -15,8 +15,7 @@ class ContinuousUserCacheUpdater:
     async def update_user(self):
         start_time = int(time.time())
         # 更新用户
-        #for region_id in [1,2,3,4,5]:
-        for region_id in [4]:
+        for region_id in [1,2,3,4,5]:
             logger.info(f'{region_id} | ---------------------------------')
             await Update.main(region_id)
         end_time = int(time.time())

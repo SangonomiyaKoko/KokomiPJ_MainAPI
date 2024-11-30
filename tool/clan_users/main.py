@@ -32,6 +32,7 @@ class ContinuousUserCacheUpdater:
                 region_id = clan['clan_basic']['region_id']
                 logger.info(f'{region_id} - {clan_id} | ---------------------------------')
                 await Update.main(clan_id, region_id, clan)
+            offset += limit
         end_time = int(time.time())
         # 避免测试时候的循环bug
         if end_time - start_time <= 50:

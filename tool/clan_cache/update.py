@@ -29,7 +29,7 @@ class Update:
         season_number, clan_data_list = await Network.get_clan_rank_data(region_id)
         logger.debug(f'{region_id} | ├── 当前赛季代码 {season_number}')
         logger.debug(f'{region_id} | ├── 当前工会数量 {len(clan_data_list)}')
-        if len(clan_data_list) == 0:
+        if season_number == None or len(clan_data_list) == 0:
             return
         need_update_list = []
         chunk_size = 50  # 每次获取50个数据
@@ -43,7 +43,6 @@ class Update:
                 }
                 update_result = await self.update_clan_info_data(i, region_id, data)
                 need_update_list = need_update_list + update_result
-        season_number = 27
         logger.debug(f'{region_id} | ├── 需要更新用户数量 {len(need_update_list)}')
         for clan_id in need_update_list:
             clan_cvc_data = await Network.get_clan_cvc_data(clan_id,region_id,season_number)
@@ -55,12 +54,12 @@ class Update:
                 }
                 await self.update_clan_data(region_id,clan_basic,None)
                 logger.debug(f"{region_id} - {clan_id} | ├── 工会不存在，更新数据")
-                return
+                continue
             if clan_cvc_data.get('code', None) != 1000:
                 logger.error(f"{region_id} - {clan_id} | ├── 网络请求失败，Error: {clan_cvc_data.get('message')}")
-                return
+                continue
             await self.update_clan_data(clan_id,region_id,None,clan_cvc_data['data'])
-            return
+        return
 
     async def update_clan_info_data(
         i: int,

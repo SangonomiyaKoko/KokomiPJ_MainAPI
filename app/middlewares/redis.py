@@ -33,15 +33,14 @@ class RedisConnection:
             else:
                 self.__init_connection(self)
             redis_pool = self._pool
-            test_value = 'value'
-            redis_value = None
             async with redis_pool as redis:
-                await redis.set("test_connection", test_value, 60)
-                redis_value = await redis.get("test_connection")
-            if redis_value == test_value:
-                api_logger.info('The Redis connection was successfully tested')
-            else:
-                api_logger.warning('Failed to test the Redis connection')
+                # ping测试连接
+                ping_response = await redis.ping()
+                api_logger.info(f"Redis PING Response: {ping_response}")
+                # 获取redis版本
+                info = await redis.info("server")
+                redis_version = info.get("redis_version")
+                api_logger.info(f"Redis Version: {redis_version}")
         except Exception as e:
             api_logger.warning(f'Failed to test the Redis connection')
             api_logger.error(e)

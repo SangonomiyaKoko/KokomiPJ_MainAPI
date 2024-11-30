@@ -47,8 +47,10 @@ class BinaryParserUtils:
 
 class BinaryGeneratorUtils:
     @classmethod
-    def to_user_binary_data_from_dict(self, data_dict) -> bytes:
+    def to_user_binary_data_from_dict(self, data_dict: dict) -> bytes:
         '''从user的dict数据生成为存储的二进制数据'''
+        if data_dict == {}:
+            return b'\x00\x00\x00\x00\x00\x00\x00'
         # 存储合并后的二进制数据
         result = bytearray()
         for key, value in data_dict.items():
@@ -60,10 +62,12 @@ class BinaryGeneratorUtils:
         return bytes(result)
     
     def to_clan_binary_data_from_list(data_list: list[int]) -> bytes:
+        if data_list == []:
+            return b'\x00\x00\x00\x00\x00'
         binary_data = bytearray()
         for number in data_list:
             if not (0 <= number <= 2**40):
-                raise ValueError(f"{number} out of the range！")
+                raise ValueError("key must be a non-negative integer less than 2^40.")
             # 将数字转为5字节二进制数据（固定大小）
             binary_data.extend(number.to_bytes(5, byteorder='big'))
         return bytes(binary_data)

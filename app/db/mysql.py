@@ -41,16 +41,20 @@ class MysqlConnection:
             else:
                 await self.__init_connection(self)
             mysql_pool = self.__pool
-            query = "SELECT @@GLOBAL.transaction_isolation;"
             async with mysql_pool.acquire() as conn:
                 conn: Connection
                 async with conn.cursor() as cur:
                     cur: Cursor
-                    await cur.execute(query)
+                    await cur.execute("SELECT VERSION();")
                     result = await cur.fetchone()
                     if result != None:
-                        api_logger.info('The MySQL connection was successfully tested')
-                        api_logger.info(f'MYSQL global transaction isolation: {result[0]}')
+                        api_logger.info(f'MYSQL Version: {result[0]}')
+                    else:
+                        api_logger.warning('Failed to test the MySQL connection')
+                    await cur.execute("SELECT @@GLOBAL.transaction_isolation;")
+                    result = await cur.fetchone()
+                    if result != None:
+                        api_logger.info(f'MYSQL transaction isolation: {result[0]}')
                     else:
                         api_logger.warning('Failed to test the MySQL connection')
         except Exception as e:

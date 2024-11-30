@@ -450,7 +450,7 @@ class ClanModel:
             cur: Cursor = await conn.cursor()
 
             await cur.execute(
-                "SELECT kokomi.season_number FROM region_season WHERE region_id = %s;",
+                "SELECT season_number FROM kokomi.region_season WHERE region_id = %s;",
                 [region_id]
             )
             season_number_in_db = await cur.fetchone()

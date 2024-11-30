@@ -106,7 +106,6 @@ class Update:
             return
         user_ships_data = await Network.get_cache_data(account_id,region_id,ac_value)
         if user_ships_data.get('code', None) != 1000:
-            logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {user_ships_data.get('message')}")
             return
         new_user_data = user_ships_data['data']
         sorted_dict = dict(sorted(new_user_data['basic'].items()))

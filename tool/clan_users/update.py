@@ -25,7 +25,7 @@ class Update:
     async def service_master(self, clan_id: int, region_id: int, clan_data: dict):
         current_timestamp = int(time.time())
         if clan_data['clan_info']['update_time'] and clan_data['clan_users']['update_time'] and (
-            current_timestamp - clan_data['clan_users']['update_time'] <= 2*60*60
+            current_timestamp - clan_data['clan_users']['update_time'] <= 2*24*60*60
         ):
             logger.debug(f'{region_id} - {clan_id} | ├── 未到达更新时间，跳过更新')
             return

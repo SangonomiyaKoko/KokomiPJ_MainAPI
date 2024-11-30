@@ -148,10 +148,12 @@ class Network:
             else:
                 logger.debug(f"{region_id} | ├── 第 {i}/13 个API请求成功")
             season, data = self.__clan_data_processing(result)
+            if season == None:
+                continue
             if season_number == None:
                 season_number = season
             if season_number != season:
-                return []
+                return None, []
             clan_data_list = clan_data_list + data
         return season_number, clan_data_list
     
@@ -192,14 +194,24 @@ class Network:
     
     def __cvc_data_processing(clan_id: int, region_id: int, season: int, response: dict):
         last_battle_at = response['data']['clan_statistics']['last_battle_at']
+        clan_null_data = {
+            'battles_count': 0, 
+            'wins_count': 0, 
+            'public_rating': 1100, 
+            'league': 4, 
+            'division': 2, 
+            'division_rating': 0, 
+            'stage_type': None, 
+            'stage_progress': None
+        }
         result = {
             'clan_id': clan_id,
             'region_id': region_id,
             'season_number': season,
             'last_battle_time': int(datetime.fromisoformat(last_battle_at).timestamp()),
             'team_data': {
-                1: None,
-                2: None
+                1: clan_null_data,
+                2: clan_null_data
             }
         }
         for team_data in response['data']['clan_statistics']['ratings']:

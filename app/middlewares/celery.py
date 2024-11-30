@@ -144,10 +144,11 @@ def task_check_user_recent(user_data: dict):
 
 @celery_app.task
 def task_update_clan_users(clan_id: int, hash_value: str, user_data: list):
-    result = update_users_clan(pool, clan_id, user_data)
-    if result.get('code', None) != 1000:
-        print(result)
-        return 'error'
+    if len(user_data) != 0:
+        result = update_users_clan(pool, clan_id, user_data)
+        if result.get('code', None) != 1000:
+            print(result)
+            return 'error'
     result = update_clan_users(pool, clan_id, hash_value, user_data)
     if result.get('code', None) != 1000:
         print(result)

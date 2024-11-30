@@ -389,7 +389,7 @@ def update_clan_users(pool: PooledDB, clan_id: int, hash_value, user_data: list)
                     leave_user_list.append(account_id)
         cur.execute(
             "UPDATE kokomi.clan_users "
-            "SET hash_value = %s, users_data = %s "
+            "SET hash_value = %s, users_data = %s, updated_at = CURRENT_TIMESTAMP "
             "WHERE clan_id = %s",
             [hash_value, BinaryGeneratorUtils.to_clan_binary_data_from_list(user_data),clan_id]
         )
@@ -430,7 +430,7 @@ def update_users_clan(pool: PooledDB, clan_id: int, user_data: list):
             params.append(aid)
         cur.execute(
             "UPDATE kokomi.user_clan "
-            "SET clan_id = %s "
+            "SET clan_id = %s, updated_at = CURRENT_TIMESTAMP "
             f"WHERE account_id IN ( %s{sql_str} );", 
             [clan_id] + [user_data[0]] + params
         )
@@ -462,7 +462,7 @@ def update_user_ships(pool: PooledDB, user_data: dict):
         if user_data['hash_value']:
             cur.execute(
                 "UPDATE kokomi.user_ships "
-                "SET battles_count = %s, hash_value = %s, ships_data = %s "
+                "SET battles_count = %s, hash_value = %s, ships_data = %s, updated_at = CURRENT_TIMESTAMP "
                 "WHERE account_id = %s;", 
                 [
                     user_data['battles_count'], 
@@ -474,7 +474,7 @@ def update_user_ships(pool: PooledDB, user_data: dict):
         else:
             cur.execute(
                 "UPDATE kokomi.user_ships "
-                "SET battles_count = %s "
+                "SET battles_count = %s, updated_at = CURRENT_TIMESTAMP "
                 "WHERE account_id = %s;", 
                 [user_data['battles_count'], account_id]
             )
@@ -508,12 +508,12 @@ def update_user_clan(pool: PooledDB, user_data: dict):
         clan_id = user_data['clan_id']
         if clan_id:
             cur.execute(
-                "UPDATE kokomi.user_clan SET clan_id = %s WHERE account_id = %s;",
+                "UPDATE kokomi.user_clan SET clan_id = %s, updated_at = CURRENT_TIMESTAMP WHERE account_id = %s;",
                 [clan_id, account_id]
             )
         else:
             cur.execute(
-                "UPDATE kokomi.user_clan SET updated_at = CURRENT_TIMESTAMP WHERE account_id = %s;",
+                "UPDATE kokomi.user_clan SET clan_id = NULL, updated_at = CURRENT_TIMESTAMP WHERE account_id = %s;",
                 [account_id]
             )
 
