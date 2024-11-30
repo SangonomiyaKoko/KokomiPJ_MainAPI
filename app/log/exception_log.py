@@ -5,7 +5,7 @@ import httpx
 import aiomysql
 import pymysql
 import sqlite3
-import aioredis
+import redis
 
 from .error_log import write_error_info
 from app.response import JSONResponse
@@ -235,7 +235,7 @@ class ExceptionLogger:
             try:
                 result = await func(*args, **kwargs)
                 return result
-            except aioredis.exceptions.RedisError as e:
+            except redis.RedisError as e:
                 error_id = generate_error_id()
                 write_error_info(
                     error_id = error_id,
