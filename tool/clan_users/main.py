@@ -17,22 +17,26 @@ class ContinuousUserCacheUpdater:
         # 更新用户
         
         limit = 1000
-        request_result = await Network.get_clan_cache_number()
+        request_result = await Network.get_cache_clans()
         if request_result['code'] != 1000:
             logger.error(f"获取MaxClanID时发生错误，Error: {request_result.get('message')}")
-        max_id = request_result['data']['max_id']
-        max_offset = (int(max_id / limit) + 1) * limit
-        offset = 0
-        while offset <= max_offset:
-            clans_result = await Network.get_cache_clans(offset, limit)
-            if clans_result['code'] != 1000:
-                logger.error(f"获取CacheClans时发生错误，Error: {clans_result.get('message')}")
-            for clan in clans_result['data']:
-                clan_id = clan['clan_basic']['clan_id']
-                region_id = clan['clan_basic']['region_id']
-                logger.info(f'{region_id} - {clan_id} | ---------------------------------')
-                await Update.main(clan_id, region_id, clan)
-            offset += limit
+        else:
+            max_id = request_result['data']['max_id']
+            max_offset = (int(max_id / limit) + 1) * limit
+            offset = 0
+            while offset <= max_offset:
+                clans_result = await Network.get_cache_clans(offset, limit)
+                if clans_result['code'] == 1000:
+                    i = 0
+                    for clan in clans_result['data']:
+                        clan_id = clan['clan_basic']['clan_id']
+                        region_id = clan['clan_basic']['region_id']
+                        logger.info(f'{region_id} - {clan_id} | ------------------[ {offset + i} / {max_id} ]')
+                        await Update.main(clan_id, region_id, clan)
+                        i += 1
+                else:
+                    logger.error(f"获取CacheClans时发生错误，Error: {clans_result.get('message')}")
+                offset += limit
         end_time = int(time.time())
         # 避免测试时候的循环bug
         if end_time - start_time <= 50:

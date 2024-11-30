@@ -48,21 +48,22 @@ class Network:
                 return {'status': 'ok','code': 2004,'message': 'NetworkError','data': None}
             except httpx.ReadError:
                 return {'status': 'ok','code': 2005,'message': 'NetworkError','data': None}
-        
-    @classmethod
-    async def get_user_cache_number(self):
-        "获取用户缓存的数量，用于确定offset边界"
-        platform_api_url = API_URL
-        url = f'{platform_api_url}/p/game/users/cache/'
-        result = await self.fetch_data(url)
-        return result
     
     @classmethod
-    async def get_cache_users(self, offset: int, limit: int):
+    async def get_cache_users(self, offset: int = None, limit: int = None):
         "获取用户缓存的数量，用于确定offset边界"
         platform_api_url = API_URL
-        url = f'{platform_api_url}/p/game/users/cache/?offset={offset}&limit={limit}'
+        if offset != None and limit != None:
+            url = f'{platform_api_url}/p/game/users/cache/?offset={offset}&limit={limit}'
+        elif offset == None and limit == None:
+            url = f'{platform_api_url}/p/game/users/cache/'
+        else:
+            raise ValueError('Invaild Params')
         result = await self.fetch_data(url)
+        if result.get('code', None) == 2004:
+            logger.debug(f"接口请求失败，休眠 5 s")
+            await asyncio.sleep(5)
+            result = await self.fetch_data(url)
         return result
     
     @classmethod 
@@ -70,6 +71,10 @@ class Network:
         platform_api_url = API_URL
         url = f'{platform_api_url}/p/game/user/update/'
         result = await self.fetch_data(url, method='put', data=data)
+        if result.get('code', None) == 2004:
+            logger.debug(f"0 - 0000000000 | ├── 接口请求失败，休眠 5 s")
+            await asyncio.sleep(5)
+            result = await self.fetch_data(url, method='put', data=data)
         return result
 
     @classmethod
@@ -112,7 +117,7 @@ class Network:
         error = None
         for response in responses:
             if response.get('code', None) != 1000:
-                logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {response.get('message')}")
+                logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {response.get('code')} {response.get('message')}")
                 error = response
         if not error:
             result = self.__ships_data_processing(account_id,responses)

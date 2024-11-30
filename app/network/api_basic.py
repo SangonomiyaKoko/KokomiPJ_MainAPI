@@ -24,10 +24,15 @@ class BasicAPI:
     4. 获取搜索工会的结果
     '''
     @ExceptionLogger.handle_network_exception_async
-    async def fetch_data(url):
+    async def fetch_data(url, method: str = 'get', data: dict | list = None):
         try:
             async with httpx.AsyncClient() as client:
-                res = await client.get(url=url, timeout=BaseUrl.REQUEST_TIME_OUT)
+                if method == 'get':
+                    res = await client.get(url=url, timeout=BaseUrl.REQUEST_TIME_OUT)
+                elif method == 'post': 
+                    res = await client.post(url=url, json=data, timeout=BaseUrl.REQUEST_TIME_OUT)
+                else:
+                    raise ValueError('Invalid Method')
                 requset_code = res.status_code
                 requset_result = res.json()
                 if '/clans.' in url:
@@ -63,6 +68,8 @@ class BasicAPI:
                 elif requset_code == 404:
                     # 用户不存在或者账号删除的情况
                     return JSONResponse.API_1001_UserNotExist
+                elif method == 'post' and requset_code == 200:
+                    return JSONResponse.get_success_response(requset_result)
                 elif requset_code == 200:
                     # 正常返回值的处理
                     data = requset_result['data']
@@ -71,6 +78,23 @@ class BasicAPI:
                     res.raise_for_status()  # 其他状态码
         except Exception as e:
             raise e
+        
+    @classmethod
+    async def get_game_version(
+        self,
+        region_id: int
+    ):
+        '''获取游戏当前版本'''
+        api_url = BaseUrl.get_vortex_base_url(region_id)
+        url = f'{api_url}/api/v2/graphql/glossary/version/'
+        data = [{"query":"query Version {\n  version\n}"}]
+        result = await self.fetch_data(url, method='post', data=data)
+        if result['code'] != 1000:
+            return result
+        if result['data'] == []:
+            return JSONResponse.API_1000_Success
+        version = result['data'][0]['data']['version'][:7]
+        return JSONResponse.get_success_response({'version': version})
 
     @classmethod
     async def get_user_basic(

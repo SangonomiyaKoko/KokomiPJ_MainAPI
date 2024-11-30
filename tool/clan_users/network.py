@@ -57,19 +57,31 @@ class Network:
                 return {'status': 'ok','code': 2005,'message': 'NetworkError','data': None}
     
     @classmethod
-    async def get_clan_cache_number(self):
-        "获取工会缓存的数量，用于确定offset边界"
-        platform_api_url = API_URL
-        url = f'{platform_api_url}/p/game/clans/cache/'
-        result = await self.fetch_data(url)
-        return result
-    
-    @classmethod
-    async def get_cache_clans(self, offset: int, limit: int):
+    async def get_cache_clans(self, offset: int = None, limit: int = None):
         "获取用户缓存的数量，用于确定offset边界"
         platform_api_url = API_URL
-        url = f'{platform_api_url}/p/game/clans/cache/?offset={offset}&limit={limit}'
+        if offset != None and limit != None:
+            url = f'{platform_api_url}/p/game/clans/cache/?offset={offset}&limit={limit}'
+        elif offset == None and limit == None:
+            url = f'{platform_api_url}/p/game/clans/cache/'
+        else:
+            raise ValueError('Invaild Params')
         result = await self.fetch_data(url)
+        if result.get('code', None) == 2004:
+            logger.debug(f"接口请求失败，休眠 5 s")
+            await asyncio.sleep(5)
+            result = await self.fetch_data(url)
+        return result
+    
+    @classmethod 
+    async def update_user_data(self, data: dict):
+        platform_api_url = API_URL
+        url = f'{platform_api_url}/p/game/clan/update/'
+        result = await self.fetch_data(url, method='put', data=data)
+        if result.get('code', None) == 2004:
+            logger.debug(f"0 - 0000000000 | ├── 接口请求失败，休眠 5 s")
+            await asyncio.sleep(5)
+            result = await self.fetch_data(url, method='put', data=data)
         return result
 
     @classmethod
@@ -91,7 +103,7 @@ class Network:
         if responses[0].get('code', None) == 1002:
             return responses[0]
         elif responses[0].get('code', None) != 1000:
-            logger.error(f"{region_id} - {clan_id} | ├── 网络请求失败，Error: {responses[0].get('message')}")
+            logger.error(f"{region_id} - {clan_id} | ├── 网络请求失败，Error: {responses[0].get('code')} {responses[0].get('message')}")
             return responses[0]
         else:
             result = self.__clan_data_processing(clan_id, region_id, responses[0])
@@ -122,7 +134,7 @@ class Network:
         if responses[0].get('code', None) == 1002:
             return responses[0]
         elif responses[0].get('code', None) != 1000:
-            logger.error(f"{region_id} - {clan_id} | ├── 网络请求失败，Error: {responses[0].get('message')}")
+            logger.error(f"{region_id} - {clan_id} | ├── 网络请求失败，Error: {responses[0].get('code')} {responses[0].get('message')}")
             return responses[0]
         else:
             result = self.__clan_data_processing(clan_id, region_id, responses[0])
@@ -131,19 +143,12 @@ class Network:
         if responses[1].get('code', None) == 1002:
             return responses[1]
         elif responses[1].get('code', None) != 1000:
-            logger.error(f"{region_id} - {clan_id} | ├── 网络请求失败，Error: {responses[1].get('message')}")
+            logger.error(f"{region_id} - {clan_id} | ├── 网络请求失败，Error: {responses[1].get('code')} {responses[1].get('message')}")
             return responses[1]
         else:
             result = self.__clan_info_data_processing(clan_id, region_id, responses[1])
             data['clan_basic'] = result
         return {'status': 'ok', 'code': 1000, 'message': 'Success', 'data': data}
-    
-    @classmethod 
-    async def update_user_data(self, data: dict):
-        platform_api_url = API_URL
-        url = f'{platform_api_url}/p/game/clan/update/'
-        result = await self.fetch_data(url, method='put', data=data)
-        return result
     
     def __clan_data_processing(clan_id: int, region_id: int, response: dict):
         result = {

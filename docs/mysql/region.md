@@ -67,5 +67,5 @@ CREATE TABLE region_version (
 INSERT INTO region_version
     (region_id, game_version)
 VALUES
-    (1, 0), (2, 0), (3, 0), (4, 0), (5, 0);
+    (1, '13.11.0'), (2, '13.11.0'), (3, '13.11.0'), (4, '13.10.0'), (5, '13.11.0');
 ```

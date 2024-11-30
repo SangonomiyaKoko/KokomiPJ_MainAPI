@@ -41,7 +41,6 @@ class Update:
                 logger.debug(f"{region_id} - {clan_id} | ├── 工会不存在，更新数据")
                 return
             elif result.get('code', None) != 1000:
-                logger.error(f"{region_id} - {clan_id} | ├── 网络请求失败，Error: {result.get('message')}")
                 return
             clan_users = {
                 'clan_id': clan_id,
@@ -68,7 +67,6 @@ class Update:
                 logger.debug(f"{region_id} - {clan_id} | ├── 工会不存在，更新数据")
                 return
             elif result.get('code', None) != 1000:
-                logger.error(f"{region_id} - {clan_id} | ├── 网络请求失败，Error: {result.get('message')}")
                 return
             clan_users = {
                 'clan_id': clan_id,

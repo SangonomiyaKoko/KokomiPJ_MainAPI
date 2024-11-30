@@ -68,7 +68,7 @@ class Update:
     ) -> None:
         update_result = await Network.update_clan_data({'clan_info': clan_info})
         if update_result.get('code',None) != 1000:
-            logger.error(f"{region_id} | ├── 更新数据上传失败，数据切片{i}，Error: {update_result.get('message')}")
+            logger.error(f"{region_id} | ├── 更新数据上传失败，数据切片{i}，Error: {update_result.get('code')} {update_result.get('message')}")
             return []
         else:
             logger.debug(f'{region_id} | ├── 更新数据上传成功，数据切片{i}')
@@ -85,7 +85,7 @@ class Update:
         if clan_season:
             update_result = await Network.update_clan_data({'clan_season': clan_season})
         if update_result.get('code',None) != 1000:
-            logger.error(f"{region_id} - {clan_id} | ├── 更新数据上传失败，Error: {update_result.get('message')}")
+            logger.error(f"{region_id} - {clan_id} | ├── 更新数据上传失败，Error: {update_result.get('code')} {update_result.get('message')}")
             return []
         else:
             logger.debug(f'{region_id} - {clan_id} | ├── 更新数据上传成功')

@@ -1,4 +1,5 @@
 import httpx
+import asyncio
 from typing import Optional
 from datetime import datetime
 
@@ -134,6 +135,17 @@ class Network:
                 return {'status': 'ok','code': 2005,'message': 'NetworkError','data': None}
 
     @classmethod
+    async def update_clan_data(self, clan_data: dict):
+        platform_api_url = API_URL
+        url = f'{platform_api_url}/p/game/clan/update/'
+        result = await self.fetch_data(url, method='put', data=clan_data)
+        if result.get('code', None) == 2004:
+            logger.debug(f"0 | ├── 接口请求失败，休眠 5 s")
+            await asyncio.sleep(5)
+            result = await self.fetch_data(url, method='put', data=clan_data)
+        return result
+
+    @classmethod
     async def get_clan_rank_data(self, region_id: int):
         season_number = None
         clan_data_list = []
@@ -143,7 +155,7 @@ class Network:
             i += 1
             result = await self.fetch_data(url)
             if result.get('code', None) != 1000:
-                logger.debug(f"{region_id} | ├── 网络请求失败，Error: {result.get('message')}")
+                logger.debug(f"{region_id} | ├── 网络请求失败，Error: {result.get('code')} {result.get('message')}")
                 continue
             else:
                 logger.debug(f"{region_id} | ├── 第 {i}/13 个API请求成功")
@@ -167,13 +179,6 @@ class Network:
         else:
             result = self.__cvc_data_processing(clan_id, region_id, season, result)
             return {'status': 'ok', 'code': 1000, 'message': 'Success', 'data': result}
-
-    @classmethod
-    async def update_clan_data(self, clan_data: dict):
-        platform_api_url = API_URL
-        url = f'{platform_api_url}/p/game/clan/update/'
-        result = await self.fetch_data(url, method='put', data=clan_data)
-        return result
 
     def __clan_data_processing(response: dict) -> tuple:
         result = []

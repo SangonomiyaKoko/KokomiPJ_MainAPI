@@ -26,6 +26,20 @@ INSERT INTO region_season
 VALUES
     (1, 0), (2, 0), (3, 0), (4, 0), (5, 0);
 
+CREATE TABLE region_version (
+    region_id      TINYINT        NOT NULL,
+    game_version   VARCHAR(10)    NOT NULL,
+
+    PRIMARY KEY (region_id),
+
+    FOREIGN KEY (region_id) REFERENCES region(region_id) ON DELETE CASCADE -- 外键
+);
+
+INSERT INTO region_version
+    (region_id, game_version)
+VALUES
+    (1, '13.11.0'), (2, '13.11.0'), (3, '13.11.0'), (4, '13.10.0'), (5, '13.11.0');
+
 CREATE TABLE user_basic (
     -- 相关id
     id               INT          AUTO_INCREMENT,
@@ -285,7 +299,9 @@ CREATE TABLE clan_battle_s27 (
 
     PRIMARY KEY (id), -- 主键
 
-    INDEX idx_cid (battle_time), -- 索引
+    INDEX idx_time (battle_time), -- 索引
+
+    INDEX idx_cid (clan_id), -- 索引
 
     FOREIGN KEY (clan_id) REFERENCES clan_basic(clan_id) ON DELETE CASCADE -- 外键
 );
@@ -315,7 +331,9 @@ CREATE TABLE clan_battle_s28 (
 
     PRIMARY KEY (id), -- 主键
 
-    INDEX idx_cid (battle_time), -- 索引
+    INDEX idx_time (battle_time), -- 索引
+
+    INDEX idx_cid (clan_id), -- 索引
 
     FOREIGN KEY (clan_id) REFERENCES clan_basic(clan_id) ON DELETE CASCADE -- 外键
 );

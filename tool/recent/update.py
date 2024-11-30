@@ -247,7 +247,7 @@ class Update:
         basic_data = await Network.get_basic_data(account_id,region_id,ac_value)
         for response in basic_data:
             if response['code'] != 1000 and response['code'] != 1001:
-                logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {response.get('message')}")
+                logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {response.get('code')} {response.get('message')}")
                 return
         # 用户数据
         if basic_data[0]['code'] == 1001:
@@ -379,7 +379,7 @@ class Update:
             data['user_recent'] = user_recent
         update_result = await Network.update_user_data(data)
         if update_result.get('code',None) != 1000:
-            logger.error(f"{region_id} - {account_id} | ├── 更新数据上传失败，Error: {update_result.get('message')}")
+            logger.error(f"{region_id} - {account_id} | ├── 更新数据上传失败，Error: {user_recent.get('code')} {update_result.get('message')}")
         else:
             logger.debug(f'{region_id} - {account_id} | ├── 更新数据上传成功')
 
@@ -387,7 +387,7 @@ class Update:
         "删除用户的recent功能"
         request_result = await Network.del_user_recent(account_id,region_id)
         if request_result.get('code', None) != 1000:
-            logger.error(f"{region_id} - {account_id} | ├── 删除用户请求失败，Error: {request_result.get('message')}")
+            logger.error(f"{region_id} - {account_id} | ├── 删除用户请求失败，Error: {request_result.get('code')} {request_result.get('message')}")
         else:
             logger.info(f'{region_id} - {account_id} | ├── 删除用户，因为长时间未活跃')
 

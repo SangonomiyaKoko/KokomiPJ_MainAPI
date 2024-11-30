@@ -188,7 +188,9 @@ CREATE TABLE clan_battle_s27 (
 
     PRIMARY KEY (id), -- 主键
 
-    INDEX idx_cid (battle_time), -- 索引
+    INDEX idx_time (battle_time), -- 索引
+
+    INDEX idx_cid (clan_id), -- 索引
 
     FOREIGN KEY (clan_id) REFERENCES clan_basic(clan_id) ON DELETE CASCADE -- 外键
 );

@@ -200,7 +200,7 @@ class Network:
         error = None
         for response in responses:
             if response.get('code', None) != 1000:
-                logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {response.get('message')}")
+                logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {response.get('code')} {response.get('message')}")
                 error = response
         if not error:
             result = self.__recent_data_processing(account_id,responses)
