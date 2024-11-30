@@ -10,43 +10,39 @@
 
    - 轻量级、高性能的 ASGI 服务器，用于运行 FastAPI 应用
 
-3. `aioredis`
-
-   - 异步 Redis 客户端，支持与 Redis 数据库的异步交互
-
-4. `aiomysql`
+3. `aiomysql`
 
    - 异步 MySQL 客户端，支持与 MySQL 数据库的异步操作
 
-5. `celery`
+4. `celery`
 
    - 异步任务队列，用于处理异步任务和分布式任务队列
 
-6. `flower`
+5. `flower`
 
    - Celery 监控工具，通过 Web 界面实时监控 Celery 中的任务、队列、工作进程等信息。
 
-7. `eventlet`
+6. `eventlet`
 
    - 支持并发编程的库，为 Celery 提供协程支持，实现更高的并发能力。
 
-8. `redis`
+7. `redis`
 
    - 开源的内存数据结构存储，用于缓存、会话管理、任务队列等功能，与 Celery 一起用作消息代理。
 
-9. `colorlog`
+8. `colorlog`
 
    - 格式化日志
 
-10. `httpx`
+9. `httpx`
 
-    - 负责接口的网络请求
+   - 负责接口的网络请求
 
-11. `dbutils`
+10. `dbutils`
 
     - 负责 Celery 的数据库同步任务
 
-12. `brotli`
+11. `brotli`
     - 数据压缩方法
 
 dbutils
@@ -135,21 +131,174 @@ kokomi_api_project/
 
 ## 启动步骤
 
-> 关于怎么配置虚拟环境这里就不展开
+### MySQL 配置
 
-一. 进入虚拟环境
+> 如果已有搭建好的 MySQL 数据库可直接跳过本篇
+
+此处只介绍 Linux 环境下的配置方法，Windows 环境过于简单就不做介绍
+
+以 `Ubuntu-24.04` 安装 `MySQL-8.0` 为例
+
+#### 一. 安装 MySQL
 
 ```bash
+sudo apt install mysql-server # 下载MySQL
+
+mysql --version # 查看版本
+
+sudo systemctl status mysql # 查看运行状态
+```
+
+### 二. 设置 root 密码(可选)
+
+```bash
+sudo mysql -u root # 使用root无密码登录
+```
+
+```sql
+alter user 'root'@'localhost' identified with mysql_native_password by '123456'; -- 为root添加密码
+
+exit; -- 退出mysql的命令行模式
+```
+
+### 三. 允许 root 远程登录(可选)
+
+```bash
+mysql -u root -p #使用root有密码登录
+```
+
+```sql
+use mysql; -- 使用mysql数据库
+
+update user set host='%' where user='root'; -- 允许root远程登录
+
+flush privileges; -- 权限刷新
+
+exit; -- 退出mysql的命令行模式
+```
+
+### 四. 允许其他 ip 远程登录(可选)
+
+打开以下路径的文件: **/etc/mysql/mysql.conf.d/mysqld.cnf**
+
+将文件内 `bind-address` 后的值修改为 `0.0.0.0` 即可允许其他 ip 登录 mysql
+
+```bash
+sudo systemctl restart mysql # 修改后需要重启
+```
+
+### 安装 Redis
+
+> 如果已有搭建好的 Redis 数据库可直接跳过本篇
+
+此处只介绍 Linux 环境下的配置方法，Windows 环境过于简单就不做介绍
+
+以 `Ubuntu-24.04` 安装 `Redis-7.0` 为例
+
+#### 一. 安装 Redis
+
+```bash
+sudo apt install redis # 下载Redis
+
+sudo systemctl status redis-server  # 查看运行状态
+```
+
+#### 二. 配置 Redis 密码
+
+打开以下路径内的文件: **/etc/redis/redis.conf**
+
+点击 `Ctrl`+`F` 搜索 `requirepass` 找到以下行
+
+> 在大概 1036 行附近，不推荐使用 vim 编辑
+
+```txt
+# requirepass foobared
+```
+
+去掉行前面的#并将 foobared 替换为你想要设置的密码
+
+#### 三. 允许其他 ip 远程登录(可选)
+
+打开以下路径内的文件: **/etc/redis/redis.conf**
+
+点击 `Ctrl`+`F` 搜索 `bind` 找到以下行
+
+> 在大概 70 行附近，应该不用搜索都能一眼看到
+
+```txt
+bind 127.0.0.1 ::1
+```
+
+将后面的值修改为 `* -::*`
+
+```txt
+# 或者根据自己的需求更改, 示例:
+#
+# bind 192.168.1.100 10.0.0.1     # listens on two specific IPv4 addresses
+# bind 127.0.0.1 ::1              # listens on loopback IPv4 and IPv6
+# bind * -::*                     # like the default, all available interfaces
+```
+
+### KokomiAPI 安装步骤
+
+#### 一. 从 Github 下载最新的代码
+
+```bash
+git clone https://github.com/SangonomiyaKoko/KokomiPJ_API.git
+```
+
+> 没有 git 先安装 git
+
+#### 二. 创建并激活虚拟环境
+
+推荐的 Python 版本: `3.8.0`及以上
+
+```bash
+python -m venv venv
+
 .venv/Scripts/activate
 ```
 
-或者
+#### 三. 安装依赖
 
 ```bash
-activate
+pip install -r requirements.txt # 安装python依赖
 ```
 
-二. 启动 FastAPI
+#### 四. 数据库配置
+
+创建 `kokomi` 和 `ships` 数据库
+
+执行 **migrations\create_db.sql** 文件创建数据表
+
+#### 五. 配置.env 文件
+
+创建 `.env` 文件, 并写入以下内容，根据自己的配置修改
+
+```ini
+# API configuration
+API_HOST='127.0.0.1'
+API_PORT=8080
+
+# Mysql configuration
+MYSQL_HOST='127.0.0.1'
+MYSQL_PORT=3306
+MYSQL_USERNAME = 'root'
+MYSQL_PASSWORD = '123456'
+
+# SQLite DB file pathw
+SQLITE_PATH='F:\Kokomi_PJ_Api\temp\db'
+
+# Redis configuration
+REDIS_HOST='127.0.0.1'
+REDIS_PORT=6379
+REDIS_PASSWORD='123456'
+
+# Proxy
+USE_PROXY=0
+```
+
+#### 四. 启动 FastAPI
 
 ```bash
 uvicorn app.main:app --log-level debug
@@ -157,13 +306,13 @@ uvicorn app.main:app --log-level debug
 
 浏览器打开 localhost:8080/docs 可以看到自动生成的接口文档页面
 
-三. 启动 Celery
+#### 五. 启动 Celery
 
 ```bash
 celery --app app.middlewares.celery:celery_app worker -P eventlet --loglevel=debug
 ```
 
-四. 启动 Flower
+#### 六. 启动 Flower
 
 ```bash
 celery --app app.middlewares.celery:celery_app flower --port=5555

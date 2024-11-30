@@ -25,7 +25,6 @@ six==1.16.0
 tzdata==2024.2 
 vine==5.1.0 
 wcwidth==0.2.13
-aioredis==2.0.1 
 async-timeout==4.0.3
 PyMySQL==1.1.1 
 aiomysql==0.2.0

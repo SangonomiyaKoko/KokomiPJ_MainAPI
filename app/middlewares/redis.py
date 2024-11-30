@@ -1,7 +1,7 @@
 from typing import Optional
 
-import aioredis
-from aioredis.client import Redis
+import redis.asyncio as redis
+from redis.asyncio.client import Redis
 
 from app.core import EnvConfig,api_logger
 
@@ -14,7 +14,7 @@ class RedisConnection:
         "初始化Redis连接"
         try:
             config = EnvConfig.get_config()
-            self._pool = aioredis.from_url(
+            self._pool = redis.from_url(
                 url=f"redis://:{config.REDIS_PASSWORD}@{config.REDIS_HOST}:{config.REDIS_PORT}",
                 encoding="utf-8",
                 decode_responses=True
