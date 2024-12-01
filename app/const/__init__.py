@@ -1,7 +1,8 @@
 from .game import GameData
-from .color import ClanColor
+from .color import ClanColor, RatingColor
 
 __all__ = [
     'GameData',
-    'ClanColor'
+    'ClanColor',
+    'RatingColor'
 ]

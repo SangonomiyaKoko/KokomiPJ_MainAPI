@@ -153,6 +153,15 @@ class UtilityFunctions:
             if rid == region_id:
                 return r
             
+    def get_language_code(language: str) -> str:
+        language_dict = {
+            'chinese': 'cn',
+            'english': 'en',
+            'japanese': 'ja',
+            'russian': 'ru'
+        }
+        return language_dict.get(language)
+            
     def get_region_id(region: str) -> int:
         "从region获取region_id"
         for r, rid in GameData.REGION_LIST.items():

@@ -8,9 +8,9 @@ from app.models import UserAccessToken
 async def wws_user_basic(
     account_id: int, 
     region_id: int, 
-    language: str, 
     game_type: str,
-    algo_type: str
+    algo_type: str,
+    language: str
 ):
     '''用于`wws me`功能的接口
 
@@ -74,12 +74,27 @@ async def wws_user_basic(
                 'func_reference': None
             },
             'clan_battle': {
-                'type_list': ['clan'],
+                'type_list': ['clan','achievement'],
                 'func_reference': None
             }
         }
         game_type_data = game_type_dict.get(game_type)
-
+        details_data = await DetailsAPI.get_user_detail(account_id,region_id,game_type_data.get('type_list'))
+        for response in details_data:
+            if response['code'] != 1000:
+                return response
+        print(details_data)
+        # handle_api_data_func: function = game_type_data.get('func_reference')
+        # processed_data = handle_api_data_func(
+        #     account_id = account_id, 
+        #     region_id = region_id, 
+        #     responses = details_data,
+        #     language = language,
+        #     algo_type = algo_type
+        # )
+        # if processed_data.get('code', None) != 1000:
+        #     return processed_data
+        # data['statistics'] = processed_data['data']
         # 返回结果
         return JSONResponse.get_success_response(data)
     except Exception as e:

@@ -130,44 +130,44 @@ async def main(name):
                         j += 1
                         i = 0
                         print(j*10000)
-                    # if check_aid_and_rid(user_id, region_id):
-                    #     await cur.execute(
-                    #     "INSERT INTO kokomi.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
-                    #         [user_id, region_id, f'User_{user_id}']
-                    #     )
-                    #     await cur.execute(
-                    #         "INSERT INTO kokomi.user_info (account_id) VALUES (%s);",
-                    #         [user_id]
-                    #     )
-                    #     await cur.execute(
-                    #         "INSERT INTO kokomi.user_ships (account_id) VALUES (%s);",
-                    #         [user_id]
-                    #     )
-                    #     await cur.execute(
-                    #         "INSERT INTO kokomi.user_clan (account_id) VALUES (%s);",
-                    #         [user_id]
-                    #     )
-                    # else:
-                    #     print(f'{region_id} {user_id} 不合法')
-                    if check_cid_and_rid(user_id, region_id):
+                    if check_aid_and_rid(user_id, region_id):
                         await cur.execute(
-                            "INSERT INTO kokomi.clan_basic (clan_id, region_id, tag) VALUES (%s, %s, %s);",
-                            [user_id, region_id, 'N/A']
+                        "INSERT INTO kokomi.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                            [user_id, region_id, f'User_{user_id}']
                         )
                         await cur.execute(
-                            "INSERT INTO kokomi.clan_info (clan_id) VALUES (%s);",
+                            "INSERT INTO kokomi.user_info (account_id) VALUES (%s);",
                             [user_id]
                         )
                         await cur.execute(
-                            "INSERT INTO kokomi.clan_users (clan_id) VALUES (%s);",
+                            "INSERT INTO kokomi.user_ships (account_id) VALUES (%s);",
                             [user_id]
                         )
                         await cur.execute(
-                            "INSERT INTO kokomi.clan_season (clan_id) VALUES (%s);",
+                            "INSERT INTO kokomi.user_clan (account_id) VALUES (%s);",
                             [user_id]
                         )
                     else:
                         print(f'{region_id} {user_id} 不合法')
+                    # if check_cid_and_rid(user_id, region_id):
+                    #     await cur.execute(
+                    #         "INSERT INTO kokomi.clan_basic (clan_id, region_id, tag) VALUES (%s, %s, %s);",
+                    #         [user_id, region_id, 'N/A']
+                    #     )
+                    #     await cur.execute(
+                    #         "INSERT INTO kokomi.clan_info (clan_id) VALUES (%s);",
+                    #         [user_id]
+                    #     )
+                    #     await cur.execute(
+                    #         "INSERT INTO kokomi.clan_users (clan_id) VALUES (%s);",
+                    #         [user_id]
+                    #     )
+                    #     await cur.execute(
+                    #         "INSERT INTO kokomi.clan_season (clan_id) VALUES (%s);",
+                    #         [user_id]
+                    #     )
+                    # else:
+                    #     print(f'{region_id} {user_id} 不合法')
                     i += 1
             await conn.commit()
     except:

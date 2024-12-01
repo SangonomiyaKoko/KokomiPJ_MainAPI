@@ -32,15 +32,23 @@ class DetailsAPI:
         account_id: int,
         region_id: int,
         type_list: list,
-        ac_value: str = None
+        ac_value: str = None,
+        ac_value2: str = None
     ) -> list:
         '''获取用户基础信息和工会信息
 
         参数：
             account_id： 用户id
             region_id； 用户服务器id
-            type_list: 数据类型，支持[pvp,pvp_solo,pvp_div2,pvp_div3,rank_solo]
-            ac_value: 是否使用ac查询数据
+            type_list: 数据类型
+            ac_value: vortex接口的token
+            ac_value2: official接口的token
+
+        支持的数据类型： [
+            pvp, pvp_solo, pvp_div2, pvp_div3,
+            rank_solo, achievement, lifetime, 
+            oper, clan
+        ]
 
         返回：
             用户详细数据
@@ -54,10 +62,18 @@ class DetailsAPI:
         for match_type in type_list:
             if match_type in ['pvp','pvp_solo','pvp_div2','pvp_div3','rank_solo']:
                 urls.append(f'{vortex_api_url}/api/accounts/{account_id}/ships/{match_type}/' + (f'?ac={ac_value}' if ac_value else ''))
+            elif match_type == 'achievement':
+                urls.append(f'{vortex_api_url}/api/accounts/{account_id}/achievements/' + (f'?ac={ac_value}' if ac_value else ''))
             elif match_type == 'lifetime':
-                urls.append(f'{official_api_url}/wows/account/info/?application_id={official_api_token}&account_id={account_id}&access_token={ac_value}')
+                if ac_value2 == None:
+                    raise ValueError('The `ac_value2` parameter cannot be empty')
+                urls.append(f'{official_api_url}/wows/account/info/?application_id={official_api_token}&account_id={account_id}&access_token={ac_value2}')
             elif match_type == 'oper':
                 urls.append(f'{official_api_url}/wows/account/info/?application_id={official_api_token}&account_id={account_id}&extra=statistics.oper_solo%2Cstatistics.oper_div%2Cstatistics.oper_div_hard')
+            elif match_type == 'clan':
+                urls.append(f'{official_api_url}/wows/clans/seasonstats/?application_id={official_api_token}&account_id={account_id}')
+            else:
+                raise ValueError('The entered `match_type` parameter is invalid')
         tasks = []
         responses = []
         async with asyncio.Semaphore(len(urls)):

@@ -70,3 +70,48 @@ class Rating_Algorithm:
             result['n_damage_dealt'] = round((actual_dmg / expected_dmg) * battles_count, 6)
             result['n_frags'] = round((actual_frags / expected_frags) * battles_count, 6)
             return result
+        
+    def get_rating_by_data(
+        algo_type: str,
+        game_type: str,
+        ship_data: List[int],
+        server_data: List[int] | None
+    ):
+        if algo_type == 'pr':
+            result = [0,-1,-1,-1]
+            battles_count = ship_data[0]
+            if battles_count <= 0:
+                return result
+            # 获取服务器数据
+            if server_data == {}:
+                return result
+            # 用户数据
+            actual_wins = ship_data[1] / battles_count * 100
+            actual_dmg = ship_data[2] / battles_count
+            actual_frags = ship_data[3] / battles_count
+            # 服务器数据
+            expected_wins = server_data[0]
+            expected_dmg = server_data[0]
+            expected_frags = server_data[0]
+            # 计算PR
+            # Step 1 - ratios:
+            r_wins = actual_wins / expected_wins
+            r_dmg = actual_dmg / expected_dmg
+            r_frags = actual_frags / expected_frags
+            # Step 2 - normalization:
+            n_wins = max(0, (r_wins - 0.7) / (1 - 0.7))
+            n_dmg = max(0, (r_dmg - 0.4) / (1 - 0.4))
+            n_frags = max(0, (r_frags - 0.1) / (1 - 0.1))
+            # Step 3 - PR value:
+            if game_type in ['rank', 'rank_solo']:
+                personal_rating = 600 * n_dmg + 350 * n_frags + 400 * n_wins
+            else:
+                personal_rating = 700 * n_dmg + 300 * n_frags + 150 * n_wins
+            return [
+                battles_count,
+                round(personal_rating * battles_count, 6),
+                round((actual_dmg / expected_dmg) * battles_count, 6),
+                round((actual_frags / expected_frags) * battles_count, 6)
+            ]
+        else:
+            raise ValueError('Invaild Algorithm Parameters')

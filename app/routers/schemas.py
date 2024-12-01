@@ -17,10 +17,10 @@ class RegionList(str, Enum):
     cn = "cn"
 
 class LanguageList(str, Enum):
-    cn = 'cn'
-    en = 'en'
-    ja = 'ja'
-    ru = 'ru'
+    chinese = 'chinese'
+    english = 'english'
+    japanese = 'japanese'
+    russian = 'russian'
 
 class AlgorithmList(str, Enum):
     pr = 'pr'
