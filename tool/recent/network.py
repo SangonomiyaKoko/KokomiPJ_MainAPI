@@ -113,6 +113,14 @@ class Network:
         region = REGION_LIST.get(region_id)
         url = f'{platform_api_url}/r1/features/users/{region}/'
         result = await self.fetch_data(url)
+        if result.get('code', None) == 2004:
+            logger.debug(f"接口请求失败，休眠 5 s")
+            await asyncio.sleep(5)
+            result = await self.fetch_data(url)
+        elif result.get('code', None) == 8000:
+            logger.debug(f"服务器维护中，休眠 60 s")
+            await asyncio.sleep(60)
+            result = await self.fetch_data(url)
         return result
     
     @classmethod
@@ -124,6 +132,14 @@ class Network:
         region = REGION_LIST.get(region_id)
         url = f'{platform_api_url}/r1/features/user/{region}/{account_id}/'
         result = await self.fetch_data(url)
+        if result.get('code', None) == 2004:
+            logger.debug(f"接口请求失败，休眠 5 s")
+            await asyncio.sleep(5)
+            result = await self.fetch_data(url)
+        elif result.get('code', None) == 8000:
+            logger.debug(f"服务器维护中，休眠 60 s")
+            await asyncio.sleep(60)
+            result = await self.fetch_data(url)
         return result
     
     @classmethod
@@ -135,6 +151,14 @@ class Network:
         region = REGION_LIST.get(region_id)
         url = f'{platform_api_url}/r1/features/user/{region}/{account_id}/'
         result = await self.fetch_data(url,method='delete')
+        if result.get('code', None) == 2004:
+            logger.debug(f"接口请求失败，休眠 5 s")
+            await asyncio.sleep(5)
+            result = await self.fetch_data(url,method='delete')
+        elif result.get('code', None) == 8000:
+            logger.debug(f"服务器维护中，休眠 60 s")
+            await asyncio.sleep(60)
+            result = await self.fetch_data(url,method='delete')
         return result
 
     @classmethod 
@@ -146,6 +170,14 @@ class Network:
         region = REGION_LIST.get(region_id)
         url = f'{platform_api_url}/r1/features/user/{region}/{account_id}/info/'
         result = await self.fetch_data(url)
+        if result.get('code', None) == 2004:
+            logger.debug(f"接口请求失败，休眠 5 s")
+            await asyncio.sleep(5)
+            result = await self.fetch_data(url)
+        elif result.get('code', None) == 8000:
+            logger.debug(f"服务器维护中，休眠 60 s")
+            await asyncio.sleep(60)
+            result = await self.fetch_data(url)
         return result
     
     @classmethod
@@ -156,6 +188,14 @@ class Network:
             platform_api_url = MASTER_API_URL
         url = f'{platform_api_url}/p/game/user/update/'
         result = await self.fetch_data(url, method='put', data=data)
+        if result.get('code', None) == 2004:
+            logger.debug(f"接口请求失败，休眠 5 s")
+            await asyncio.sleep(5)
+            result = await self.fetch_data(url, method='put', data=data)
+        elif result.get('code', None) == 8000:
+            logger.debug(f"服务器维护中，休眠 60 s")
+            await asyncio.sleep(60)
+            result = await self.fetch_data(url, method='put', data=data)
         return result
 
     @classmethod

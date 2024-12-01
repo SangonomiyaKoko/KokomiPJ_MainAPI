@@ -109,7 +109,7 @@ app.include_router(
 )
 
 # 重写shutdown函数，避免某些协程bug
-async def _shutdown(self, any):
+async def _shutdown(self, any = None):
     await origin_shutdown(self)
     wait_second = 3
     while wait_second > 0:

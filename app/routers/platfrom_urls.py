@@ -12,6 +12,7 @@ from app.apis.platform import (
     Search, Update, GameUser, 
     GameClan, UserCache, ClanCache
 )
+from app.core import ServiceStatus
 from app.utils import UtilityFunctions
 from app.response import JSONResponse, ResponseDict
 from app.middlewares import record_api_call
@@ -39,6 +40,8 @@ async def searchUser(
     - ResponseDict
     """
     # 参数效验
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
     region_id = UtilityFunctions.get_region_id(region)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
@@ -76,6 +79,8 @@ async def searchClan(
     - ResponseDict
     """
     # 参数效验
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
     region_id = UtilityFunctions.get_region_id(region)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
@@ -110,6 +115,8 @@ async def searchShip(
     返回:
     - ResponseDict
     """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
     region_id = UtilityFunctions.get_region_id(region)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
@@ -133,6 +140,8 @@ async def updateShipName(region: RegionList) -> ResponseDict:
     返回:
     - ResponseDict
     """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
     region_id = UtilityFunctions.get_region_id(region)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
@@ -153,6 +162,8 @@ async def getUserCache(offset: Optional[int] = None, limit: Optional[int] = None
     返回:
     - ResponseDict
     """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
     if offset == None:
         result = await UserCache.get_user_max_number()
     else:
@@ -173,6 +184,8 @@ async def getClanCache(offset: Optional[int] = None, limit: Optional[int] = None
     返回:
     - ResponseDict
     """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
     if offset == None:
         result = await ClanCache.get_clan_max_number()
     else:
@@ -192,6 +205,8 @@ async def updateUserCache(user_data: UserUpdateModel) -> ResponseDict:
     返回:
     - ResponseDict
     """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
     result = await GameUser.update_user_data(user_data.model_dump())
     await record_api_call(result['status'])
     return result
@@ -208,6 +223,8 @@ async def updateUserCache(clan_data: ClanUpdateModel) -> ResponseDict:
     返回:
     - ResponseDict
     """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
     result = await GameClan.update_clan_data(clan_data.model_dump())
     await record_api_call(result['status'])
     return result

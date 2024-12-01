@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from .schemas import RegionList, RecentEnableModel
 from app.utils import UtilityFunctions
+from app.core import ServiceStatus
 from app.response import JSONResponse, ResponseDict
 from app.apis.recent import RecentBasic, RecentData
 from app.apis.platform import GameUser
@@ -21,6 +22,8 @@ async def enabledFeatureUsers(region: RegionList) -> ResponseDict:
     返回:
     - ResponseDict
     """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
     region_id = UtilityFunctions.get_region_id(region)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
@@ -41,6 +44,8 @@ async def get_recent_data_overview(region: RegionList,account_id: int) -> Respon
     返回:
     - ResponseDict
     """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
     region_id = UtilityFunctions.get_region_id(region)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
@@ -62,6 +67,8 @@ async def get_user_info(region: RegionList, account_id: int) -> ResponseDict:
     返回:
     - ResponseDict
     """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
     region_id = UtilityFunctions.get_region_id(region)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
@@ -83,6 +90,8 @@ async def get_user_info(region: RegionList, account_id: int) -> ResponseDict:
     返回:
     - ResponseDict
     """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
     region_id = UtilityFunctions.get_region_id(region)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
@@ -105,6 +114,8 @@ async def getUserFeatureData(region: RegionList,account_id: int) -> ResponseDict
     返回:
     - ResponseDict
     """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
     region_id = UtilityFunctions.get_region_id(region)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
@@ -126,6 +137,8 @@ async def enableFeature(enable_data: RecentEnableModel) -> ResponseDict:
     返回:
     - ResponseDict
     """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
     region_id = UtilityFunctions.get_region_id(enable_data.region)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
@@ -147,6 +160,8 @@ async def disableFeature(region: RegionList,account_id: int) -> ResponseDict:
     返回:
     - ResponseDict
     """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
     region_id = UtilityFunctions.get_region_id(region)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion

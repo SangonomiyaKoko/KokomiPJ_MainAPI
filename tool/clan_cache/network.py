@@ -143,6 +143,10 @@ class Network:
             logger.debug(f"0 | ├── 接口请求失败，休眠 5 s")
             await asyncio.sleep(5)
             result = await self.fetch_data(url, method='put', data=clan_data)
+        elif result.get('code', None) == 8000:
+            logger.debug(f"0 | ├── 服务器维护中，休眠 60 s")
+            await asyncio.sleep(60)
+            result = await self.fetch_data(url, method='put', data=clan_data)
         return result
 
     @classmethod

@@ -4,6 +4,7 @@ from fastapi import APIRouter
 
 from .schemas import RegionList, LanguageList
 from app.utils import UtilityFunctions
+from app.core import ServiceStatus
 from app.response import JSONResponse, ResponseDict
 from app.apis.robot import wws_me, wws_me_clan
 from app.middlewares import record_api_call
@@ -26,6 +27,8 @@ async def getUserBasic(
     返回:
     - ResponseDict
     """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
     region_id = UtilityFunctions.get_region_id(region)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
@@ -51,6 +54,8 @@ async def getClanBasic(
     返回:
     - ResponseDict
     """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
     region_id = UtilityFunctions.get_region_id(region)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion

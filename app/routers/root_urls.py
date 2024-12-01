@@ -1,10 +1,46 @@
 from fastapi import APIRouter
 
-from app.response import ResponseDict
+from app.response import ResponseDict, JSONResponse
+from app.core import ServiceStatus
 from app.apis.root import RootData
 from app.middlewares import record_api_call
 
 router = APIRouter()
+
+@router.get("/service/status")
+async def getServiceStatus() -> ResponseDict:
+    """获取当前服务的状态
+    
+    返回True或者False表示是否处于维护状态
+
+    参数:
+    - None
+
+    返回:
+    - ResponseDict
+    """
+    result = ServiceStatus.is_service_available()
+    if result:
+        data = {
+            'status': 'Maintenance'
+        }
+    else:
+        data = {
+            'status': 'OK'
+        }
+    return JSONResponse.get_success_response(data)
+
+@router.post("service/status")
+async def setServiceStatus(set: bool = False) -> ResponseDict:
+    """修改服务器当前的状态
+    
+    设置服务器为维护或者运行状态
+    """
+    if set:
+        ServiceStatus.service_set_available()
+    else:
+        ServiceStatus.service_set_unavailable()
+    return JSONResponse.API_1000_Success
 
 @router.get("/users/overview/")
 async def getUsersOverview() -> ResponseDict:
