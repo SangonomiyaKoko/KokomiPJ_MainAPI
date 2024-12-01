@@ -19,6 +19,9 @@ class LoadConfig(BaseSettings):
 
     USE_PROXY: int
 
+    WG_API_TOKEN: str
+    LESTA_API_TOKEN: str
+
     class Config:
         env_file = ".env"
 

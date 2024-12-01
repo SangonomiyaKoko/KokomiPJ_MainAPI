@@ -26,16 +26,16 @@ class AlgorithmList(str, Enum):
     pr = 'pr'
 
 class GameTypeList(str, Enum):
-    card = 'card'
+    signature = 'signature'
     overall = 'overall'
     lifetime = 'lifetime'
-    pvp = 'pvp'
-    solo = 'pvp_solo'
-    div2 = 'pvp_div2'
-    div3 = 'pvp_div3'
-    rank = 'rank'
-    oper = 'oper'
-    clan = 'clan'
+    random = 'random'
+    pvp_solo = 'pvp_solo'
+    pvp_div2 = 'pvp_div2'
+    pvp_div3 = 'pvp_div3'
+    ranked = 'ranked'
+    operation = 'operation'
+    clan_battle = 'clan_battle'
 
 class UserBaseModel(BaseModel):
     region_id: int = Field(..., description='服务器id')

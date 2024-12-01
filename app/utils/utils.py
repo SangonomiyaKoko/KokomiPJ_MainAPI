@@ -42,7 +42,13 @@ class UtilityFunctions:
         # 目前的检查逻辑是判断aid不在其他的字段内
 
         # 俄服 1-9 [~5字段]
-        if region_id == 4 and account_id_len <= 9:
+        if region_id == 4 and account_id_len < 9:
+            return True
+        elif (
+            region_id == 4 and 
+            account_id_len == 9 and 
+            int(account_id/100000000) not in [5,6,7,8,9,]
+        ):
             return True
         # 欧服 9 [5~字段] 
         if (

@@ -71,12 +71,10 @@ class BaseUrl:
         else:
             return VORTEX_API_URL_LIST.get(region_id)
         
-    def get_official_basse_url(region_id: int):
+    def get_official_base_url(region_id: int):
         '''获取official api接口的url
 
-        根据代理配置和服务器返回对应的url
-        
-        如果某个服务器下有多个可用代理则会随机选择一个返回
+        不使用代理服务
 
         参数：
             region: 接口服务器
@@ -84,16 +82,11 @@ class BaseUrl:
         返回：
             url: str
         '''
-        if config.USE_PROXY:
-            proxy_url_len = len(proxy_list.get(region_id))
-            if proxy_url_len >= 2:
-                random_num = random.randint(0,proxy_url_len-1)
-            else:
-                random_num = 0
-            proxy_url = f'http://{proxy_list.get(region_id)[random_num]}/proxy?url={OFFICIAL_API_URL_LIST.get(region_id)}'
-            return proxy_url
+        if region_id == 4:
+            api_token = config.LESTA_API_TOKEN
         else:
-            return OFFICIAL_API_URL_LIST.get(region_id)
+            api_token = config.WG_API_TOKEN
+        return OFFICIAL_API_URL_LIST.get(region_id), api_token
         
     def get_clan_basse_url(region_id: int):
         '''获取clan api接口的url
