@@ -2,48 +2,92 @@
 
 ## 项目依赖
 
-1. `fastapi`
+1. **`fastapi`**
 
-   - 高性能的 Web 框架，用于构建 API，基于 Starlette 和 Pydantic
+   - **用途**：FastAPI 是一个现代、高性能的 Web 框架，用于快速构建 API，特别适用于构建高性能的 RESTful API 服务。
+   - **特点**：
+     - 基于 Python 类型提示，自动生成 API 文档。
+     - 内置支持异步操作，适合处理高并发请求。
+     - 基于 Starlette（用于 Web 服务器）和 Pydantic（用于数据验证）构建，提供强大的数据验证、序列化功能。
 
-2. `uvicorn`
+2. **`uvicorn`**
 
-   - 轻量级、高性能的 ASGI 服务器，用于运行 FastAPI 应用
+   - **用途**：Uvicorn 是一个轻量级、高性能的 ASGI 服务器，用于运行 FastAPI 应用。
+   - **特点**：
+     - 完全支持异步框架，能够处理 WebSocket 等协议。
+     - 高性能，基于 `uvloop` 和 `httptools` 构建，能够承载高并发负载。
+     - 提供热重载和调试模式，适用于开发和生产环境。
 
-3. `aiomysql`
+3. **`aiomysql`**
 
-   - 异步 MySQL 客户端，支持与 MySQL 数据库的异步操作
+   - **用途**：`aiomysql` 是一个异步 MySQL 客户端，允许与 MySQL 数据库进行异步操作。
+   - **特点**：
+     - 提供异步查询接口，能在 FastAPI 中实现高效的数据库操作。
+     - 基于 `asyncio` 构建，与 Python 的异步机制兼容。
+     - 支持事务和连接池等高级功能，适用于高并发的数据库操作。
 
-4. `celery`
+4. **`celery`**
 
-   - 异步任务队列，用于处理异步任务和分布式任务队列
+   - **用途**：Celery 是一个强大的异步任务队列框架，用于处理异步任务和分布式任务队列。
+   - **特点**：
+     - 支持任务调度、延迟任务和周期性任务。
+     - 支持分布式环境，可以在多台机器上运行并行任务。
+     - 可以与多种消息代理（如 Redis、RabbitMQ）集成，适用于任务队列和消息传递。
 
-5. `flower`
+5. **`flower`**
 
-   - Celery 监控工具，通过 Web 界面实时监控 Celery 中的任务、队列、工作进程等信息。
+   - **用途**：Flower 是一个实时监控 Celery 任务的工具，提供 Web 界面来查看任务状态、队列、工作进程等信息。
+   - **特点**：
+     - 实时显示任务的执行状态、执行时间和结果。
+     - 支持任务重试、撤销等操作。
+     - 提供用户认证功能，支持远程监控。
 
-6. `eventlet`
+6. **`eventlet`**
 
-   - 支持并发编程的库，为 Celery 提供协程支持，实现更高的并发能力。
+   - **用途**：Eventlet 是一个支持并发编程的 Python 库，主要用于为 Celery 提供协程支持。
+   - **特点**：
+     - 通过协程实现高并发，能够有效处理大量 I/O 密集型操作。
+     - 在 Celery 中作为协程池使用，提升任务的并发处理能力。
+     - 支持绿色线程，能显著提高 I/O 操作的性能。
 
-7. `redis`
+7. **`redis`**
 
-   - 开源的内存数据结构存储，用于缓存、会话管理、任务队列等功能，与 Celery 一起用作消息代理。
+   - **用途**：Redis 是一个开源的内存数据结构存储，广泛用于缓存、会话管理和任务队列等场景。
+   - **特点**：
+     - 作为 Celery 的消息代理，负责任务队列的存储与分发。
+     - 作为缓存层，提供高效的内存存储，降低数据库负载。
 
-8. `colorlog`
+8. **`colorlog`**
 
-   - 格式化日志
+   - **用途**：`colorlog` 是一个格式化日志的 Python 库，用于为日志添加颜色，使日志输出更具可读性。
+   - **特点**：
+     - 提供多种日志格式，支持根据日志级别为日志文本添加不同颜色。
+     - 可以与 Python 内置的 `logging` 模块结合使用，方便配置日志输出格式。
+     - 在开发和生产环境中均能提高日志的可读性，帮助快速定位问题。
 
-9. `httpx`
+9. **`httpx`**
 
-   - 负责接口的网络请求
+   - **用途**：`httpx` 是一个支持 HTTP/1.1 和 HTTP/2 的异步网络请求库。
+   - **特点**：
+     - 提供同步和异步 API，支持 HTTP 请求的异步发起，适合高并发环境。
+     - 支持请求超时、重试机制和连接池等功能。
+     - 在 FastAPI 中常用于发起外部 API 请求或进行 Web 数据抓取。
 
-10. `dbutils`
+10. **`dbutils`**
 
-    - 负责 Celery 的数据库同步任务
+    - **用途**：`dbutils` 是一个用于 Celery 的数据库同步任务工具，简化了数据库任务的执行和管理。
+    - **特点**：
+      - 提供与数据库的同步接口，支持连接池、事务等功能。
+      - 用于在 Celery 任务中执行数据库操作，简化数据库与任务调度的集成。
+      - 支持不同类型的数据库操作，如增、删、改、查等，提升任务执行效率。
 
-11. `brotli`
-    - 数据压缩方法
+11. **`brotli`**
+
+    - **用途**：`brotli` 是一种数据压缩算法，用于提高数据传输效率。
+    - **特点**：
+      - 压缩率高，适用于 Web 服务和 HTTP 请求的压缩。
+      - 在 HTTP 响应中使用 Brotli 压缩可以显著减小传输数据量，提高带宽利用率。
+      - 适合用于静态资源的压缩，尤其是在需要快速响应的 API 中。
 
 dbutils
 
@@ -256,7 +300,11 @@ git clone https://github.com/SangonomiyaKoko/KokomiPJ_API.git
 ```bash
 python -m venv venv
 
+activate
+# 或者
 .venv/Scripts/activate
+# 或者
+source venv/bin/activate
 ```
 
 #### 三. 安装依赖
@@ -301,12 +349,14 @@ USE_PROXY=0
 #### 四. 启动 FastAPI
 
 ```bash
-uvicorn app.main:app --log-level debug
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level debug
 ```
 
 浏览器打开 localhost:8080/docs 可以看到自动生成的接口文档页面
 
 #### 五. 启动 Celery
+
+> Linux环境可能需要 `sudo apt install celery`
 
 ```bash
 celery --app app.middlewares.celery:celery_app worker -P eventlet --loglevel=debug
