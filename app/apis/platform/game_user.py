@@ -11,7 +11,6 @@ from app.middlewares.celery import (
 )
 
 class GameUser:
-
     @ExceptionLogger.handle_program_exception_async
     async def get_user_info_data(account_id: int, region_id: int) -> ResponseDict:
         try:

@@ -4,6 +4,7 @@ from celery import Celery, signals
 from celery.app.base import logger
 
 from .background_task import (
+    check_game_version,
     check_user_basic, 
     check_clan_basic, 
     check_user_info,
@@ -53,6 +54,14 @@ def close_mysql_pool(**kwargs):
     pool.close()
     logger.info('MySQL closed')
 
+
+@celery_app.task
+def task_check_game_version(game_data: dict):
+    result = check_game_version(pool,game_data)
+    if result.get('code', None) != 1000:
+        print(result)
+    return 'ok'
+    
 
 @celery_app.task
 def task_check_user_basic(user_data: dict):

@@ -9,6 +9,45 @@ from app.utils import UtilityFunctions, BinaryGeneratorUtils, BinaryParserUtils
 
 
 @ExceptionLogger.handle_database_exception_sync
+def check_game_version(pool: PooledDB, game_data: dict):
+    '''检查游戏版本是否更改
+    
+    参数:
+        game_data
+    '''
+    conn = pool.connection()
+    cur = None
+    try:
+        conn.begin()
+        cur = conn.cursor(pymysql.cursors.DictCursor)
+        
+        region_id = game_data['region_id']
+        game_version = game_data['version']
+        cur.execute(
+            "SELECT game_version FROM kokomi.region_version WHERE region_id = %s;",
+            [region_id]
+        )
+        game = cur.fetchone()
+        if game == None:
+            raise ValueError('Table Not Found')
+        else:
+            if game[0] != game_version:
+                cur.execute(
+                    "UPDATE kokomi.region_version SET game_version = %s WHERE region_id = %s;",
+                    [game_version, region_id]
+                )
+        
+        conn.commit()
+        return JSONResponse.API_1000_Success
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        if cur:
+            cur.close()
+        conn.close()  # 归还连接到连接池
+
+@ExceptionLogger.handle_database_exception_sync
 def check_user_basic(pool: PooledDB, user_data: dict):
     '''检查用户数据是否需要更新
 

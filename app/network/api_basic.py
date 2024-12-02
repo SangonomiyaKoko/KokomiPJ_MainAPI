@@ -89,8 +89,10 @@ class BasicAPI:
         url = f'{api_url}/api/v2/graphql/glossary/version/'
         data = [{"query":"query Version {\n  version\n}"}]
         result = await self.fetch_data(url, method='post', data=data)
-        if result['code'] != 1000:
+        if result['code'] != 1000 and result['code'] not in [2000,2001,2002,2003,2004,2005]:
             return result
+        elif result['code'] != 1000:
+            return JSONResponse.API_1000_Success
         if result['data'] == []:
             return JSONResponse.API_1000_Success
         version = result['data'][0]['data']['version'][:7]

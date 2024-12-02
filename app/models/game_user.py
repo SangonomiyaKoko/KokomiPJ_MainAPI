@@ -22,21 +22,21 @@ class UserModel:
             ResponseDict
         '''
         try:
-            conn: Connection = await MysqlConnection.get_connection()  # 获取连接
-            await conn.begin()  # 开启事务
-            cur: Cursor = await conn.cursor()  # 获取游标
+            connection: Connection = await MysqlConnection.get_connection()  # 获取连接
+            await connection.begin()  # 开启事务
+            cursor: Cursor = await connection.cursor()  # 获取游标
 
             # 在这里执行sql语句
-            await cur.execute()
+            await cursor.execute()
 
-            await conn.commit()  # 提交事务
+            await connection.commit()  # 提交事务
             return JSONResponse.API_1000_Success  # 返回数据
         except Exception as e:
-            await conn.rollback()  # 执行报错回滚事务
+            await connection.rollback()  # 执行报错回滚事务
             raise e  # 抛出异常
         finally:
-            await cur.close()  # 关闭游标
-            await MysqlConnection.release_connection(conn)  # 释放连接
+            await cursor.close()  # 关闭游标
+            await MysqlConnection.release_connection(connection)  # 释放连接
 
     @ExceptionLogger.handle_database_exception_async
     async def get_user_max_number() -> ResponseDict:

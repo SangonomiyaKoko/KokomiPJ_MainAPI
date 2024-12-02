@@ -9,7 +9,7 @@ from .schemas import (
     ClanUpdateModel
 )
 from app.apis.platform import (
-    Search, Update, GameUser, 
+    Search, Update, GameUser, GameBasic,
     GameClan, UserCache, ClanCache
 )
 from app.core import ServiceStatus
@@ -18,6 +18,29 @@ from app.response import JSONResponse, ResponseDict
 from app.middlewares import record_api_call
 
 router = APIRouter()
+
+@router.get("/game/version/")
+async def getGameVersion(
+    region: RegionList
+):
+    """获取服务器当前版本
+    
+    获取Version
+
+    参数:
+    - region: 服务器
+
+    返回:
+    - ResponseDict
+    """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
+    region_id = UtilityFunctions.get_region_id(region)
+    if not region_id:
+        return JSONResponse.API_1010_IllegalRegion
+    result = await GameBasic.get_game_version(region_id)
+    await record_api_call(result['status'])
+    return result
 
 @router.get("/search/user/")
 async def searchUser(
@@ -39,7 +62,6 @@ async def searchUser(
     返回:
     - ResponseDict
     """
-    # 参数效验
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
     region_id = UtilityFunctions.get_region_id(region)
@@ -47,7 +69,6 @@ async def searchUser(
         return JSONResponse.API_1010_IllegalRegion
     if not 3 <= len(nickname) <= 25:
         return JSONResponse.API_1011_IllegalUserName
-    # 调用函数
     result = await Search.search_user(
         region_id = region_id,
         nickname = nickname,
@@ -55,7 +76,6 @@ async def searchUser(
         check = check
     )
     await record_api_call(result['status'])
-    # 返回结果
     return result
 
 @router.get("/search/clan/")
@@ -78,7 +98,6 @@ async def searchClan(
     返回:
     - ResponseDict
     """
-    # 参数效验
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
     region_id = UtilityFunctions.get_region_id(region)
@@ -86,7 +105,6 @@ async def searchClan(
         return JSONResponse.API_1010_IllegalRegion
     if not 2 <= len(tag) <= 5:
         return JSONResponse.API_1012_IllegalClanTag
-    # 调用函数
     result = await Search.search_clan(
         region_id = region_id,
         tag = tag,
@@ -94,7 +112,6 @@ async def searchClan(
         check = check
     )
     await record_api_call(result['status'])
-    # 返回结果
     return result
 
 @router.get("/search/ship/")
