@@ -27,8 +27,8 @@ class AlgorithmList(str, Enum):
 
 class GameTypeList(str, Enum):
     signature = 'signature'
-    overall = 'overall'
     lifetime = 'lifetime'
+    overall = 'overall'
     random = 'random'
     pvp_solo = 'pvp_solo'
     pvp_div2 = 'pvp_div2'

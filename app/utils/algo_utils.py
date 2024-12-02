@@ -77,14 +77,15 @@ class Rating_Algorithm:
         ship_data: List[int | float],
         server_data: List[int | float] | None
     ):
+        if not algo_type:
+            return [0,-1,-1,-1]
         if algo_type == 'pr':
-            result = [0,-1,-1,-1]
             battles_count = ship_data[0]
             if battles_count <= 0:
-                return result
+                return [0,-1,-1,-1]
             # 获取服务器数据
             if server_data == {}:
-                return result
+                return [0,-1,-1,-1]
             # 用户数据
             actual_wins = ship_data[1] / battles_count * 100
             actual_dmg = ship_data[2] / battles_count

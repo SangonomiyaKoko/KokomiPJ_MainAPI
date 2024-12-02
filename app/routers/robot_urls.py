@@ -91,6 +91,6 @@ async def getUserBasic(
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
         return JSONResponse.API_1003_IllegalAccoutIDorRegionID
     language = UtilityFunctions.get_language_code(language)
-    result = await wws_basic.wws_user_basic(account_id,region_id,game_type,algo_type,language)
+    result = await wws_basic.wws_user_basic(account_id,region_id,game_type,language,algo_type)
     await record_api_call(result['status'])
     return result

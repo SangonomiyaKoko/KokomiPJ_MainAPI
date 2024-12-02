@@ -62,3 +62,4 @@
 | 1017 | ClanInBlacklist           | 工会在黑名单内                           |
 | 1018 | RecentNotEnabled          | 用户 Recent 功能未启用                   |
 | 1019 | RecentsNotEnabled         | 用户 Recents 功能未启用                  |
+| 1020 | AC2isInvalid              | 输入的 ac2 参数无效                      |

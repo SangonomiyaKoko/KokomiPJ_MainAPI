@@ -1,23 +1,34 @@
 from app.log import ExceptionLogger
 from app.network import DetailsAPI
 from app.response import JSONResponse
-from app.models import UserAccessToken
+from app.models import UserAccessToken, UserAccessToken2
 
 from ..user_basic import get_user_name_and_clan
-from ..processors.basic import process_signature_data
+from ..processors.basic import (
+    process_signature_data,
+    process_lifetime_data
+)
 
 @ExceptionLogger.handle_program_exception_async
 async def wws_user_basic(
     account_id: int, 
     region_id: int, 
     game_type: str,
-    algo_type: str,
-    language: str
+    language: str,
+    algo_type: str
 ):
     '''用于`wws me`功能的接口
 
     返回用户基本数据
     
+    参数:
+        account_id 用户id
+        region_id 服务器id
+        game_type 数据类型
+        algo_type 算法类型
+
+    返回:
+        ResponseDict
     '''
     try:
         # 返回数据的格式
@@ -27,7 +38,8 @@ async def wws_user_basic(
             'statistics': {}
         }
         # 请求获取user和clan数据
-        ac_value = UserAccessToken.get_ac_value_by_id(account_id,region_id)
+        ac_value = UserAccessToken.get_ac_value_by_id(account_id, region_id)
+        ac2_value = UserAccessToken2.get_ac_value_by_id(account_id, region_id)
         user_and_clan_result = await get_user_name_and_clan(
             account_id=account_id,
             region_id=region_id,
@@ -43,12 +55,12 @@ async def wws_user_basic(
                 'type_list': ['pvp'],
                 'func_reference': process_signature_data
             },
-            'overall': {
-                'type_list': ['pvp_solo','pvp_div2','pvp_div3','rank_solo'],
-                'func_reference': None
-            },
             'lifetime': {
                 'type_list': ['pvp','lifetime'],
+                'func_reference': process_lifetime_data
+            },
+            'overall': {
+                'type_list': ['pvp_solo','pvp_div2','pvp_div3','rank_solo'],
                 'func_reference': None
             },
             'random': {
@@ -81,7 +93,13 @@ async def wws_user_basic(
             }
         }
         game_type_data = game_type_dict.get(game_type)
-        details_data = await DetailsAPI.get_user_detail(account_id,region_id,game_type_data.get('type_list'))
+        details_data = await DetailsAPI.get_user_detail(
+            account_id=account_id,
+            region_id=region_id,
+            type_list=game_type_data.get('type_list'),
+            ac_value=ac_value,
+            ac2_value=ac2_value
+        )
         for response in details_data:
             if response['code'] != 1000:
                 return response

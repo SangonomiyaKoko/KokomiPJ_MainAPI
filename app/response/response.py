@@ -44,6 +44,7 @@ class JSONResponse:
     API_1017_ClanInBlacklist = {'status': 'ok','code': 1017,'message': 'ClanInBlacklist','data': None}
     API_1018_RecentNotEnabled = {'status': 'ok','code': 1018,'message': 'RecentNotEnabled','data': None}
     API_1019_RecentsNotEnabled = {'status': 'ok','code': 1019,'message': 'RecentsNotEnabled','data': None}
+    API_1020_AC2isInvalid = {'status': 'ok','code': 1020,'message': 'AC2isInvalid','data' : None}
 
     # API_1_ = {'status': 'ok','code': 1,'message': '','data': None}
 

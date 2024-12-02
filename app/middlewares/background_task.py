@@ -124,7 +124,7 @@ def check_clan_basic(pool: PooledDB, clan_data: dict):
             )
         else:
             cur.execute(
-                "UPDATE kokomi.clan_basic SET tag = %s, league = %s WHERE region_id = %s and clan_id = %s;",
+                "UPDATE kokomi.clan_basic SET tag = %s, league = %s, updated_at = CURRENT_TIMESTAMP WHERE region_id = %s and clan_id = %s;",
                 [tag, league, region_id, clan_id]
             )
         
