@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import asyncio.selector_events
 import time
 import asyncio
 from log import log as logger
@@ -32,6 +33,7 @@ class ContinuousUserCacheUpdater:
                         region_id = user['user_basic']['region_id']
                         logger.info(f'{region_id} - {account_id} | ------------------[ {offset + i} / {max_id} ]')
                         await Update.main(user)
+                        await asyncio.sleep(1)
                         i += 1
                 else:
                     logger.error(f"获取CacheUsers时发生错误，Error: {users_result.get('message')}")
