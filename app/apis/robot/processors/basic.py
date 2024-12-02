@@ -8,16 +8,21 @@ def process_signature_data(
     language: str,
     algo_type: str = None
 ) -> ResponseDict:
+    '''处理signature的数据
+    
+    处理流程：处理原始数据 -> 数据格式化 -> 返回处理好数据
+    '''
     # 返回数据的格式
     result = {
         'overall': {}
     }
-    processed_data = {}
-    formatted_data = {}
-    ship_ids = set()
+    processed_data = {} # 处理好的数据
+    formatted_data = {} # 格式化好的数据
+    ship_ids = set() # 需要处理的ship_id集合
     response = responses[0]
     battle_type = 'pvp'
     for ship_id, ship_data in response['data'][str(account_id)]['statistics'].items():
+        # 读取并保留原始数据中需要的数据
         if (
             ship_data[battle_type] == {} or 
             ship_data[battle_type]['battles_count'] == 0
@@ -39,20 +44,26 @@ def process_signature_data(
         if ship_data[battle_type] != {}:
             for index in ['battles_count','wins','damage_dealt','frags']:
                 processed_data[ship_id][battle_type][index] = ship_data[battle_type][index]
+    # 获取船只的信息
     ship_info_dict = ShipName.get_ship_info_batch(region_id,language,ship_ids)
+    # 获取船只服务器数据
     ship_data_dict = ShipData.get_ship_data_batch(region_id,ship_ids)
+    # 循环计算船只pr
     for ship_id in ship_ids:
         ship_data = processed_data.get(ship_id)[battle_type]
+        # 用户数据
         account_data = [
             ship_data['battles_count'],
             ship_data['wins'],
             ship_data['damage_dealt'],
             ship_data['frags']
         ]
+        # 服务器数据
         if ship_data_dict.get(ship_id):
             server_data = ship_data_dict.get(ship_id)
         else:
             server_data = None
+        # 计算评分
         rating_data = Rating_Algorithm.get_rating_by_data(
             algo_type,
             battle_type,
@@ -60,10 +71,12 @@ def process_signature_data(
             server_data
         )
         if rating_data[0] > 0:
+            # 数据有效则写入
             processed_data[ship_id][battle_type]['value_battles_count'] += rating_data[0]
             processed_data[ship_id][battle_type]['personal_rating'] += rating_data[1]
             processed_data[ship_id][battle_type]['n_damage_dealt'] += rating_data[2]
             processed_data[ship_id][battle_type]['n_frags'] += rating_data[3]
+    # 中间变量，用于存放计算好的数据
     overall_data = {
         'battles_count': 0,
         'wins': 0,
@@ -75,6 +88,7 @@ def process_signature_data(
         'n_frags': 0
     }
     for ship_id in ship_ids:
+        # 数据写入，计算出总数据
         ship_data = processed_data.get(ship_id)[battle_type]
         ship_info = ship_info_dict.get(ship_id,None)
         if ship_info is None:
@@ -98,6 +112,7 @@ def process_signature_data(
     if overall_data['battles_count'] == 0:
         return JSONResponse.API_1006_UserDataisNone
     else:
+        # 数据格式化
         formatted_data['battles_count'] = overall_data['battles_count']
         formatted_data['win_rate'] = round(overall_data['wins']/overall_data['battles_count']*100,2)
         formatted_data['avg_damage'] = int(overall_data['damage_dealt']/overall_data['battles_count'])

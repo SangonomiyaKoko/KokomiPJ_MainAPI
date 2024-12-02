@@ -37,9 +37,10 @@ async def wws_user_basic(
             'clan': {},
             'statistics': {}
         }
-        # 请求获取user和clan数据
+        # 获取用户相关的access token
         ac_value = UserAccessToken.get_ac_value_by_id(account_id, region_id)
         ac2_value = UserAccessToken2.get_ac_value_by_id(account_id, region_id)
+        # 获取用户user和clan数据
         user_and_clan_result = await get_user_name_and_clan(
             account_id=account_id,
             region_id=region_id,
@@ -50,6 +51,7 @@ async def wws_user_basic(
         else:
             data['user'] = user_and_clan_result['data']['user']
             data['clan'] = user_and_clan_result['data']['clan']
+        # 获取需要请求的数据和处理数据函数的引用
         game_type_dict = {
             'signature': {
                 'type_list': ['pvp'],
@@ -93,6 +95,7 @@ async def wws_user_basic(
             }
         }
         game_type_data = game_type_dict.get(game_type)
+        # 请求数据
         details_data = await DetailsAPI.get_user_detail(
             account_id=account_id,
             region_id=region_id,
@@ -103,6 +106,7 @@ async def wws_user_basic(
         for response in details_data:
             if response['code'] != 1000:
                 return response
+        # 处理数据
         handle_api_data_func: function = game_type_data.get('func_reference')
         if not handle_api_data_func:
             raise NotImplementedError
