@@ -200,7 +200,7 @@ class UserModel:
                         [nickname, region_id, account_id]
                     )
                 else:
-                    if exists_users[account_id] == None:
+                    if exists_users[account_id][1] == None:
                         await cur.execute(
                             "UPDATE kokomi.user_basic SET username = %s WHERE region_id = %s AND account_id = %s",
                             [nickname, region_id, account_id]
