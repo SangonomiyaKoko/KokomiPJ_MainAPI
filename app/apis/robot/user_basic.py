@@ -105,30 +105,6 @@ async def get_user_name_and_clan(
     if basic_data[0]['code'] == 1001:
         # 用户数据不存在
         user_info['is_active'] = False
-        if not valid_clan:
-            #处理工会信息
-            user_clan_data = basic_data[1]['data']
-            if user_clan_data['clan_id'] != None:
-                clan_basic['id'] = user_clan_data['clan_id']
-                clan_basic['tag'] = user_clan_data['clan']['tag']
-                clan_basic['league'] = UtilityFunctions.get_league_by_color(user_clan_data['clan']['color'])
-                task_update_clan_and_user(
-                    {
-                    'clan_id': clan_basic['id'],
-                    'region_id': region_id,
-                    'tag': clan_basic['tag'],
-                    'league': clan_basic['league']
-                    },
-                    {
-                        'account_id': user_basic['id'],
-                        'clan_id': clan_basic['id']
-                    }
-                )
-            else:
-                task_update_user_clan.delay({
-                    'account_id': user_basic['id'],
-                    'clan_id': None
-                })
         task_check_user_info.delay(user_info)
         return JSONResponse.API_1001_UserNotExist
     if user_basic_result['data']['nickname'] != basic_data[0]['data'][str(account_id)]['name']:
@@ -150,7 +126,7 @@ async def get_user_name_and_clan(
                 clan_basic['id'] = user_clan_data['clan_id']
                 clan_basic['tag'] = user_clan_data['clan']['tag']
                 clan_basic['league'] = UtilityFunctions.get_league_by_color(user_clan_data['clan']['color'])
-                task_update_clan_and_user(
+                task_update_clan_and_user.delay(
                     {
                         'clan_id': clan_basic['id'],
                         'region_id': region_id,
@@ -205,16 +181,18 @@ async def get_user_name_and_clan(
             clan_basic['id'] = user_clan_data['clan_id']
             clan_basic['tag'] = user_clan_data['clan']['tag']
             clan_basic['league'] = UtilityFunctions.get_league_by_color(user_clan_data['clan']['color'])
-            task_check_clan_basic.delay({
-                'clan_id': clan_basic['id'],
-                'region_id': region_id,
-                'tag': clan_basic['tag'],
-                'league': clan_basic['league']
-            })
-            task_update_user_clan.delay({
-                'account_id': user_basic['id'],
-                'clan_id': clan_basic['id']
-            })
+            task_update_clan_and_user.delay(
+                {
+                    'clan_id': clan_basic['id'],
+                    'region_id': region_id,
+                    'tag': clan_basic['tag'],
+                    'league': clan_basic['league']
+                },
+                {
+                    'account_id': user_basic['id'],
+                    'clan_id': clan_basic['id']
+                }
+            )
         else:
             task_update_user_clan.delay({
                 'account_id': user_basic['id'],
