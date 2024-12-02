@@ -3,8 +3,7 @@
 from pydantic_settings import BaseSettings
 
 class LoadConfig(BaseSettings):
-    API_HOST: str
-    API_PORT: int
+    LOG_PATH: str
 
     MYSQL_HOST: str
     MYSQL_PORT: int

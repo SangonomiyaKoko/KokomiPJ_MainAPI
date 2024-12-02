@@ -1,24 +1,10 @@
-"""
-错误类型：
-1. 网络错误
-2. 数据库错误
-3. 缓存错误
-4. 后台任务错误
-5. 其他程序错误
-
-错误日志（基础结构）
-错误id
-错误类型
-错误文件
-错误时间
-错误信息
-"""
-
 import os
 
 from app.utils import TimeFormat
+from app.core import EnvConfig
 
-log_path = r'F:\Kokomi_PJ_Api\temp\log'
+config = EnvConfig.get_config()
+log_path = config.LOG_PATH
 
 def write_error_info(
     error_id: str,
