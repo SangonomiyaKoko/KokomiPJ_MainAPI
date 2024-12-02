@@ -40,8 +40,8 @@ class ContinuousUserCacheUpdater:
                 offset += limit
         end_time = int(time.time())
         # 避免测试时候的循环bug
-        if end_time - start_time <= 50:
-            sleep_time = 60 - (end_time - start_time)
+        if end_time - start_time <= 4*60*60-10:
+            sleep_time = 4*60*60 - (end_time - start_time)
             logger.info(f'更新线程休眠 {round(sleep_time,2)} s')
             await asyncio.sleep(sleep_time)
 
