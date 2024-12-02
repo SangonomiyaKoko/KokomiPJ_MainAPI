@@ -74,8 +74,8 @@ class Rating_Algorithm:
     def get_rating_by_data(
         algo_type: str,
         game_type: str,
-        ship_data: List[int],
-        server_data: List[int] | None
+        ship_data: List[int | float],
+        server_data: List[int | float] | None
     ):
         if algo_type == 'pr':
             result = [0,-1,-1,-1]
@@ -91,8 +91,8 @@ class Rating_Algorithm:
             actual_frags = ship_data[3] / battles_count
             # 服务器数据
             expected_wins = server_data[0]
-            expected_dmg = server_data[0]
-            expected_frags = server_data[0]
+            expected_dmg = server_data[1]
+            expected_frags = server_data[2]
             # 计算PR
             # Step 1 - ratios:
             r_wins = actual_wins / expected_wins

@@ -1,8 +1,10 @@
-from ..user_basic import get_user_name_and_clan
 from app.log import ExceptionLogger
 from app.network import DetailsAPI
 from app.response import JSONResponse
 from app.models import UserAccessToken
+
+from ..user_basic import get_user_name_and_clan
+from ..processors.basic import process_signature_data
 
 @ExceptionLogger.handle_program_exception_async
 async def wws_user_basic(
@@ -39,7 +41,7 @@ async def wws_user_basic(
         game_type_dict = {
             'signature': {
                 'type_list': ['pvp'],
-                'func_reference': None
+                'func_reference': process_signature_data
             },
             'overall': {
                 'type_list': ['pvp_solo','pvp_div2','pvp_div3','rank_solo'],
@@ -83,18 +85,19 @@ async def wws_user_basic(
         for response in details_data:
             if response['code'] != 1000:
                 return response
-        print(details_data)
-        # handle_api_data_func: function = game_type_data.get('func_reference')
-        # processed_data = handle_api_data_func(
-        #     account_id = account_id, 
-        #     region_id = region_id, 
-        #     responses = details_data,
-        #     language = language,
-        #     algo_type = algo_type
-        # )
-        # if processed_data.get('code', None) != 1000:
-        #     return processed_data
-        # data['statistics'] = processed_data['data']
+        handle_api_data_func: function = game_type_data.get('func_reference')
+        if not handle_api_data_func:
+            raise NotImplementedError
+        processed_data = handle_api_data_func(
+            account_id = account_id, 
+            region_id = region_id, 
+            responses = details_data,
+            language = language,
+            algo_type = algo_type
+        )
+        if processed_data.get('code', None) != 1000:
+            return processed_data
+        data['statistics'] = processed_data['data']
         # 返回结果
         return JSONResponse.get_success_response(data)
     except Exception as e:

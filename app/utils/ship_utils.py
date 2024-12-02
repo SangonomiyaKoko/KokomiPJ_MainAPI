@@ -123,7 +123,7 @@ class ShipName:
                     }
         return result
     
-    async def get_ship_info_batch(region_id: int, language: str, ship_ids: List[int] | Set[int]) -> dict:
+    def get_ship_info_batch(region_id: int, language: str, ship_ids: List[int] | Set[int]) -> dict:
         ''''''
         result = {}
         if region_id == 4:
@@ -132,14 +132,14 @@ class ShipName:
             server = 'wg'
         main_data = JsonData.read_json_data(f'ship_name_{server}')
         for ship_id in ship_ids:
-            if ship_id in main_data:
+            if str(ship_id) in main_data:
                 result[ship_id] = {
-                    'tier':main_data[ship_id]['tier'],
-                    'type':main_data[ship_id]['type'],
-                    'nation':main_data[ship_id]['nation'],
-                    'premium':main_data[ship_id]['premium'],
-                    'special':main_data[ship_id]['special'],
-                    'name':main_data[ship_id]['ship_name'][language],
-                    'index':main_data[ship_id]['index']
+                    'tier':main_data[str(ship_id)]['tier'],
+                    'type':main_data[str(ship_id)]['type'],
+                    'nation':main_data[str(ship_id)]['nation'],
+                    'premium':main_data[str(ship_id)]['premium'],
+                    'special':main_data[str(ship_id)]['special'],
+                    'name':main_data[str(ship_id)]['ship_name'][language],
+                    'index':main_data[str(ship_id)]['index']
                 }
         return result
