@@ -100,43 +100,6 @@ class ClanModel:
         finally:
             await cur.close()
             await MysqlConnection.release_connection(conn)
-
-    @ExceptionLogger.handle_database_exception_async
-    async def get_clan_by_rid(region_id: int) -> ResponseDict:
-        try:
-            conn: Connection = await MysqlConnection.get_connection()
-            await conn.begin()
-            cur: Cursor = await conn.cursor()
-
-            data = []
-            await cur.execute(
-                "SELECT b.clan_id, i.is_active, UNIX_TIMESTAMP(i.updated_at) AS info_update_time, "
-                "u.hash_value, UNIX_TIMESTAMP(u.updated_at) AS users_update_time "
-                "FROM kokomi.clan_basic AS b "
-                "LEFT JOIN kokomi.clan_info AS i ON b.clan_id = i.clan_id "
-                "LEFT JOIN kokomi.clan_users AS u ON b.clan_id = u.clan_id "
-                "WHERE b.region_id = %s;",
-                [region_id]
-            )
-            users = await cur.fetchall()
-            for user in users:
-                # 排除不活跃的用户数据
-                if user[2] and not user[1]:
-                    continue
-                data.append({
-                    'clan_id': user[0],
-                    'hash_value': user[3],
-                    'update_time': user[4]
-                })
-            
-            await conn.commit()
-            return JSONResponse.get_success_response(data)
-        except Exception as e:
-            await conn.rollback()
-            raise e
-        finally:
-            await cur.close()
-            await MysqlConnection.release_connection(conn)
         
     @ExceptionLogger.handle_database_exception_async
     async def get_clan_tag_and_league(clan_id: int, region_id: int) -> ResponseDict:
@@ -237,8 +200,7 @@ class ClanModel:
                 )
                 await conn.commit()
                 return JSONResponse.API_1000_Success
-            #if clan[1] != last_battle_time:
-            if clan[1] == last_battle_time:
+            if clan[1] != last_battle_time:
                 await cur.execute(
                     "UPDATE kokomi.clan_season SET season = %s, last_battle_at = FROM_UNIXTIME(%s), "
                     "team_data_1 = %s, team_data_2 = %s WHERE clan_id = %s",
