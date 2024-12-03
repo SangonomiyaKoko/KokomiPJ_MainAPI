@@ -84,7 +84,7 @@ class Rating_Algorithm:
             if battles_count <= 0:
                 return [0,-1,-1,-1]
             # 获取服务器数据
-            if server_data == {}:
+            if server_data == {} or server_data is None:
                 return [0,-1,-1,-1]
             # 用户数据
             actual_wins = ship_data[1] / battles_count * 100
