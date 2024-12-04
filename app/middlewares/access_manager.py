@@ -1,5 +1,5 @@
 # 由于需求不大，就不用数据库存储数据
-IP_WHITE_LIST = ['127.0.0.1']
+IP_WHITE_LIST = ['127.0.0.1','43.155.60.190','43.133.59.53','43.157.28.149']
 IP_BLACK_LIST = []
 USER_BLACK_LIST = []
 CLAN_BLACK_LIST = []
