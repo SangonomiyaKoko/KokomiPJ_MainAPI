@@ -244,9 +244,11 @@ class ClanModel:
                                 temp_list += [None]
                             if (
                                 new_team_data[team_number]['stage_type'] and 
-                                new_team_data[team_number]['stage_progress'] != None
+                                new_team_data[team_number]['stage_progress'] != None and 
+                                new_team_data[team_number]['stage_progress'] != '[]'
                             ):
-                                if new_team_data[team_number]['stage_progress'][len(new_team_data[team_number]['stage_progress']) - 1] == 1:
+                                stage_progress = eval(new_team_data[team_number]['stage_progress'])
+                                if stage_progress[len(stage_progress) - 1] == 1:
                                     temp_list += ['+★']
                                 else:
                                     temp_list += ['+☆']
