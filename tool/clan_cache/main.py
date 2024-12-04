@@ -45,7 +45,7 @@ async def main():
         updater.stop()
 
 if __name__ == "__main__":
-    logger.info('开始运行UserCache更新进程')
+    logger.info('开始运行ClanCache更新进程')
     # 开始不间断更新
     try:
         asyncio.run(main())

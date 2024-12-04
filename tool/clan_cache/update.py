@@ -88,5 +88,5 @@ class Update:
             logger.error(f"{region_id} - {clan_id} | ├── 更新数据上传失败，Error: {update_result.get('code')} {update_result.get('message')}")
             return []
         else:
-            logger.debug(f'{region_id} - {clan_id} | ├── 更新数据上传成功')
+            logger.info(f'{region_id} - {clan_id} | ├── 更新数据上传成功')
             return update_result['data']
