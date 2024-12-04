@@ -5,6 +5,7 @@ import time
 import asyncio
 from log import log as logger
 
+from config import REGION_LIST
 from network import Network
 from update import Update
 
@@ -31,8 +32,9 @@ class ContinuousUserCacheUpdater:
                     for user in users_result['data']:
                         account_id = user['user_basic']['account_id']
                         region_id = user['user_basic']['region_id']
-                        logger.info(f'{region_id} - {account_id} | ------------------[ {offset + i} / {max_id} ]')
-                        await Update.main(user)
+                        if region_id in REGION_LIST:
+                            logger.info(f'{region_id} - {account_id} | ------------------[ {offset + i} / {max_id} ]')
+                            await Update.main(user)
                         i += 1
                 else:
                     logger.error(f"获取CacheUsers时发生错误，Error: {users_result.get('message')}")

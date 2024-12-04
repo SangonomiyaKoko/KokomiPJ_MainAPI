@@ -1,7 +1,6 @@
 import httpx
 import asyncio
 from typing import Optional
-from dataclasses import dataclass
 
 from log import log as logger
 from config import API_URL
