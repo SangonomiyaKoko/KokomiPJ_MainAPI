@@ -448,8 +448,8 @@ class UserModel:
                 "FROM kokomi.user_basic AS b "
                 "LEFT JOIN kokomi.user_info AS i ON i.account_id = b.account_id "
                 "LEFT JOIN kokomi.user_ships AS s ON s.account_id = b.account_id "
-                "ORDER BY b.id LIMIT %s OFFSET %s;", 
-                [limit, offset]
+                "WHERE b.id BETWEEN %s AND %s;", 
+                [offset+1, offset+limit]
             )
             rows = await cur.fetchall()
             for row in rows:

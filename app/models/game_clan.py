@@ -68,8 +68,8 @@ class ClanModel:
                 "FROM kokomi.clan_basic AS b "
                 "LEFT JOIN kokomi.clan_info AS i ON b.clan_id = i.clan_id "
                 "LEFT JOIN kokomi.clan_users AS u ON b.clan_id = u.clan_id "
-                "ORDER BY b.id LIMIT %s OFFSET %s;", 
-                [limit, offset]
+                "WHERE b.id BETWEEN %s AND %s;", 
+                [offset+1, offset+limit]
             )
             rows = await cur.fetchall()
             for row in rows:
