@@ -33,7 +33,7 @@ class ContinuousUserCacheUpdater:
                         region_id = clan['clan_basic']['region_id']
                         logger.info(f'{region_id} - {clan_id} | ------------------[ {offset + i} / {max_id} ]')
                         await Update.main(clan_id, region_id, clan)
-                        await asyncio.sleep(0.2)
+                        await asyncio.sleep(1)
                         i += 1
                 else:
                     logger.error(f"获取CacheClans时发生错误，Error: {clans_result.get('message')}")
