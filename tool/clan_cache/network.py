@@ -181,7 +181,21 @@ class Network:
         if result.get('code', None) != 1000:
             return result
         else:
-            result = self.__cvc_data_processing(clan_id, region_id, season, result)
+            if result['data']['is_hidden_statistics']:
+                return None
+            else:
+                result = self.__cvc_data_processing(clan_id, region_id, season, result)
+                return {'status': 'ok', 'code': 1000, 'message': 'Success', 'data': result}
+    
+    @classmethod
+    async def get_clan_cvc_data2(self, clan_id: int, region_id: int, season: int):
+        api_url = CLAN_API_URL_LIST.get(region_id)
+        url = f'{api_url}/api/clanbase/{clan_id}/claninfo/'
+        result = await self.fetch_data(url)
+        if result.get('code', None) != 1000:
+            return result
+        else:
+            result = self.__cvc_data2_processing(clan_id, region_id, season, result)
             return {'status': 'ok', 'code': 1000, 'message': 'Success', 'data': result}
 
     def __clan_data_processing(response: dict) -> tuple:
@@ -224,6 +238,56 @@ class Network:
             }
         }
         for team_data in response['data']['clan_statistics']['ratings']:
+            if team_data['season_number'] != season:
+                continue
+            team_number = team_data['team_number']
+            result['team_data'][team_number] = {
+                'battles_count': team_data['battles_count'],
+                'wins_count': team_data['wins_count'],
+                'public_rating': team_data['public_rating'],
+                'league': team_data['league'],
+                'division': team_data['division'],
+                'division_rating': team_data['division_rating'],
+                'stage_type': None,
+                'stage_progress': None
+            }
+            if team_data['stage']:
+                if team_data['stage']['type'] == 'promotion':
+                    result['team_data'][team_number]['stage_type'] = '1'
+                else:
+                    result['team_data'][team_number]['stage_type'] = '2'
+                stage_progress = []
+                for progress in team_data['stage']['progress']:
+                    if progress == 'victory':
+                        stage_progress.append(1)
+                    else:
+                        stage_progress.append(0)
+                result['team_data'][team_number]['stage_progress'] = str(stage_progress)
+        return result
+    
+    def __cvc_data2_processing(clan_id: int, region_id: int, season: int, response: dict):
+        last_battle_at = response['data']['clanview']['wows_ladder']['last_battle_at']
+        clan_null_data = {
+            'battles_count': 0, 
+            'wins_count': 0, 
+            'public_rating': 1100, 
+            'league': 4, 
+            'division': 2, 
+            'division_rating': 0, 
+            'stage_type': None, 
+            'stage_progress': None
+        }
+        result = {
+            'clan_id': clan_id,
+            'region_id': region_id,
+            'season_number': season,
+            'last_battle_time': int(datetime.fromisoformat(last_battle_at).timestamp()),
+            'team_data': {
+                1: clan_null_data,
+                2: clan_null_data
+            }
+        }
+        for team_data in response['data']['clanview']['wows_ladder']['ratings']:
             if team_data['season_number'] != season:
                 continue
             team_number = team_data['team_number']

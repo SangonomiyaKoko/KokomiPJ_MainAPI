@@ -45,7 +45,10 @@ class Update:
                 need_update_list = need_update_list + update_result
         logger.debug(f'{region_id} | ├── 需要更新用户数量 {len(need_update_list)}')
         for clan_id in need_update_list:
+            logger.info(f'{region_id} - {clan_id} | ├── 需要更新')
             clan_cvc_data = await Network.get_clan_cvc_data(clan_id,region_id,season_number)
+            if clan_cvc_data == None:
+                clan_cvc_data = await Network.get_clan_cvc_data2(clan_id,region_id,season_number)
             if clan_cvc_data.get('code', None) == 1002:
                 clan_basic = {
                     'clan_id': clan_id,
