@@ -15,7 +15,8 @@ class ShipData:
             result[ship_id] = [
                 ship_data[str(ship_id)][region]['win_rate'],
                 ship_data[str(ship_id)][region]['avg_damage'],
-                ship_data[str(ship_id)][region]['avg_frags']
+                ship_data[str(ship_id)][region]['avg_frags'],
+                ship_data[str(ship_id)][region]['avg_exp']
             ]
         return result
 

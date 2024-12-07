@@ -7,6 +7,7 @@ from .recent_data import RecentDatabaseModel
 from .access_token import UserAccessToken, UserAccessToken2
 from .ships_cache import ShipsCacheModel
 from .root import RootModel
+from .ship_rank import RankDataModel
 
 __all__ = [
     'UserModel',
@@ -19,4 +20,5 @@ __all__ = [
     'UserAccessToken2',
     'RecentDatabaseModel',
     'ShipsCacheModel'
+    'RankDataModel'
 ]
