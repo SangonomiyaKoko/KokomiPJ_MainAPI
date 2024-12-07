@@ -13,7 +13,7 @@ from app.db import MysqlConnection
 from app.response import JSONResponse as API_JSONResponse
 from app.middlewares import RedisConnection, IPAccessListManager, rate_limit
 
-from app.routers import platform_router, robot_router, recent_1_router, root_router
+from app.routers import platform_router, robot_router, recent_1_router, root_router, rank_router
 
 
 # 应用程序的生命周期
@@ -108,6 +108,11 @@ app.include_router(
     tags=['Recent Interface']
 )
 
+app.include_router(
+    rank_router,
+    prefix='/rank',
+    tags=['Rank Interface']
+)
 # 重写shutdown函数，避免某些协程bug
 async def _shutdown(self, any = None):
     await origin_shutdown(self)

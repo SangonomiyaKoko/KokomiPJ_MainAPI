@@ -212,24 +212,27 @@ class Rating_Algorithm:
                         print(user_id, username)
                         clan_id = await RankDataModel.get_clan_id(user_id)
                         print(clan_id)
-                        clan_id = clan_id['data'][0][0]
-                        print(clan_id)
-                        if not clan_id:
-                            clan = clan_id = league = 'NULL'
+                        if clan_id['status'] == 'ok':
+                            clan_id = clan_id['data'][0][0]
+                            print(clan_id)
+                            if not clan_id:
+                                clan = clan_id = league = 'NULL'
+                            else:
+                                clan = await RankDataModel.get_clan(clan_id, region_id)
+                                clan = clan['data']
+                                print(clan)
+                                league = clan[0][1]
+                                clan = clan[0][0]
+                            user_data = {
+                                "username": username,
+                                "clan_id": clan_id,
+                                "clan_tag": clan,
+                                "clan_rank": league
+                            }
+                            print(user_data)
+                            await redis.hset(f"user_data:{user_id}", mapping=user_data)
                         else:
-                            clan = await RankDataModel.get_clan(clan_id, region_id)
-                            clan = clan['data']
-                            print(clan)
-                            league = clan[0][1]
-                            clan = clan[0][0]
-                        user_data = {
-                            "username": username,
-                            "clan_id": clan_id,
-                            "clan_tag": clan,
-                            "clan_rank": league
-                        }
-                        print(user_data)
-                        await redis.hset(f"user_data:{user_id}", mapping=user_data)
+                            i = i - 1
                     else:
                         i = i - 1
             return JSONResponse.get_success_response()
