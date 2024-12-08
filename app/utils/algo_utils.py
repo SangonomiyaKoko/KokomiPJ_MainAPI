@@ -209,20 +209,15 @@ class Rating_Algorithm:
                     user_data = {}
                     user_data = await RankDataModel.get_user(user_id, region_id)
                     if user_data['status'] == 'ok':
-                        print("user_data:", user_data)
                         username = user_data['data'][0][0]
-                        print(user_id, username)
                         clan_id = await RankDataModel.get_clan_id(user_id)
-                        print(clan_id)
                         if clan_id['status'] == 'ok':
                             clan_id = clan_id['data'][0][0]
-                            print(clan_id)
                             if not clan_id:
                                 clan = clan_id = league = 'NULL'
                             else:
                                 clan = await RankDataModel.get_clan(clan_id, region_id)
                                 clan = clan['data']
-                                print(clan)
                                 league = clan[0][1]
                                 clan = clan[0][0]
                             user_data = {
@@ -231,7 +226,6 @@ class Rating_Algorithm:
                                 "clan_tag": clan,
                                 "clan_rank": league
                             }
-                            print(user_data)
                             await redis.hset(f"user_data:{user_id}", mapping=user_data, expire=86400)
                             await redis.expire(f"user_data:{user_id}", 3600)
                         else:
