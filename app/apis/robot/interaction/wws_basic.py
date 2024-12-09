@@ -6,7 +6,9 @@ from app.models import UserAccessToken, UserAccessToken2
 from ..user_basic import get_user_name_and_clan
 from ..processors.basic import (
     process_signature_data,
-    process_lifetime_data
+    process_lifetime_data,
+    process_overall_data
+    
 )
 
 @ExceptionLogger.handle_program_exception_async
@@ -54,7 +56,7 @@ async def wws_user_basic(
         # 获取需要请求的数据和处理数据函数的引用
         game_type_dict = {
             'signature': {
-                'type_list': ['pvp'],
+                'type_list': ['pvp','rank_solo'],
                 'func_reference': process_signature_data
             },
             'lifetime': {
@@ -63,7 +65,7 @@ async def wws_user_basic(
             },
             'overall': {
                 'type_list': ['pvp_solo','pvp_div2','pvp_div3','rank_solo'],
-                'func_reference': None
+                'func_reference': process_overall_data
             },
             'random': {
                 'type_list': ['pvp_solo','pvp_div2','pvp_div3'],
