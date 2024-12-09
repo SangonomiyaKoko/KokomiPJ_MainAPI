@@ -39,7 +39,7 @@ async def get_rank_a(ship_id: int, page: int):
     results = await redis.zrevrange(key, start, end, withscores=True)
     final_result = []
     if not results:
-        raise HTTPException(status_code=404, detail=JSONResponse.API_1001_NoData)
+        raise HTTPException(status_code=404, detail=JSONResponse.API_7000_InvalidParameter)
     for i in range(len(results)):
         ship_data = await redis.hgetall(f"ship_data:{ship_id}:{results[i][0]}")
         user_data = await redis.hgetall(f"user_data:{results[i][0]}")
