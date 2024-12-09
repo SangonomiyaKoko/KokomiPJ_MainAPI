@@ -6,3 +6,5 @@ __pycache__/
 .venv/
 .VSCodeCounter/
 temp/
+logs
+tests/test_pr.py
