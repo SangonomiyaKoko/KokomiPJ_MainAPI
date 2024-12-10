@@ -7,7 +7,7 @@ from app.middlewares import record_api_call
 
 router = APIRouter()
 
-@router.get("/service/status")
+@router.get("/service/status/")
 async def getServiceStatus() -> ResponseDict:
     """获取当前服务的状态
     
@@ -30,7 +30,7 @@ async def getServiceStatus() -> ResponseDict:
         }
     return JSONResponse.get_success_response(data)
 
-@router.post("service/status")
+@router.post("/service/status/")
 async def setServiceStatus(set: bool = False) -> ResponseDict:
     """修改服务器当前的状态
     

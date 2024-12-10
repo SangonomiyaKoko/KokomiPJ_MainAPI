@@ -51,7 +51,7 @@ async def get_user_name_and_clan(
     clan_basic = {
         'id': None,
         'tag': None,
-        'league': None
+        'league': 5
     }
     # 用于后台更新user_info表的数据
     user_info = {

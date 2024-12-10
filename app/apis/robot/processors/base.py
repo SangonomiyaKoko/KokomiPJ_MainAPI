@@ -18,6 +18,7 @@ class BaseFormatData:
                 'win_rate': 0.0,
                 'avg_damage': 0,
                 'avg_frags': 0.0,
+                'avg_exp': 0,
                 'rating': 0,
                 'rating_class': 0,
                 'rating_next': 0,
@@ -30,6 +31,7 @@ class BaseFormatData:
             result['win_rate'] = round(processed_data['wins']/processed_data['battles_count']*100,2)
             result['avg_damage'] = int(processed_data['damage_dealt']/processed_data['battles_count'])
             result['avg_frags'] = round(processed_data['frags']/processed_data['battles_count'],2)
+            result['avg_exp'] = int(processed_data['original_exp']/processed_data['battles_count'])
             if not algo_type:
                 result['rating'] = -2
                 rating_class, rating_next = Rating_Algorithm.get_rating_class(algo_type,-2,show_eggshell)
@@ -65,6 +67,7 @@ class BaseFormatData:
             result['win_rate'] = '{:.2f}%'.format(result['win_rate'])
             result['avg_damage'] = '{:,}'.format(result['avg_damage']).replace(',', ' ')
             result['avg_frags'] = '{:.2f}'.format(result['avg_frags'])
+            result['avg_exp'] = '{:,}'.format(result['avg_exp']).replace(',', ' ')
             result['rating'] = '{:,}'.format(result['rating']).replace(',', ' ')
         else:
             result = {

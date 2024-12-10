@@ -266,6 +266,7 @@ def process_overall_data(
         'wins': 0,
         'damage_dealt': 0,
         'frags': 0,
+        'original_exp': 0,
         'value_battles_count': 0,
         'personal_rating': 0,
         'n_damage_dealt': 0,
@@ -292,7 +293,7 @@ def process_overall_data(
             ):
                 continue
             if ship_data[battle_type] != {}:
-                for index in ['battles_count','wins','damage_dealt','frags']:
+                for index in ['battles_count','wins','damage_dealt','frags','original_exp']:
                     processed_data[ship_id][battle_type][index] = ship_data[battle_type][index]
     # 获取船只的信息
     ship_info_dict = ShipName.get_ship_info_batch(region_id,language,ship_ids)
@@ -357,7 +358,7 @@ def process_overall_data(
                 continue
             ship_tier = ship_info['tier']
             ship_type = ship_info['type']
-            for index in ['battles_count','wins','damage_dealt','frags']:
+            for index in ['battles_count','wins','damage_dealt','frags','original_exp']:
                 overall_data['battle_type'][battle_type][index] += ship_data[index]
                 overall_data['ship_type'][ship_type][index] += ship_data[index]
             if ship_data['value_battles_count'] > 0:
@@ -367,7 +368,7 @@ def process_overall_data(
             if battle_type != 'rank_solo':
                 if ship_data['battles_count'] > 0:
                     overall_data['chart_data'][str(ship_tier)] += ship_data['battles_count']
-                for index in ['battles_count','wins','damage_dealt','frags']:
+                for index in ['battles_count','wins','damage_dealt','frags','original_exp']:
                     overall_data['overall'][index] += ship_data[index]
                 if ship_data['value_battles_count'] > 0:
                     for index in ['value_battles_count','personal_rating','n_damage_dealt','n_frags']:
