@@ -20,6 +20,8 @@ from .background_task import (
 from app.core import EnvConfig
 
 import asyncio
+import eventlet
+eventlet.monkey_patch()
 
 config = EnvConfig.get_config()
 
