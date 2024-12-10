@@ -117,6 +117,36 @@ class Rating_Algorithm:
             ]
         else:
             raise ValueError('Invaild Algorithm Parameters')
+        
+    def get_rating_class(
+        algo_type: str, 
+        rating: int | float, 
+        show_eggshell: bool = False
+    ):
+        '''获取pr的等级以及距离下一级的差值
+
+        其中启用彩蛋功能才会返回彩色评分
+        
+        '''
+        if algo_type == 'pr':
+            if rating == -2:
+                return 0, 2
+            if rating == -1:
+                return 0, 1
+            if show_eggshell:
+                data = [750, 1100, 1350, 1550, 1750, 2100, 2450, 3250]
+                for i in range(len(data)):
+                    if rating < data[i]:
+                        return i + 1, int(data[i]-rating)
+                return 9, int(rating - 3250)
+            else:
+                data = [750, 1100, 1350, 1550, 1750, 2100, 2450]
+                for i in range(len(data)):
+                    if rating < data[i]:
+                        return i + 1, int(data[i]-rating)
+                return 8, int(rating - 2450)
+        else:
+            raise ValueError('Invaild Algorithm Parameters')
        
     async def batch_pr_by_data(
         ship_id: int,

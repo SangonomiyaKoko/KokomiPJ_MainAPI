@@ -17,13 +17,13 @@ class JSONResponse:
     对于返回值的描述，请查看设计文档
     '''
     API_1000_Success = {'status': 'ok','code': 1000,'message': 'Success','data': None}
-    API_2000_NetworkError = {'status': 'ok','code': 2000,'message': 'NetworkError','data': None}
-    API_3000_DatabaseError = {'status': 'ok','code': 3000,'message': 'DatabaseError','data': None}
-    API_4000_RedisError = {'status': 'ok','code': 4000,'message': 'RedisError','data': None}
-    API_5000_ProgramError = {'status': 'ok','code': 5000,'message': 'ProgramError','data': None}
-    API_6000_VersionError = {'status': 'ok','code': 6000,'message': 'VersionError','data': None}
-    API_7000_InvalidParameter = {'status': 'ok','code': 7000,'message': 'InvalidParameter','data': None}
-    API_8000_ServiceUnavailable = {'status': 'ok','code': 8000,'message': 'ServiceUnavailable','data': None}
+    API_2000_NetworkError = {'status': 'error','code': 2000,'message': 'NetworkError','data': None}
+    API_3000_DatabaseError = {'status': 'error','code': 3000,'message': 'DatabaseError','data': None}
+    API_4000_RedisError = {'status': 'error','code': 4000,'message': 'RedisError','data': None}
+    API_5000_ProgramError = {'status': 'error','code': 5000,'message': 'ProgramError','data': None}
+    API_6000_VersionError = {'status': 'error','code': 6000,'message': 'VersionError','data': None}
+    API_7000_InvalidParameter = {'status': 'error','code': 7000,'message': 'InvalidParameter','data': None}
+    API_8000_ServiceUnavailable = {'status': 'error','code': 8000,'message': 'ServiceUnavailable','data': None}
 
     API_1001_UserNotExist = {'status': 'ok','code': 1001,'message': 'UserNotExist','data' : None}
     API_1002_ClanNotExist = {'status': 'ok','code': 1002,'message': 'ClanNotExist','data' : None}
