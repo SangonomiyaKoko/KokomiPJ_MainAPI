@@ -232,9 +232,9 @@ class Rating_Algorithm:
 
                 redis = RedisConnection.get_connection()
                 await redis.zadd(f"region:{region_id}:ship:{ship_id}", {user_id: personal_rating})
-                await redis.expire(f"region:{region_id}:ship:{ship_id}", 3600)
+                await redis.expire(f"region:{region_id}:ship:{ship_id}", 2000)
                 await redis.hset(f"ship_data:{ship_id}:{user_id}", mapping=user_data)
-                await redis.expire(f"ship_data:{ship_id}:{user_id}", 3600)
+                await redis.expire(f"ship_data:{ship_id}:{user_id}", 2000)
                 if not await redis.hexists(f"user_data:{user_id}", "username"):
                     user_data = {}
                     user_data = await RankDataModel.get_user(user_id, region_id)
@@ -257,7 +257,7 @@ class Rating_Algorithm:
                                 "clan_rank": league
                             }
                             await redis.hset(f"user_data:{user_id}", mapping=user_data)
-                            await redis.expire(f"user_data:{user_id}", 86400)
+                            await redis.expire(f"user_data:{user_id}", 2000)
                         else:
                             i = i - 1
                     else:

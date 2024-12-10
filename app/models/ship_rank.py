@@ -135,10 +135,32 @@ class RankDataModel:
             await cursor.close()  # 关闭游标
             await MysqlConnection.release_connection(connection)  # 释放连接    
             
-async def main():
-    data = await RankDataModel.get_user(2026760380, 1)
-    print(data)
+    @ExceptionLogger.handle_database_exception_async
+    async def get_ship_id() -> ResponseDict:
+        '''获取船只id
 
-# 运行主函数
-if __name__ == "__main__":
-    asyncio.run(main())
+        参数:
+            None
+        
+        返回:
+            ResponseDict(ship_id)
+        '''
+        try:
+            connection: Connection = await MysqlConnection.get_connection()  # 获取连接
+            await connection.begin()  # 开启事务
+            cursor: Cursor = await connection.cursor()  # 获取游标
+
+            await cursor.execute(
+                '''SELECT ship_id
+                FROM ships.existing_ships
+                ''')
+            
+            data = await cursor.fetchall()
+
+            
+            return JSONResponse.get_success_response(data)  # 返回数据
+        except Exception as e:
+            raise e  # 抛出异常
+        finally:
+            await cursor.close()  # 关闭游标
+            await MysqlConnection.release_connection(connection)  # 释放连接    

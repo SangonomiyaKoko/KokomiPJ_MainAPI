@@ -1,6 +1,4 @@
 from app.middlewares import RedisConnection
-import json
-import asyncio
 
 class Rank_utils:
     async def update_rank_all(ship_id: int):
@@ -12,6 +10,7 @@ class Rank_utils:
             f'region:2:ship:{ship_id}',
             f'region:3:ship:{ship_id}',
             f'region:4:ship:{ship_id}',
+            f'region:5:ship:{ship_id}',
         ]
 
         all_members = {}
@@ -24,4 +23,5 @@ class Rank_utils:
         
         if all_members:
             await redis.zadd(f'region:all:ship:{ship_id}', all_members)
-        print("数据整合完成")
+            await redis.expire(f'region:all:ship:{ship_id}', 2000)
+        print(ship_id, "数据整合完成")
