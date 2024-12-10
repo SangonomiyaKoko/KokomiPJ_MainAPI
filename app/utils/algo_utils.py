@@ -226,8 +226,8 @@ class Rating_Algorithm:
                                 "clan_tag": clan,
                                 "clan_rank": league
                             }
-                            await redis.hset(f"user_data:{user_id}", mapping=user_data, expire=86400)
-                            await redis.expire(f"user_data:{user_id}", 3600)
+                            await redis.hset(f"user_data:{user_id}", mapping=user_data)
+                            await redis.expire(f"user_data:{user_id}", 86400)
                         else:
                             i = i - 1
                     else:
