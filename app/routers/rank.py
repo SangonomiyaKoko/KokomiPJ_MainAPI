@@ -72,7 +72,7 @@ async def get_personal_rank(region_id: int, ship_id: int, account_id: int):
     }
     return JSONResponse.get_success_response(result)
 
-@router.get("/{region_id}/{ship_id}/{account_id}")
+@router.get("/n/{region_id}/{ship_id}/{account_id}")
 async def get_personal_rank_near(region_id: int, ship_id: int, account_id: int):
     '''获取个人排名附近的玩家'''
     redis = RedisConnection.get_connection()
