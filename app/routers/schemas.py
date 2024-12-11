@@ -16,6 +16,12 @@ class RegionList(str, Enum):
     ru = "ru"
     cn = "cn"
 
+class PlatformList(str, Enum):
+    qq_bot = 'qq_bot'
+    qq_group = 'qq_group'
+    qq_guild = 'qq_guild'
+    discord = 'discord'
+
 class LanguageList(str, Enum):
     chinese = 'chinese'
     english = 'english'
@@ -112,3 +118,9 @@ class UserUpdateModel(BaseModel):
     user_info: UserInfoModel = Field(None, description='用户详细数据')
     user_recent: UserRecentModel = Field(None, description='用户recent功能数据')
     user_cache: UserCacheModel = Field(None, description='用户缓存数据')
+
+class BotUserBindModel(BaseModel):
+    platform: str = Field(..., description='平台')
+    user_id: str = Field(..., description='用户id')
+    region_id: int = Field(..., description='服务器id')
+    account_id: int = Field(..., description='用户id')

@@ -2,14 +2,40 @@ from typing import Optional
 
 from fastapi import APIRouter
 
-from .schemas import RegionList, LanguageList, GameTypeList, AlgorithmList
+from .schemas import RegionList, LanguageList, GameTypeList, AlgorithmList, PlatformList, BotUserBindModel
 from app.utils import UtilityFunctions
 from app.core import ServiceStatus
 from app.response import JSONResponse, ResponseDict
-from app.apis.robot import wws_me, wws_me_clan, wws_basic
+from app.apis.robot import wws_me, wws_me_clan, wws_basic, BotUser
 from app.middlewares import record_api_call
 
 router = APIRouter()
+
+@router.get("/version/")
+async def getVersion() -> ResponseDict:
+    """获取bot的版本"""
+    result = JSONResponse.API_1000_Success
+    await record_api_call(result['status'])
+    return result
+
+@router.get("/user/bind/")
+async def getUserBind(
+    platform: PlatformList,
+    user_id: str
+) -> ResponseDict:
+    """获取用户的绑定信息"""
+    result = await BotUser.get_user_bind(platform, user_id)
+    await record_api_call(result['status'])
+    return result
+
+@router.post("/user/bind/")
+async def getUserBind(
+    user_data: BotUserBindModel
+) -> ResponseDict:
+    """更新或者写入用户的绑定信息"""
+    result = await BotUser.post_user_bind(user_data)
+    await record_api_call(result['status'])
+    return result
 
 @router.get("/user-basic/")
 async def getUserBasic(

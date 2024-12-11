@@ -1,4 +1,5 @@
 from .game_user import UserModel
+from .bot_user import BotUserModel
 from .game_clan import ClanModel
 from .game_basic import GameModel
 from .recent_user import RecentUserModel
@@ -14,6 +15,7 @@ __all__ = [
     'ClanModel',
     'GameModel',
     'RootModel',
+    'BotUserModel',
     'RecentUserModel',
     'RecentsUserModel',
     'UserAccessToken',
