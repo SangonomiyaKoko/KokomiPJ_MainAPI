@@ -24,10 +24,10 @@ class RankDataModel:
             
             cursor: Cursor = await conn.cursor()  # 获取游标
             data = []
-            query = '''SELECT account_id, battles_count, wins, damage_dealt, frags, exp, max_exp, max_damage_dealt, max_frags
+            query = f'''SELECT account_id, battles_count, wins, damage_dealt, frags, exp, max_exp, max_damage_dealt, max_frags
                 FROM ships.ship_{ship_id}
                 WHERE battles_count > 80 AND region_id = %s;
-                ''',
+                '''
             await cursor.execute(query, (region_id,))
             rows = await cursor.fetchall()
             for row in rows:

@@ -6,6 +6,7 @@ class Rank_tasks:
     async def get_ship_ids():
         '''获取所有船的id'''
         ship_ids = await RankDataModel.get_ship_id()
+        ship_ids = ship_ids['data']
         return ship_ids
     
     async def update_rank():
