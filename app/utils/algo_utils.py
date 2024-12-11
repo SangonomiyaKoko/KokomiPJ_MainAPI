@@ -146,6 +146,30 @@ class Rating_Algorithm:
                         return i + 1, int(data[i]-rating)
                 return 8, int(rating - 2450)
         else:
+            return 0, 2
+        
+    def get_content_class(
+        algo_type: str, 
+        index: int, 
+        value: int | float
+    ) -> int:
+        index_list = [
+            [45, 49, 51, 52.5, 55, 60, 70],
+            [0.8, 0.95, 1.0, 1.1, 1.2, 1.4, 1.7],
+            [0.2, 0.3, 0.6, 1.0, 1.3, 1.5, 2],
+            [750, 1100, 1350, 1550, 1750, 2100, 2450]
+        ]
+        if algo_type == 'pr':
+            if value == -2:
+                return 0
+            if value == -1:
+                return 0
+            data = index_list[index]
+            for i in range(len(data)):
+                if value < data[i]:
+                    return i + 1
+            return 8
+        else:
             raise ValueError('Invaild Algorithm Parameters')
        
     async def batch_pr_by_data(

@@ -42,6 +42,7 @@ async def get_user_name_and_clan(
     # 返回的user和clan数据格式
     user_basic = {
         'id': account_id,
+        'region': region_id,
         'name': UtilityFunctions.get_user_default_name(account_id),
         'karma': 0,
         'crated_at': 0,
