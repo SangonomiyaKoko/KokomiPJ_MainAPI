@@ -11,6 +11,8 @@ class ShipData:
         ship_data = JsonData.read_json_data('ship_data')['ship_data']
         if str(ship_id) not in ship_data:
             return result
+        elif 'win_rate' not in ship_data[str(ship_id)][region]:
+            return None
         else:
             result[ship_id] = [
                 ship_data[str(ship_id)][region]['win_rate'],

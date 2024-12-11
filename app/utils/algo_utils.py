@@ -175,7 +175,8 @@ class Rating_Algorithm:
             result = {}
             # 获取服务器数据
             server_data = ShipData.get_ship_data_by_sid_and_rid(region_id,ship_id)
-            # {4181604048: [50.33, 34471.64, 0.67, 1068.45]}
+            if not server_data:
+                return None
             server_data = server_data[ship_id]
             if server_data == {}:
                 return result

@@ -14,7 +14,7 @@ class Rank_tasks:
         ship_ids = await Rank_tasks.get_ship_ids()
         for ship_id in ship_ids:
             for region_id in range(1, 6):
-                await Rating_Algorithm.batch_pr_by_data(ship_id, region_id, "pr")
-            Rank_utils.update_rank_all(ship_id)
+                await Rating_Algorithm.batch_pr_by_data(ship_id[0], region_id, "pr")
+            await Rank_utils.update_rank_all(ship_id[0])
         return 'ok'
         
