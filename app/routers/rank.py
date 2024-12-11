@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.middlewares import RedisConnection
+from app.middlewares.rank import Rank_tasks
 from app.response import JSONResponse
 
 import asyncio
@@ -100,3 +101,9 @@ async def get_personal_rank_near(region_id: int, ship_id: int, account_id: int):
         }
         final_result.append(result)
     return JSONResponse.get_success_response(final_result)
+
+@router.post("/update/")
+async def update_rank():
+    '''更新排行榜数据'''
+    result = await Rank_tasks.update_rank()
+    return JSONResponse.get_success_response(result)

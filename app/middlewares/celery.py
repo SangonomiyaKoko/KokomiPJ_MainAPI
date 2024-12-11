@@ -2,7 +2,6 @@ import pymysql
 from dbutils.pooled_db import PooledDB
 from celery import Celery, signals
 from celery.app.base import logger
-from .rank import Rank_tasks
 
 from .background_task import (
     check_game_version,
@@ -18,10 +17,6 @@ from .background_task import (
     update_users_clan
 )
 from app.core import EnvConfig
-
-import asyncio
-import eventlet
-eventlet.monkey_patch()
 
 config = EnvConfig.get_config()
 
@@ -167,18 +162,3 @@ def task_update_clan_users(clan_id: int, hash_value: str, user_data: list):
         print(result)
         return 'error'
     return 'ok'
-
-@celery_app.task
-def task_update_ship_rank():
-    result =  asyncio.run(Rank_tasks.update_rank())
-    if result == 'ok':
-        return 'ok'
-    else:
-        return 'error'
-    
-celery_app.conf.beat_schedule = {
-    'update_ship_rank_every_30_minutes': {
-        'task': 'task_update_ship_rank',
-        'schedule': 1800.0,
-    },
-}

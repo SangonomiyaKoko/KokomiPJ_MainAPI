@@ -1,5 +1,5 @@
 from typing import List
-
+from redis import Redis
 from .server_utils import ShipData
 from app.response import JSONResponse
 
@@ -152,47 +152,39 @@ class Rating_Algorithm:
         ship_id: int,
         region_id: int,
         algo_type: str,
+        redis: Redis,
     ):
-        '''批量计算评分数据
 
-        参数:
-            ship_id 船只id
-            region_id 服务器id
-            algo_type 评分算法
-            data数据格式为: {'status': 'ok', 'code': 1000, 'message': 'Success', 'data': ...}
-            传入顺序 account_id, battles_count, wins, damage_dealt, frags, exp, max_exp(6), max_damage_dealt(7), max_frags(8)
-        
-        返回:
-            1000Success 数据存入redis
-        '''
-        from app.models import RankDataModel
-        from app.middlewares import RedisConnection
-        result = []
+        from app.models.ship_rank import RankDataModel
         data = await RankDataModel.get_ship_data(ship_id, region_id)
+        if data['code'] != 1000:
+            print(ship_id, region_id, '无数据')
+            return None
         data = data['data']
         x = len(data)
         if algo_type == 'pr':
             result = {}
             # 获取服务器数据
-            server_data = ShipData.get_ship_data_by_sid_and_rid(region_id,ship_id)
+            server_data = ShipData.get_ship_data_by_sid_and_rid(region_id, ship_id)
             if not server_data:
-                return None
+                return
             server_data = server_data[ship_id]
             if server_data == {}:
                 return result
-            # 服务器数据
             expected_wins = server_data[0]
             expected_dmg = server_data[1]
             expected_frags = server_data[2]
-            excepted_exp = server_data[3]
+            # excepted_exp = server_data[3]
+            final_user_ship_data = {}
+            final_pr = {}
+            final_user_data = {}
             # 遍历用户数据
             for i in range(x):
                 user_data = {}
                 battles_count = data[i][1]
                 if battles_count <= 0:
-                    result.append([0,-1,-1,-1])
+                    result.append([0, -1, -1, -1])
                     continue
-                # 用户数据
                 actual_wins = data[i][2] / battles_count * 100
                 actual_dmg = data[i][3] / battles_count
                 actual_frags = data[i][4] / battles_count
@@ -200,24 +192,16 @@ class Rating_Algorithm:
                 lose_count = battles_count - data[i][2]
                 user_id = data[i][0]
                 # 计算PR
-                # Step 1 - ratios:
                 r_wins = actual_wins / expected_wins
                 r_dmg = actual_dmg / expected_dmg
                 r_frags = actual_frags / expected_frags
-                # Step 2 - normalization:
                 n_wins = max(0, (r_wins - 0.7) / (1 - 0.7))
                 n_dmg = max(0, (r_dmg - 0.4) / (1 - 0.4))
                 n_frags = max(0, (r_frags - 0.1) / (1 - 0.1))
-                # Step 3 - PR value:
                 personal_rating = 700 * n_dmg + 300 * n_frags + 150 * n_wins
-                #print("PR:", personal_rating)
-                #修正
                 cWins = (data[i][2] * 1.5 + lose_count) / battles_count
-                #print("cWins:", cWins)
-                cExp = actual_exp / cWins  # 系数未给 采用第二种
-                #print("cExp:", cExp)
-                personal_rating = personal_rating + cExp * 0.2  # 裸经验系数暂定0.2
-                
+                cExp = actual_exp / cWins
+                personal_rating = personal_rating + cExp * 0.2
                 user_data = {
                     "Player": user_id,
                     "battle_count": battles_count,
@@ -230,39 +214,43 @@ class Rating_Algorithm:
                     "avg_Exp": round(actual_exp),
                     "max_Exp": data[i][6],
                 }
-
-                redis = RedisConnection.get_connection()
-                await redis.zadd(f"region:{region_id}:ship:{ship_id}", {user_id: personal_rating})
-                await redis.expire(f"region:{region_id}:ship:{ship_id}", 2000)
-                await redis.hset(f"ship_data:{ship_id}:{user_id}", mapping=user_data)
-                await redis.expire(f"ship_data:{ship_id}:{user_id}", 2000)
-                if not await redis.hexists(f"user_data:{user_id}", "username"):
-                    user_data = {}
-                    user_data = await RankDataModel.get_user(user_id, region_id)
-                    if user_data['status'] == 'ok':
-                        username = user_data['data'][0][0]
-                        clan_id = await RankDataModel.get_clan_id(user_id)
-                        if clan_id['status'] == 'ok':
-                            clan_id = clan_id['data'][0][0]
+                final_pr[f"{user_id}"] = personal_rating
+                final_user_ship_data[f"ship_data:{ship_id}:{user_id}"] = user_data
+                if not redis.hexists(f"user_data:{user_id}", "username"):
+                    user_data_response = await RankDataModel.get_user(user_id, region_id)
+                    if user_data_response['status'] == 'ok':
+                        username = user_data_response['data'][0][0]
+                        clan_id_response = await RankDataModel.get_clan_id(user_id)
+                        if clan_id_response['status'] == 'ok':
+                            clan_id = clan_id_response['data'][0][0]
                             if not clan_id:
                                 clan = clan_id = league = 'NULL'
                             else:
-                                clan = await RankDataModel.get_clan(clan_id, region_id)
-                                clan = clan['data']
-                                league = clan[0][1]
-                                clan = clan[0][0]
-                            user_data = {
+                                clan_response = await RankDataModel.get_clan(clan_id, region_id)
+                                clan_data = clan_response['data']
+                                league = clan_data[0][1]
+                                clan = clan_data[0][0]
+                            user_data_dict = {
                                 "username": username,
                                 "clan_id": clan_id,
                                 "clan_tag": clan,
                                 "clan_rank": league
                             }
-                            await redis.hset(f"user_data:{user_id}", mapping=user_data)
-                            await redis.expire(f"user_data:{user_id}", 2000)
+                            final_user_data[f"user_data:{user_id}"] = user_data_dict
                         else:
                             i = i - 1
                     else:
                         i = i - 1
+            redis.zadd(f"region:{region_id}:ship:{ship_id}", final_pr)
+            redis.expire(f"region:{region_id}:ship:{ship_id}", 3600)
+            pipeline = redis.pipeline()
+            for hash_name, userdata in final_user_ship_data.items():
+                pipeline.hset(hash_name, mapping=userdata)
+                pipeline.expire(hash_name, 36000)
+            for hash_name, userdata in final_user_data.items():
+                pipeline.hset(hash_name, mapping=userdata)
+                pipeline.expire(hash_name, 36000)
+            pipeline.execute()
             return JSONResponse.get_success_response()
         else:
-            raise ValueError('Invaild Algorithm Parameters')
+            raise ValueError('Invalid Algorithm Parameters')
