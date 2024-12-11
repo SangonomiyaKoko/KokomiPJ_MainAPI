@@ -24,13 +24,11 @@ class RankDataModel:
             
             cursor: Cursor = await conn.cursor()  # 获取游标
             data = []
-            
-            await cursor.execute(
-                '''SELECT account_id, battles_count, wins, damage_dealt, frags, exp, max_exp, max_damage_dealt, max_frags
-                FROM ships.ship_%s 
+            query = '''SELECT account_id, battles_count, wins, damage_dealt, frags, exp, max_exp, max_damage_dealt, max_frags
+                FROM ships.ship_{ship_id}
                 WHERE battles_count > 80 AND region_id = %s;
-                ''',[ship_id, region_id]
-            )
+                ''',
+            await cursor.execute(query, (region_id,))
             rows = await cursor.fetchall()
             for row in rows:
                 data.append(row)
@@ -61,7 +59,8 @@ class RankDataModel:
                 '''SELECT username 
                 FROM kokomi.user_basic 
                 WHERE account_id = %s AND region_id = %s
-                ''',[user_id, region_id])
+                ''',(user_id, region_id)
+                )
             
             data = await cursor.fetchall()
 
@@ -92,7 +91,8 @@ class RankDataModel:
                 '''SELECT clan_id
                 FROM kokomi.user_clan 
                 WHERE account_id = %s
-                ''',[user_id])
+                ''',(user_id,)
+                )
             
             data = await cursor.fetchall()
 
