@@ -370,13 +370,7 @@ celery --app app.middlewares.celery:celery_app flower --port=5555
 
 浏览器打开 localhost:5555 可以看到 Flower 页面
 
-#### 七. 启动beat
-
-```bash
-celery --app app.middlewares.celery:celery_app beat --loglevel=debug
-```
-
-#### 八. 更新代码
+#### 七. 更新代码
 
 ```bash
 git pull origin main
