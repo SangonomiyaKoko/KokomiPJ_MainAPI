@@ -31,7 +31,7 @@ async def get_rank(region_id: int, ship_id: int, page: int):
         final_result.append(result)
     return JSONResponse.get_success_response(final_result)
 
-@router.get("/{ship_id}/{page}")
+@router.get("/all/{ship_id}/{page}")
 async def get_rank_all(ship_id: int, page: int):
     '''获取总排行榜数据'''
     redis = RedisConnection.get_connection(db=3)
@@ -55,7 +55,7 @@ async def get_rank_all(ship_id: int, page: int):
         final_result.append(result)
     return JSONResponse.get_success_response(final_result)
 
-@router.get("/{region_id}/{ship_id}/{account_id}")
+@router.get("/personal/{region_id}/{ship_id}/{account_id}")
 async def get_personal_rank(region_id: int, ship_id: int, account_id: int):
     '''获取个人排名'''
     redis = RedisConnection.get_connection(db=3)
@@ -75,7 +75,7 @@ async def get_personal_rank(region_id: int, ship_id: int, account_id: int):
     }
     return JSONResponse.get_success_response(result)
 
-@router.get("/n/{region_id}/{ship_id}/{account_id}")
+@router.get("/personal/n/{region_id}/{ship_id}/{account_id}")
 async def get_personal_rank_near(region_id: int, ship_id: int, account_id: int):
     '''获取个人排名附近的玩家'''
     redis = RedisConnection.get_connection(db=3)
