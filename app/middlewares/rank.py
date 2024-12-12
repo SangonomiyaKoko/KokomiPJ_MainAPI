@@ -23,8 +23,8 @@ class Rank_tasks:
     async def update_rank():
         '''更新排行榜数据'''
         ship_ids = await Rank_tasks.get_ship_ids()
-        cpu_counts = multiprocessing.cpu_count() * 2
-        size = len(ship_ids) // cpu_counts
+        cpu_counts = min(multiprocessing.cpu_count() * 2, 61)
+        size = (len(ship_ids) + cpu_counts - 1) // cpu_counts
         chunks = [ship_ids[i:i+size] for i in range(0, len(ship_ids), size)]
         
         # 启动多进程
@@ -38,7 +38,7 @@ class Rank_tasks:
     
     @staticmethod
     def process(chunk):
-        redis_connection = Redis(host='localhost', port=6379, db=0)
+        redis_connection = Redis(host='localhost', port=6379, db=3)
         
         for ship_id_ in chunk:
             for ship_id in ship_id_:

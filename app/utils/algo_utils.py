@@ -2,6 +2,7 @@ from typing import List
 from redis import Redis
 from .server_utils import ShipData
 from app.response import JSONResponse
+from app.log import ExceptionLogger
 
 class Rating_Algorithm:
     # 评分算法
@@ -148,6 +149,7 @@ class Rating_Algorithm:
         else:
             raise ValueError('Invaild Algorithm Parameters')
        
+    @ExceptionLogger.handle_database_exception_async
     async def batch_pr_by_data(
         ship_id: int,
         region_id: int,
@@ -158,7 +160,7 @@ class Rating_Algorithm:
         from app.models.ship_rank import RankDataModel
         data = await RankDataModel.get_ship_data(ship_id, region_id)
         if data['code'] != 1000:
-            print(ship_id, region_id, '无数据')
+            print(ship_id, region_id, '无服务器数据')
             return None
         data = data['data']
         x = len(data)
@@ -182,9 +184,6 @@ class Rating_Algorithm:
             for i in range(x):
                 user_data = {}
                 battles_count = data[i][1]
-                if battles_count <= 0:
-                    result.append([0, -1, -1, -1])
-                    continue
                 actual_wins = data[i][2] / battles_count * 100
                 actual_dmg = data[i][3] / battles_count
                 actual_frags = data[i][4] / battles_count
@@ -216,41 +215,47 @@ class Rating_Algorithm:
                 }
                 final_pr[f"{user_id}"] = personal_rating
                 final_user_ship_data[f"ship_data:{ship_id}:{user_id}"] = user_data
-                if not redis.hexists(f"user_data:{user_id}", "username"):
-                    user_data_response = await RankDataModel.get_user(user_id, region_id)
-                    if user_data_response['status'] == 'ok':
-                        username = user_data_response['data'][0][0]
-                        clan_id_response = await RankDataModel.get_clan_id(user_id)
-                        if clan_id_response['status'] == 'ok':
-                            clan_id = clan_id_response['data'][0][0]
-                            if not clan_id:
-                                clan = clan_id = league = 'NULL'
-                            else:
-                                clan_response = await RankDataModel.get_clan(clan_id, region_id)
-                                clan_data = clan_response['data']
-                                league = clan_data[0][1]
-                                clan = clan_data[0][0]
-                            user_data_dict = {
-                                "username": username,
-                                "clan_id": clan_id,
-                                "clan_tag": clan,
-                                "clan_rank": league
-                            }
-                            final_user_data[f"user_data:{user_id}"] = user_data_dict
+                user_data_response = await RankDataModel.get_user(user_id, region_id)
+                if user_data_response['status'] == 'ok':
+                    username = user_data_response['data'][0][0]
+                    clan_id_response = await RankDataModel.get_clan_id(user_id)
+                    if clan_id_response['status'] == 'ok':
+                        clan_id = clan_id_response['data'][0][0]
+                        if not clan_id:
+                            clan = clan_id = league = 'NULL'
                         else:
-                            i = i - 1
+                            clan_response = await RankDataModel.get_clan(clan_id, region_id)
+                            clan_data = clan_response['data']
+                            league = clan_data[0][1]
+                            clan = clan_data[0][0]
+                        user_data_dict = {
+                            "username": username,
+                            "clan_id": clan_id,
+                            "clan_tag": clan,
+                            "clan_rank": league
+                        }
+                        final_user_data[f"user_data:{user_id}"] = user_data_dict
                     else:
-                        i = i - 1
-            redis.zadd(f"region:{region_id}:ship:{ship_id}", final_pr)
-            redis.expire(f"region:{region_id}:ship:{ship_id}", 3600)
+                        continue
+                else:
+                    continue
             pipeline = redis.pipeline()
-            for hash_name, userdata in final_user_ship_data.items():
-                pipeline.hset(hash_name, mapping=userdata)
-                pipeline.expire(hash_name, 36000)
-            for hash_name, userdata in final_user_data.items():
-                pipeline.hset(hash_name, mapping=userdata)
-                pipeline.expire(hash_name, 36000)
-            pipeline.execute()
+            size = 100
+            key = f"region:{region_id}:ship:{ship_id}"
+            try:
+                for i in range(0, len(final_pr), size):
+                    batch = dict(list(final_pr.items())[i:i + size]) 
+                    pipeline.zadd(key, batch)
+                pipeline.expire(key, 3600)
+                for hash_name, userdata in final_user_ship_data.items():
+                    pipeline.hset(hash_name, mapping=userdata)
+                    pipeline.expire(hash_name, 3600)
+                for hash_name, userdata in final_user_data.items():
+                    pipeline.hset(hash_name, mapping=userdata)
+                    pipeline.expire(hash_name, 3600)
+                pipeline.execute()
+            except Exception as e:
+                raise e
             return JSONResponse.get_success_response()
         else:
             raise ValueError('Invalid Algorithm Parameters')

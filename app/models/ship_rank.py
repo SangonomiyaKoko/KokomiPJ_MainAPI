@@ -30,7 +30,7 @@ class RankDataModel:
             for row in rows:
                 data.append(row)
             if data == []:
-                return JSONResponse.API_1006_UserDataisNone()
+                return JSONResponse.API_1006_UserDataisNone
             return JSONResponse.get_success_response(data)
         except Exception as e:
             raise e  # 抛出异常
