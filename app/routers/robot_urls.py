@@ -14,7 +14,12 @@ router = APIRouter()
 @router.get("/version/")
 async def getVersion() -> ResponseDict:
     """获取bot的版本"""
-    result = JSONResponse.API_1000_Success
+    # 临时返回值
+    data = {
+        'code': '5.0.0.bate1',
+        'image': '5.0.0.bate1'
+    }
+    result = JSONResponse.get_success_response(data)
     await record_api_call(result['status'])
     return result
 
@@ -33,7 +38,7 @@ async def getUserBind(
     user_data: BotUserBindModel
 ) -> ResponseDict:
     """更新或者写入用户的绑定信息"""
-    result = await BotUser.post_user_bind(user_data)
+    result = await BotUser.post_user_bind(user_data.model_dump())
     await record_api_call(result['status'])
     return result
 
