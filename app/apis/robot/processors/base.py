@@ -32,8 +32,12 @@ class BaseFormatData:
                 result['avg_damage'] = '-'
                 result['avg_frags'] = '-'
                 result['avg_exp'] = '-'
-                result['rating'] = '-1'
-                result['rating_next'] = '1'
+                if not algo_type:
+                    result['rating'] = '-2'
+                    result['rating_next'] = '2'
+                else:
+                    result['rating'] = '-1'
+                    result['rating_next'] = '1'
             else:
                 result['battles_count'] = processed_data['battles_count']
                 result['win_rate'] = round(processed_data['wins']/processed_data['battles_count']*100,2)
