@@ -65,6 +65,7 @@ async def getUserBasic(
         return JSONResponse.API_1010_IllegalRegion
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
         return JSONResponse.API_1003_IllegalAccoutIDorRegionID
+    language = UtilityFunctions.get_language_code(language)
     result = await wws_me.main(account_id,region_id,language,'pr')
     await record_api_call(result['status'])
     return result
@@ -92,6 +93,7 @@ async def getClanBasic(
         return JSONResponse.API_1010_IllegalRegion
     if UtilityFunctions.check_cid_and_rid(clan_id,region_id) == False:
         return JSONResponse.API_1004_IllegalClanIDorRegionID
+    language = UtilityFunctions.get_language_code(language)
     result = await wws_me_clan.main(clan_id,region_id,language,'pr')
     await record_api_call(result['status'])
     return result

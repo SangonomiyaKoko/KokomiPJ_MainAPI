@@ -23,10 +23,11 @@ class PlatformList(str, Enum):
     discord = 'discord'
 
 class LanguageList(str, Enum):
-    chinese = 'cn'
-    english = 'en'
-    japanese = 'ja'
-    russian = 'ru'
+    chinese = 'chinese'
+    english = 'english'
+    japanese = 'japanese'
+    # 俄语仅在搜索船只接口可用其他接口不支持
+    russian = 'russian'
 
 class AlgorithmList(str, Enum):
     pr = 'pr'
