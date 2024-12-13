@@ -18,7 +18,6 @@ from .background_task import (
 )
 from app.core import EnvConfig
 
-
 config = EnvConfig.get_config()
 
 # 创建 Celery 应用并配置 Redis 作为消息队列

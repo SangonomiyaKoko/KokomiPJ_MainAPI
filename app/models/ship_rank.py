@@ -24,17 +24,13 @@ class RankDataModel:
             
             cursor: Cursor = await conn.cursor()  # 获取游标
             data = []
-            
-            await cursor.execute(
-                '''SELECT account_id, battles_count, wins, damage_dealt, frags, exp, max_exp, max_damage_dealt, max_frags
-                FROM ships.ship_%s 
-                WHERE battles_count > 80 AND region_id = %s;
-                ''',[ship_id, region_id]
-            )
+            query = f'''SELECT account_id, battles_count, wins, damage_dealt, frags, exp, max_exp, max_damage_dealt, max_frags FROM ships.ship_{ship_id} WHERE battles_count > 80 AND region_id = %s;'''
+            await cursor.execute(query, (region_id,))
             rows = await cursor.fetchall()
             for row in rows:
                 data.append(row)
-
+            if data == []:
+                return JSONResponse.API_1006_UserDataisNone
             return JSONResponse.get_success_response(data)
         except Exception as e:
             raise e  # 抛出异常
@@ -61,7 +57,8 @@ class RankDataModel:
                 '''SELECT username 
                 FROM kokomi.user_basic 
                 WHERE account_id = %s AND region_id = %s
-                ''',[user_id, region_id])
+                ''',(user_id, region_id)
+                )
             
             data = await cursor.fetchall()
 
@@ -92,7 +89,8 @@ class RankDataModel:
                 '''SELECT clan_id
                 FROM kokomi.user_clan 
                 WHERE account_id = %s
-                ''',[user_id])
+                ''',(user_id,)
+                )
             
             data = await cursor.fetchall()
 
@@ -135,10 +133,32 @@ class RankDataModel:
             await cursor.close()  # 关闭游标
             await MysqlConnection.release_connection(connection)  # 释放连接    
             
-async def main():
-    data = await RankDataModel.get_user(2026760380, 1)
-    print(data)
+    @ExceptionLogger.handle_database_exception_async
+    async def get_ship_id() -> ResponseDict:
+        '''获取船只id
 
-# 运行主函数
-if __name__ == "__main__":
-    asyncio.run(main())
+        参数:
+            None
+        
+        返回:
+            ResponseDict(ship_id)
+        '''
+        try:
+            connection: Connection = await MysqlConnection.get_connection()  # 获取连接
+            await connection.begin()  # 开启事务
+            cursor: Cursor = await connection.cursor()  # 获取游标
+
+            await cursor.execute(
+                '''SELECT ship_id
+                FROM ships.existing_ships
+                ''')
+            
+            data = await cursor.fetchall()
+
+            
+            return JSONResponse.get_success_response(data)  # 返回数据
+        except Exception as e:
+            raise e  # 抛出异常
+        finally:
+            await cursor.close()  # 关闭游标
+            await MysqlConnection.release_connection(connection)  # 释放连接    
