@@ -24,6 +24,8 @@ class JSONResponse:
     API_6000_VersionError = {'status': 'error','code': 6000,'message': 'VersionError','data': None}
     API_7000_InvalidParameter = {'status': 'error','code': 7000,'message': 'InvalidParameter','data': None}
     API_8000_ServiceUnavailable = {'status': 'error','code': 8000,'message': 'ServiceUnavailable','data': None}
+    API_8001_MainServiceUnavailable = {'status': 'error','code': 8001,'message': 'MainServiceUnavailable','data': None}
+    API_8002_WorkerServiceUnavailable = {'status': 'error','code': 8002,'message': 'WorkerServiceUnavailable','data': None}
 
     API_1001_UserNotExist = {'status': 'ok','code': 1001,'message': 'UserNotExist','data' : None}
     API_1002_ClanNotExist = {'status': 'ok','code': 1002,'message': 'ClanNotExist','data' : None}

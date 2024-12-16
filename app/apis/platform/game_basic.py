@@ -4,9 +4,7 @@ from app.log import ExceptionLogger
 from app.response import ResponseDict, JSONResponse
 from app.network import BasicAPI
 from app.models import GameModel
-from app.middlewares.celery import (
-    task_check_game_version
-)
+from app.middlewares.celery import celery_app
 
 class GameBasic:
     @ExceptionLogger.handle_program_exception_async
@@ -24,7 +22,10 @@ class GameBasic:
                     'region_id': region_id,
                     'version': result['data']['version']
                 }
-                task_check_game_version.delay(data)
+                celery_app.send_task(
+                    name="check_game_version",
+                    args=[data]
+                )
                 return result
             else:
                 result = await GameModel.get_game_version(region_id)

@@ -288,7 +288,7 @@ bind 127.0.0.1 ::1
 #### 一. 从 Github 下载最新的代码
 
 ```bash
-git clone https://github.com/SangonomiyaKoko/KokomiPJ_API.git
+git clone https://github.com/SangonomiyaKoko/KokomiPJ_MainAPI.git
 ```
 
 > 没有 git 先安装 git
@@ -356,7 +356,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level debug
 
 #### 五. 启动 Celery
 
-> Linux环境可能需要 `sudo apt install celery`
+> Linux 环境可能需要 `sudo apt install celery`
 
 ```bash
 celery --app app.middlewares.celery:celery_app worker -P eventlet --loglevel=debug

@@ -21,7 +21,7 @@ class Update:
             if ship_name_result['code'] != 1000:
                 return ship_name_result
             # 记录本次更新的变化
-            result = {'add':{},'del':{}}
+            result = {'add':{},'del':{},'change':{}}
             # 去除已经删除的船只
             for ship_id, ship_data in ship_name_data.items():
                 if ship_id not in ship_name_result['data']:
@@ -100,6 +100,17 @@ class Update:
                         }
                         ship_name_data[ship_id] = data
                         result['add'][ship_id] = data
+                else:
+                    premium = False
+                    special = False
+                    if 'uiPremium' in ship_data['tags']:
+                        premium = True
+                    if 'uiSpecial' in ship_data['tags']:
+                        special = True
+                    if ship_name_data[ship_id]['premium'] != premium or ship_name_data[ship_id]['special'] != special:
+                        ship_name_data[ship_id]['premium'] = premium
+                        ship_name_data[ship_id]['special'] = special
+                        result['change'][ship_id] = ship_name_data[ship_id]
             # 更新json文件
             JsonData.write_json_data(f'ship_name_{server}', ship_name_data)
             # 返回数据

@@ -74,76 +74,6 @@ class UserModel:
             await MysqlConnection.release_connection(conn)
 
     @ExceptionLogger.handle_database_exception_async
-    async def insert_user(user: list) -> ResponseDict:
-        '''写入用户数据
-        
-        向数据库中写入不存在的用户的数据
-
-        如果参数内没有给出username则会写入一个默认值
-
-        参数:
-            user: [aid, rid, name]
-
-        返回:
-            ResponseDict
-        '''
-        try:
-            conn: Connection = await MysqlConnection.get_connection()
-            await conn.begin()
-            cur: Cursor = await conn.cursor()
-
-            # 插入新用户
-            if user[2] == None:
-                user[2] = UtilityFunctions.get_user_default_name(user[0])
-                await cur.execute(
-                    "INSERT INTO kokomi.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
-                    [user[0], user[1], user[2]]
-                )
-                await cur.execute(
-                    "INSERT INTO kokomi.user_info (account_id) VALUES (%s);",
-                    [user[0]]
-                )
-                await cur.execute(
-                    "INSERT INTO kokomi.user_ships (account_id) VALUES (%s);",
-                    [user[0]]
-                )
-                await cur.execute(
-                    "INSERT INTO kokomi.user_clan (account_id) VALUES (%s);",
-                    [user[0]]
-                )
-            else:
-                # 如果不是默认的名称则更新updated_time
-                await cur.execute(
-                    "INSERT INTO kokomi.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
-                    [user[0], user[1], UtilityFunctions.get_user_default_name(user[0])]
-                )
-                await cur.execute(
-                    "INSERT INTO kokomi.user_info (account_id) VALUES (%s);",
-                    [user[0]]
-                )
-                await cur.execute(
-                    "INSERT INTO kokomi.user_ships (account_id) VALUES (%s);",
-                    [user[0]]
-                )
-                await cur.execute(
-                    "INSERT INTO kokomi.user_clan (account_id) VALUES (%s);",
-                    [user[0]]
-                )
-                await cur.execute(
-                    "UPDATE kokomi.user_basic SET username = %s WHERE account_id = %s AND region_id = %s",
-                    [user[2], user[0], user[1]]
-                )
-            
-            await conn.commit()
-            return JSONResponse.API_1000_Success
-        except Exception as e:
-            await conn.rollback()
-            raise e
-        finally:
-            await cur.close()
-            await MysqlConnection.release_connection(conn)
-
-    @ExceptionLogger.handle_database_exception_async
     async def check_and_insert_missing_users(users: list) -> ResponseDict:
         '''检查并插入缺失的用户id
 
@@ -257,10 +187,24 @@ class UserModel:
             user = await cur.fetchone()
             if user is None:
                 # 用户不存在
-                insert_result = await UserModel.insert_user([account_id,region_id,None])
-                if insert_result.get('code', None) != 1000:
-                    return insert_result
-                data['nickname'] = UtilityFunctions.get_user_default_name(account_id)
+                name = UtilityFunctions.get_user_default_name(account_id)
+                await cur.execute(
+                    "INSERT INTO kokomi.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                    [account_id, region_id, name]
+                )
+                await cur.execute(
+                    "INSERT INTO kokomi.user_info (account_id) VALUES (%s);",
+                    [account_id]
+                )
+                await cur.execute(
+                    "INSERT INTO kokomi.user_ships (account_id) VALUES (%s);",
+                    [account_id]
+                )
+                await cur.execute(
+                    "INSERT INTO kokomi.user_clan (account_id) VALUES (%s);",
+                    [account_id]
+                )
+                data['nickname'] = name
                 data['update_time'] = None
             else:
                 data['nickname'] = user[0]
@@ -304,9 +248,23 @@ class UserModel:
             user = await cur.fetchone()
             if user is None:
                 # 用户不存在
-                insert_result = await UserModel.insert_user([account_id,region_id,None])
-                if insert_result.get('code', None) != 1000:
-                    return insert_result
+                name = UtilityFunctions.get_user_default_name(account_id)
+                await cur.execute(
+                    "INSERT INTO kokomi.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                    [account_id, region_id, name]
+                )
+                await cur.execute(
+                    "INSERT INTO kokomi.user_info (account_id) VALUES (%s);",
+                    [account_id]
+                )
+                await cur.execute(
+                    "INSERT INTO kokomi.user_ships (account_id) VALUES (%s);",
+                    [account_id]
+                )
+                await cur.execute(
+                    "INSERT INTO kokomi.user_clan (account_id) VALUES (%s);",
+                    [account_id]
+                )
                 data['clan_id'] = None
                 data['updated_at'] = None
             else:
@@ -351,9 +309,23 @@ class UserModel:
             data = None
             if user is None:
                 # 用户不存在
-                insert_result = await UserModel.insert_user([account_id,region_id,None])
-                if insert_result.get('code', None) != 1000:
-                    return insert_result
+                name = UtilityFunctions.get_user_default_name(account_id)
+                await cur.execute(
+                    "INSERT INTO kokomi.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                    [account_id, region_id, name]
+                )
+                await cur.execute(
+                    "INSERT INTO kokomi.user_info (account_id) VALUES (%s);",
+                    [account_id]
+                )
+                await cur.execute(
+                    "INSERT INTO kokomi.user_ships (account_id) VALUES (%s);",
+                    [account_id]
+                )
+                await cur.execute(
+                    "INSERT INTO kokomi.user_clan (account_id) VALUES (%s);",
+                    [account_id]
+                )
                 data = {
                     'is_active': 0,
                     'active_level': 0,
@@ -397,9 +369,23 @@ class UserModel:
             user = await cur.fetchone()
             if user is None:
                 # 用户不存在
-                insert_result = await UserModel.insert_user([account_id,region_id,None])
-                if insert_result.get('code', None) != 1000:
-                    return insert_result
+                name = UtilityFunctions.get_user_default_name(account_id)
+                await cur.execute(
+                    "INSERT INTO kokomi.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                    [account_id, region_id, name]
+                )
+                await cur.execute(
+                    "INSERT INTO kokomi.user_info (account_id) VALUES (%s);",
+                    [account_id]
+                )
+                await cur.execute(
+                    "INSERT INTO kokomi.user_ships (account_id) VALUES (%s);",
+                    [account_id]
+                )
+                await cur.execute(
+                    "INSERT INTO kokomi.user_clan (account_id) VALUES (%s);",
+                    [account_id]
+                )
                 data = {
                     'battles_count': None,
                     'hash_value': None,

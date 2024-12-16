@@ -10,16 +10,6 @@ class ClanColor:
         11776947: 5,
     }
 
-    CLAN_COLOR_INDEX_2 = {
-        # clan search接口获取的颜色hex对应的league
-        '#cda4ff': 0,
-        '#bee7bd': 1,
-        '#e3d6a0': 2,
-        '#cce4e4': 3,
-        '#cc9966': 4,
-        '#b3b3b3': 5
-    }
-
 class RatingColor:
     RATING_COLOR_MAP = [
         (88, 43, 128),

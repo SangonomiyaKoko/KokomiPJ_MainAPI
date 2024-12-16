@@ -5,12 +5,6 @@ import httpx
 from .api_base import BaseUrl
 from app.log import ExceptionLogger
 from app.response import JSONResponse
-from app.const import ClanColor
-from app.middlewares.celery import (
-    task_check_clan_basic, 
-    task_check_user_basic, 
-    task_check_user_basic_and_info
-)
 
 
 class BasicAPI:
@@ -36,10 +30,6 @@ class BasicAPI:
                 requset_code = res.status_code
                 requset_result = res.json()
                 if '/clans.' in url:
-                    if '/api/search/autocomplete/' in url and requset_code == 200:
-                        # 查询工会接口的返回值处理
-                        data = requset_result['search_autocomplete_result']
-                        return JSONResponse.get_success_response(data)
                     if '/api/clanbase/' in url and requset_code == 200:
                         # 用户基础信息接口的返回值
                         data = requset_result['clanview']
@@ -58,13 +48,6 @@ class BasicAPI:
                         "clan": {},
                     }
                     return JSONResponse.get_success_response(data)
-                elif (
-                    '/accounts/search/' in url
-                    and requset_code in [400, 500, 503]
-                ):
-                    # 用户搜索接口可能的返回值
-                    data = []
-                    return JSONResponse.get_success_response([])
                 elif requset_code == 404:
                     # 用户不存在或者账号删除的情况
                     return JSONResponse.API_1001_UserNotExist
@@ -185,149 +168,3 @@ class BasicAPI:
                 tasks.append(self.fetch_data(url))
             responses = await asyncio.gather(*tasks)
             return responses
-
-    @classmethod
-    async def get_user_search(
-        self,
-        region_id: int,
-        nickname: str,
-        limit: int = 10,
-        check: bool = False
-    ):
-        '''获取用户名称搜索结构
-
-        通过输入的用户名称搜索用户账号
-
-        参数：
-            region_id: 用户服务器id
-            nickname: 用户名称
-            limit: 搜索最多返回值，default=10，max=10
-            check: 是否对结果进行匹配，返回唯一一个完全匹配的结果
-        
-        返回：
-            结果列表
-        '''
-        if limit < 1:
-            limit = 1
-        if limit > 10:
-            limit = 10
-        nickname = nickname.lower()
-        api_url = BaseUrl.get_vortex_base_url(region_id)
-        url = f'{api_url}/api/accounts/search/{nickname.lower()}/?limit={limit}'
-        result = await self.fetch_data(url)
-        if result['code'] != 1000:
-            return result
-        # 获取所有的结果，通过后台任务更新数据库
-        delay_list = []
-        for temp_data in result.get('data',None):
-            user_basic = {
-                'account_id': temp_data['spa_id'],
-                'region_id': region_id,
-                'nickname': temp_data['name']
-            }
-            if temp_data['hidden'] == True:
-                user_info = {
-                    'account_id': temp_data['spa_id'],
-                    'region_id': region_id,
-                    'is_active': True,
-                    'active_level': 0,
-                    'is_public': False,
-                    'total_battles': 0,
-                    'last_battle_time': 0
-                }
-                task_check_user_basic_and_info.delay(user_basic,user_info)
-            elif temp_data['statistics'] == {}:
-                user_info = {
-                    'account_id': temp_data['spa_id'],
-                    'region_id': region_id,
-                    'is_active': False,
-                    'active_level': 0,
-                    'is_public': True,
-                    'total_battles': 0,
-                    'last_battle_time': 0
-                }
-                task_check_user_basic_and_info.delay(user_basic,user_info)
-            else:
-                task_check_user_basic.delay(user_basic)
-        search_data = []
-        if check:
-            for temp_data in result.get('data',None):
-                if nickname == temp_data['name'].lower():
-                    search_data.append({
-                        'account_id':temp_data['spa_id'],
-                        'region_id': region_id,
-                        'name':temp_data['name']
-                    })
-                    break
-        else:
-            for temp_data in result.get('data',None):
-                search_data.append({
-                    'account_id':temp_data['spa_id'],
-                    'region_id': region_id,
-                    'name':temp_data['name']
-                })
-        result['data'] = search_data
-        return result
-    
-    @classmethod
-    async def get_clan_search(
-        self,
-        region_id: int,
-        tag: str,
-        limit: int = 10,
-        check: bool = False
-    ):
-        '''获取工会名称搜索结果
-
-        通过输入的工会名称搜索工会账号
-
-        参数：
-            region_id: 工会服务器id
-            tga: 工会名称
-            limit: 搜索最多返回值，default=10，max=10
-            check: 是否对结果进行匹配，返回唯一一个完全匹配的结果
-        
-        返回：
-            结果列表
-        '''
-        if limit < 1:
-            limit = 1
-        if limit > 10:
-            limit = 10
-        tag = tag.lower()
-        api_url = BaseUrl.get_clan_basse_url(region_id)
-        url = f'{api_url}/api/search/autocomplete/?search={tag}&type=clans'
-        result = await self.fetch_data(url)
-        if result['code'] != 1000:
-            return result
-        # 获取所有的结果，通过后台任务更新数据库
-        for temp_data in result.get('data', None):
-            clan_basic = {
-                'clan_id': temp_data['id'],
-                'region_id': region_id,
-                'tag': temp_data['tag'],
-                'league': ClanColor.CLAN_COLOR_INDEX_2.get(temp_data['hex_color'], 5)
-            }
-            task_check_clan_basic.delay(clan_basic)
-        search_data = []
-        if check:
-            for temp_data in result.get('data',None):
-                if tag == temp_data['tag'].lower():
-                    search_data.append({
-                        'clan_id':temp_data['id'],
-                        'region_id': region_id,
-                        'tag':temp_data['tag']
-                    })
-                    break
-        else:
-            for temp_data in result.get('data',None):
-                if len(search_data) > limit:
-                    break
-                if tag in temp_data['tag'].lower():
-                    search_data.append({
-                        'clan_id':temp_data['id'],
-                        'region_id': region_id,
-                        'tag':temp_data['tag']
-                    })
-        result['data'] = search_data
-        return result

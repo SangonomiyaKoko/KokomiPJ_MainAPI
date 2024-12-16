@@ -3,13 +3,12 @@ from typing import Optional
 from fastapi import APIRouter
 
 from .schemas import (
-    RegionList, 
-    LanguageList, 
+    RegionList,
     UserUpdateModel,
     ClanUpdateModel
 )
 from app.apis.platform import (
-    Search, Update, GameUser, GameBasic,
+    Update, GameUser, GameBasic,
     GameClan, UserCache, ClanCache
 )
 from app.core import ServiceStatus
@@ -19,7 +18,7 @@ from app.middlewares import record_api_call
 
 router = APIRouter()
 
-@router.get("/game/version/")
+@router.get("/game/version/", summary="获取游戏当前版本")
 async def getGameVersion(
     region: RegionList
 ):
@@ -42,111 +41,7 @@ async def getGameVersion(
     await record_api_call(result['status'])
     return result
 
-@router.get("/search/user/")
-async def searchUser(
-    region: RegionList,
-    nickname: str,
-    limit: Optional[int] = 10,
-    check: Optional[bool] = False
-) -> ResponseDict:
-    """用户搜索接口
-
-    搜索输入的用户名称
-
-    参数:
-    - region: 服务器
-    - nickname: 搜索的名称
-    - limit: 搜索返回值的限制
-    - check: 是否检查并返回唯一合适的结果
-
-    返回:
-    - ResponseDict
-    """
-    if not ServiceStatus.is_service_available():
-        return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(region)
-    if not region_id:
-        return JSONResponse.API_1010_IllegalRegion
-    if not 3 <= len(nickname) <= 25:
-        return JSONResponse.API_1011_IllegalUserName
-    result = await Search.search_user(
-        region_id = region_id,
-        nickname = nickname,
-        limit = limit,
-        check = check
-    )
-    await record_api_call(result['status'])
-    return result
-
-@router.get("/search/clan/")
-async def searchClan(
-    region: RegionList,
-    tag: str,
-    limit: Optional[int] = 10,
-    check: Optional[bool] = False
-) -> ResponseDict:
-    """工会搜索接口
-
-    搜索输入的工会名称
-
-    参数:
-    - region: 服务器
-    - tag: 搜索的名称
-    - limit: 搜索返回值的限制
-    - check: 是否检查并返回唯一合适的结果
-
-    返回:
-    - ResponseDict
-    """
-    if not ServiceStatus.is_service_available():
-        return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(region)
-    if not region_id:
-        return JSONResponse.API_1010_IllegalRegion
-    if not 2 <= len(tag) <= 5:
-        return JSONResponse.API_1012_IllegalClanTag
-    result = await Search.search_clan(
-        region_id = region_id,
-        tag = tag,
-        limit = limit,
-        check = check
-    )
-    await record_api_call(result['status'])
-    return result
-
-@router.get("/search/ship/")
-async def searchShip(
-    region: RegionList,
-    language: LanguageList,
-    shipname: str
-) -> ResponseDict:
-    """船只搜索接口
-
-    搜索输入的船只名称
-
-    参数:
-    - region: 服务器
-    - language: 搜索的语言
-    - shipname: 搜索的名称
-
-    返回:
-    - ResponseDict
-    """
-    if not ServiceStatus.is_service_available():
-        return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(region)
-    if not region_id:
-        return JSONResponse.API_1010_IllegalRegion
-    language = UtilityFunctions.get_language_code(language)
-    result = await Search.search_ship(
-        region_id = region_id,
-        ship_name = shipname,
-        language = language
-    )
-    await record_api_call(result['status'])
-    return result
-
-@router.put("/update/ship-name/")
+@router.put("/update/ship-name/", summary="更新船只名称的json数据")
 async def updateShipName(region: RegionList) -> ResponseDict:
     """更新船只名称数据
 
@@ -167,7 +62,33 @@ async def updateShipName(region: RegionList) -> ResponseDict:
     await record_api_call(result['status'])
     return result
 
-@router.get("/game/users/cache/")
+@router.get("/game/user/basic/", summary="请求获取用户的基本数据")
+async def getUserBasic(
+    region: RegionList,
+    account_id: int
+) -> ResponseDict:
+    """用户基础数据
+
+    -
+
+    参数:
+    - None
+
+    返回:
+    - ResponseDict
+    """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
+    region_id = UtilityFunctions.get_region_id(region)
+    if not region_id:
+        return JSONResponse.API_1010_IllegalRegion
+    if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
+        return JSONResponse.API_1003_IllegalAccoutIDorRegionID
+    result = await GameUser.get_user_basic(account_id,region_id)
+    await record_api_call(result['status'])
+    return result
+
+@router.get("/game/users/cache/", summary="获取用户的数据库中数据")
 async def getUserCache(offset: Optional[int] = None, limit: Optional[int] = None) -> ResponseDict:
     """批量获取用户的Cache数据
 
@@ -189,7 +110,51 @@ async def getUserCache(offset: Optional[int] = None, limit: Optional[int] = None
     await record_api_call(result['status'])
     return result
 
-@router.get("/game/clans/cache/")
+@router.put("/game/user/update/", summary="更新用户的数据库数据")
+async def updateUserCache(user_data: UserUpdateModel) -> ResponseDict:
+    """更新用户的数据
+
+    通过传入的数据更新数据库
+
+    参数:
+    - UserUpdateModel
+    
+    返回:
+    - ResponseDict
+    """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
+    result = await GameUser.update_user_data(user_data.model_dump())
+    await record_api_call(result['status'])
+    return result
+
+@router.get("/game/clan/basic/", summary="请求获取工会的基本数据")
+async def getClanBasic(
+    region: RegionList,
+    clan_id: int
+) -> ResponseDict:
+    """工会基础数据
+
+    -
+
+    参数:
+    - None
+
+    返回:
+    - ResponseDict
+    """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
+    region_id = UtilityFunctions.get_region_id(region)
+    if not region_id:
+        return JSONResponse.API_1010_IllegalRegion
+    if UtilityFunctions.check_cid_and_rid(clan_id,region_id) == False:
+        return JSONResponse.API_1004_IllegalClanIDorRegionID
+    result = await GameClan.get_clan_basic(clan_id,region_id)
+    await record_api_call(result['status'])
+    return result
+
+@router.get("/game/clans/cache/", summary="获取工会的数据库中数据")
 async def getClanCache(offset: Optional[int] = None, limit: Optional[int] = None) -> ResponseDict:
     """批量获取工会的Cache数据
 
@@ -211,25 +176,7 @@ async def getClanCache(offset: Optional[int] = None, limit: Optional[int] = None
     await record_api_call(result['status'])
     return result
 
-@router.put("/game/user/update/")
-async def updateUserCache(user_data: UserUpdateModel) -> ResponseDict:
-    """更新用户的数据
-
-    通过传入的数据更新数据库
-
-    参数:
-    - UserUpdateModel
-    
-    返回:
-    - ResponseDict
-    """
-    if not ServiceStatus.is_service_available():
-        return JSONResponse.API_8000_ServiceUnavailable
-    result = await GameUser.update_user_data(user_data.model_dump())
-    await record_api_call(result['status'])
-    return result
-
-@router.put("/game/clan/update/")
+@router.put("/game/clan/update/", summary="更新工会的数据库数据")
 async def updateUserCache(clan_data: ClanUpdateModel) -> ResponseDict:
     """更新工会的数据
 

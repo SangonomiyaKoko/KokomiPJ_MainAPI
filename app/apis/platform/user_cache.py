@@ -3,9 +3,7 @@ import gc
 from app.log import ExceptionLogger
 from app.response import ResponseDict, JSONResponse
 from app.models import UserModel, ShipsCacheModel
-from app.middlewares.celery import (
-    task_update_user_cache
-)
+from app.middlewares.celery import celery_app
 
 
 class UserCache:
@@ -65,7 +63,10 @@ class UserCache:
                 if delete_ship_list != [] or replace_ship_dict != {}:
                     ship_data = data
             del user_data['details_data']
-            task_update_user_cache.delay(user_data, ship_data)
+            celery_app.send_task(
+                name="update_user_cache",
+                args=[user_data, ship_data]
+            )
             return JSONResponse.API_1000_Success
         except Exception as e:
             raise e

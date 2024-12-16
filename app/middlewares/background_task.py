@@ -31,7 +31,7 @@ def check_game_version(pool: PooledDB, game_data: dict):
         if game == None:
             raise ValueError('Table Not Found')
         else:
-            if game[0] != game_version:
+            if game['game_version'] != game_version:
                 cur.execute(
                     "UPDATE kokomi.region_version SET game_version = %s WHERE region_id = %s;",
                     [game_version, region_id]

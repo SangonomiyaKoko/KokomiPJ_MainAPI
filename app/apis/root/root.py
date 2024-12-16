@@ -3,7 +3,6 @@ import gc
 from app.log import ExceptionLogger
 from app.response import ResponseDict
 from app.models import RootModel
-from app.middlewares.celery import task_check_user_basic, task_check_user_info
 
 
 class RootData:
