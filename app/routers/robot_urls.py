@@ -9,13 +9,13 @@ from app.middlewares import record_api_call
 
 router = APIRouter()
 
-@router.get("/version/")
+@router.get("/version/", summary="获取robot的最新版本")
 async def getVersion() -> ResponseDict:
     """获取bot的版本"""
     # 临时返回值
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
-    data = {
+    data = {    
         'code': '5.0.0.bate1',
         'image': '5.0.0.bate1'
     }
@@ -36,7 +36,7 @@ async def getUserBind(
     return result
 
 @router.post("/user/bind/", summary="更新用户的绑定信息")
-async def getUserBind(
+async def postUserBind(
     user_data: BotUserBindModel
 ) -> ResponseDict:
     """更新或者写入用户的绑定信息"""
