@@ -1,0 +1,1 @@
+go build -o update.exe update.go
