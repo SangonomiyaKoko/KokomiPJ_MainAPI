@@ -304,7 +304,7 @@ activate
 # 或者
 .venv/Scripts/activate
 # 或者
-source venv/bin/activate
+source .venv/bin/activate
 ```
 
 #### 三. 安装依赖
@@ -348,6 +348,8 @@ USE_PROXY=0
 
 #### 四. 启动 FastAPI
 
+> Linux 环境可能需要 `sudo apt install uvicorn`
+
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level debug
 ```
@@ -373,5 +375,6 @@ celery --app app.middlewares.celery:celery_app flower --port=5555
 #### 七. 更新代码
 
 ```bash
+git reset --hard HEAD
 git pull origin main
 ```
