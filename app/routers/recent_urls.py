@@ -24,7 +24,7 @@ async def enabledFeatureUsers(region: RegionList) -> ResponseDict:
     """
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(region)
+    region_id = UtilityFunctions.get_region_id(region.name)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
     result = await RecentBasic.get_recent(region_id)
@@ -46,7 +46,7 @@ async def get_recent_data_overview(region: RegionList,account_id: int) -> Respon
     """
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(region)
+    region_id = UtilityFunctions.get_region_id(region.name)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
@@ -69,7 +69,7 @@ async def get_user_info(region: RegionList, account_id: int) -> ResponseDict:
     """
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(region)
+    region_id = UtilityFunctions.get_region_id(region.name)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
@@ -93,7 +93,7 @@ async def getUserFeatureData(region: RegionList,account_id: int) -> ResponseDict
     """
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(region)
+    region_id = UtilityFunctions.get_region_id(region.name)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
@@ -139,7 +139,7 @@ async def disableFeature(region: RegionList,account_id: int) -> ResponseDict:
     """
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(region)
+    region_id = UtilityFunctions.get_region_id(region.name)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:

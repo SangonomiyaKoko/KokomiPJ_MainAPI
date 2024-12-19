@@ -34,7 +34,7 @@ async def getGameVersion(
     """
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(region)
+    region_id = UtilityFunctions.get_region_id(region.name)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
     result = await GameBasic.get_game_version(region_id)
@@ -55,7 +55,7 @@ async def updateShipName(region: RegionList) -> ResponseDict:
     """
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(region)
+    region_id = UtilityFunctions.get_region_id(region.name)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
     result = await Update.update_ship_name(region_id)
@@ -79,7 +79,7 @@ async def getUserBasic(
     """
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(region)
+    region_id = UtilityFunctions.get_region_id(region.name)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
@@ -145,7 +145,7 @@ async def getClanBasic(
     """
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(region)
+    region_id = UtilityFunctions.get_region_id(region.name)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
     if UtilityFunctions.check_cid_and_rid(clan_id,region_id) == False:

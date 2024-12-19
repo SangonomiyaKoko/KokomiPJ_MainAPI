@@ -31,7 +31,7 @@ async def getUserBind(
     """获取用户的绑定信息"""
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
-    result = await BotUser.get_user_bind(platform, user_id)
+    result = await BotUser.get_user_bind(platform.name, user_id)
     await record_api_call(result['status'])
     return result
 
@@ -53,7 +53,7 @@ async def getUserAccountData(
 ) -> ResponseDict:
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(region)
+    region_id = UtilityFunctions.get_region_id(region.name)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
@@ -69,7 +69,7 @@ async def getUserAccountData(
 ) -> ResponseDict:
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(region)
+    region_id = UtilityFunctions.get_region_id(region.name)
     if not region_id:
         return JSONResponse.API_1010_IllegalRegion
     if UtilityFunctions.check_cid_and_rid(clan_id, region_id) == False:
