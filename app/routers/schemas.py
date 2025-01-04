@@ -113,3 +113,16 @@ class BotUserBindModel(BaseModel):
     user_id: str = Field(..., description='用户id')
     region_id: int = Field(..., description='服务器id')
     account_id: int = Field(..., description='用户id')
+
+class APPUserRegisterModel(BaseModel):
+    email: str = Field(..., description="邮箱")
+    password: str = Field(..., description="密码")
+    verification_code: str = Field(..., description="验证码")
+    invitation_code: str = Field(..., description="邀请码")
+
+class APPUserLoginModel(BaseModel):
+    email: str = Field(..., description="邮箱")
+    password: str = Field(..., description="密码")
+
+class APPUserLogoutModel(BaseModel):
+    token: str = Field(..., description="需要登出用户的token")
