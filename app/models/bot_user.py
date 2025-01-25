@@ -66,20 +66,20 @@ class BotUserModel:
             cursor: Cursor = await connection.cursor()
 
             await cursor.execute(
-                "SELECT region_id, account_id FROM kokomi.bot_user_basic "
+                "SELECT region_id, account_id FROM kokomi_bot.user_basic "
                 "WHERE platform = %s AND user_id = %s;",
                 [user_data['platform'], user_data['user_id']]
             )
             user = await cursor.fetchone()
             if user:
                 await cursor.execute(
-                    "UPDATE kokomi.bot_user_basic SET region_id = %s, account_id = %s "
+                    "UPDATE kokomi_bot.user_basic SET region_id = %s, account_id = %s "
                     "WHERE platform = %s AND user_id = %s;",
                     [user_data['region_id'],user_data['account_id'],user_data['platform'], user_data['user_id']]
                 )
             else:
                 await cursor.execute(
-                    "INSERT INTO kokomi.bot_user_basic (platform, user_id, region_id, account_id) "
+                    "INSERT INTO kokomi_bot.user_basic (platform, user_id, region_id, account_id) "
                     "VALUES (%s, %s, %s, %s);",
                     [user_data['platform'], user_data['user_id'],user_data['region_id'],user_data['account_id']]
                 )

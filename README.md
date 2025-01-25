@@ -283,6 +283,10 @@ bind 127.0.0.1 ::1
 # bind * -::*                     # like the default, all available interfaces
 ```
 
+```bash
+sudo systemctl restart redis-server # 修改后需要重启
+```
+
 ### KokomiAPI 安装步骤
 
 #### 一. 从 Github 下载最新的代码
@@ -295,10 +299,12 @@ git clone https://github.com/SangonomiyaKoko/KokomiPJ_MainAPI.git
 
 #### 二. 创建并激活虚拟环境
 
-推荐的 Python 版本: `3.8.0`及以上
+推荐的 Python 版本: 至少`3.8.0`及以上
 
 ```bash
-python -m venv venv
+apt install python3.12-venv # 可能需要
+
+python/python3 -m venv venv
 
 activate
 # 或者
