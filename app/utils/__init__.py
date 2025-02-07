@@ -5,6 +5,7 @@ from .server_utils import ShipData
 from .algo_utils import Rating_Algorithm
 from .color_utils import ColorUtils
 from .binary_utils import BinaryGeneratorUtils, BinaryParserUtils
+
 __all__ = [
     'TimeFormat',
     'ShipName',

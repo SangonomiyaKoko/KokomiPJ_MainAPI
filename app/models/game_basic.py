@@ -5,6 +5,9 @@ from app.db import MysqlConnection
 from app.log import ExceptionLogger
 from app.response import JSONResponse, ResponseDict
 
+from .db_name import MAIN_DB
+
+
 class GameModel:
     @ExceptionLogger.handle_database_exception_async
     async def get_game_version(region_id: int) -> ResponseDict:
@@ -27,7 +30,7 @@ class GameModel:
                 'version': None
             }
             await cur.execute(
-                "SELECT game_version FROM kokomi.region_version WHERE region_id = %s;",
+                f"SELECT game_version FROM {MAIN_DB}.region_version WHERE region_id = %s;",
                 [region_id]
             )
             game = await cur.fetchone()

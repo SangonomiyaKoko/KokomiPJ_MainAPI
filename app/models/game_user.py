@@ -7,6 +7,9 @@ from app.log import ExceptionLogger
 from app.response import JSONResponse, ResponseDict
 from app.utils import UtilityFunctions, TimeFormat, BinaryParserUtils
 
+from .db_name import MAIN_DB
+
+
 class UserModel:
     # # 函数统一格式格式
     @ExceptionLogger.handle_database_exception_async
@@ -59,7 +62,7 @@ class UserModel:
                 'max_id': 0
             }
             await cur.execute(
-                "SELECT MAX(id) AS max_id FROM kokomi.user_basic;"
+                f"SELECT MAX(id) AS max_id FROM {MAIN_DB}.user_basic;"
             )
             user = await cur.fetchone()
             data['max_id'] = user[0]
@@ -97,7 +100,7 @@ class UserModel:
                 params.append(user['account_id'])
             await cur.execute(
                 "SELECT account_id, username, UNIX_TIMESTAMP(updated_at) AS update_time "
-                f"FROM kokomi.user_basic WHERE region_id = %s AND account_id in ( %s{sql_str} );",
+                f"FROM {MAIN_DB}.user_basic WHERE region_id = %s AND account_id in ( %s{sql_str} );",
                 params
             )
             exists_users = {}
@@ -110,38 +113,38 @@ class UserModel:
                 nickname = user['nickname']
                 if account_id not in exists_users:
                     await cur.execute(
-                        "INSERT INTO kokomi.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                        f"INSERT INTO {MAIN_DB}.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
                         [account_id, region_id, UtilityFunctions.get_user_default_name(account_id)]
                     )
                     await cur.execute(
-                        "INSERT INTO kokomi.user_info (account_id) VALUES (%s);",
+                        f"INSERT INTO {MAIN_DB}.user_info (account_id) VALUES (%s);",
                         [account_id]
                     )
                     await cur.execute(
-                        "INSERT INTO kokomi.user_ships (account_id) VALUES (%s);",
+                        f"INSERT INTO {MAIN_DB}.user_ships (account_id) VALUES (%s);",
                         [account_id]
                     )
                     await cur.execute(
-                        "INSERT INTO kokomi.user_clan (account_id) VALUES (%s);",
+                        f"INSERT INTO {MAIN_DB}.user_clan (account_id) VALUES (%s);",
                         [account_id]
                     )
                     await cur.execute(
-                        "UPDATE kokomi.user_basic SET username = %s WHERE region_id = %s AND account_id = %s",
+                        f"UPDATE {MAIN_DB}.user_basic SET username = %s WHERE region_id = %s AND account_id = %s",
                         [nickname, region_id, account_id]
                     )
                 else:
                     if exists_users[account_id][1] == None:
                         await cur.execute(
-                            "UPDATE kokomi.user_basic SET username = %s WHERE region_id = %s AND account_id = %s",
+                            f"UPDATE {MAIN_DB}.user_basic SET username = %s WHERE region_id = %s AND account_id = %s",
                             [nickname, region_id, account_id]
                         )
                     elif nickname != exists_users[account_id][0]:
                         await cur.execute(
-                            "UPDATE kokomi.user_basic SET username = %s WHERE region_id = %s and account_id = %s;", 
+                            f"UPDATE {MAIN_DB}.user_basic SET username = %s WHERE region_id = %s and account_id = %s;", 
                             [nickname, region_id, account_id]
                         ) 
                         await cur.execute(
-                            "INSERT INTO kokomi.user_history (account_id, username, start_time, end_time) "
+                            f"INSERT INTO {MAIN_DB}.user_history (account_id, username, start_time, end_time) "
                             "VALUES (%s, %s, FROM_UNIXTIME(%s), FROM_UNIXTIME(%s));", 
                             [account_id, exists_users[account_id][0], exists_users[account_id][1], TimeFormat.get_current_timestamp()]
                         )
@@ -181,7 +184,7 @@ class UserModel:
             }
             await cur.execute(
                 "SELECT username, UNIX_TIMESTAMP(updated_at) AS update_time "
-                "FROM kokomi.user_basic WHERE region_id = %s and account_id = %s;", 
+                f"FROM {MAIN_DB}.user_basic WHERE region_id = %s and account_id = %s;", 
                 [region_id, account_id]
             )
             user = await cur.fetchone()
@@ -189,19 +192,19 @@ class UserModel:
                 # 用户不存在
                 name = UtilityFunctions.get_user_default_name(account_id)
                 await cur.execute(
-                    "INSERT INTO kokomi.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                    f"INSERT INTO {MAIN_DB}.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
                     [account_id, region_id, name]
                 )
                 await cur.execute(
-                    "INSERT INTO kokomi.user_info (account_id) VALUES (%s);",
+                    f"INSERT INTO {MAIN_DB}.user_info (account_id) VALUES (%s);",
                     [account_id]
                 )
                 await cur.execute(
-                    "INSERT INTO kokomi.user_ships (account_id) VALUES (%s);",
+                    f"INSERT INTO {MAIN_DB}.user_ships (account_id) VALUES (%s);",
                     [account_id]
                 )
                 await cur.execute(
-                    "INSERT INTO kokomi.user_clan (account_id) VALUES (%s);",
+                    f"INSERT INTO {MAIN_DB}.user_clan (account_id) VALUES (%s);",
                     [account_id]
                 )
                 data['nickname'] = name
@@ -242,7 +245,7 @@ class UserModel:
             }
             await cur.execute(
                 "SELECT clan_id, UNIX_TIMESTAMP(updated_at) AS update_time "
-                "FROM kokomi.user_clan WHERE account_id = %s;", 
+                f"FROM {MAIN_DB}.user_clan WHERE account_id = %s;", 
                 [account_id]
             )
             user = await cur.fetchone()
@@ -250,19 +253,19 @@ class UserModel:
                 # 用户不存在
                 name = UtilityFunctions.get_user_default_name(account_id)
                 await cur.execute(
-                    "INSERT INTO kokomi.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                    f"INSERT INTO {MAIN_DB}.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
                     [account_id, region_id, name]
                 )
                 await cur.execute(
-                    "INSERT INTO kokomi.user_info (account_id) VALUES (%s);",
+                    f"INSERT INTO {MAIN_DB}.user_info (account_id) VALUES (%s);",
                     [account_id]
                 )
                 await cur.execute(
-                    "INSERT INTO kokomi.user_ships (account_id) VALUES (%s);",
+                    f"INSERT INTO {MAIN_DB}.user_ships (account_id) VALUES (%s);",
                     [account_id]
                 )
                 await cur.execute(
-                    "INSERT INTO kokomi.user_clan (account_id) VALUES (%s);",
+                    f"INSERT INTO {MAIN_DB}.user_clan (account_id) VALUES (%s);",
                     [account_id]
                 )
                 data['clan_id'] = None
@@ -302,7 +305,7 @@ class UserModel:
             await cur.execute(
                 "SELECT is_active, active_level, is_public, total_battles, "
                 "UNIX_TIMESTAMP(last_battle_at) AS last_battle_time, UNIX_TIMESTAMP(updated_at) AS update_time "
-                "FROM kokomi.user_info WHERE account_id = %s;", 
+                f"FROM {MAIN_DB}.user_info WHERE account_id = %s;", 
                 [account_id]
             )
             user = await cur.fetchone()
@@ -311,19 +314,19 @@ class UserModel:
                 # 用户不存在
                 name = UtilityFunctions.get_user_default_name(account_id)
                 await cur.execute(
-                    "INSERT INTO kokomi.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                    f"INSERT INTO {MAIN_DB}.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
                     [account_id, region_id, name]
                 )
                 await cur.execute(
-                    "INSERT INTO kokomi.user_info (account_id) VALUES (%s);",
+                    f"INSERT INTO {MAIN_DB}.user_info (account_id) VALUES (%s);",
                     [account_id]
                 )
                 await cur.execute(
-                    "INSERT INTO kokomi.user_ships (account_id) VALUES (%s);",
+                    f"INSERT INTO {MAIN_DB}.user_ships (account_id) VALUES (%s);",
                     [account_id]
                 )
                 await cur.execute(
-                    "INSERT INTO kokomi.user_clan (account_id) VALUES (%s);",
+                    f"INSERT INTO {MAIN_DB}.user_clan (account_id) VALUES (%s);",
                     [account_id]
                 )
                 data = {
@@ -363,7 +366,7 @@ class UserModel:
             
             await cur.execute(
                 "SELECT battles_count, hash_value, ships_data, UNIX_TIMESTAMP(updated_at) AS update_time "
-                "FROM kokomi.user_ships WHERE account_id = %s;", 
+                f"FROM {MAIN_DB}.user_ships WHERE account_id = %s;", 
                 [account_id]
             )
             user = await cur.fetchone()
@@ -371,19 +374,19 @@ class UserModel:
                 # 用户不存在
                 name = UtilityFunctions.get_user_default_name(account_id)
                 await cur.execute(
-                    "INSERT INTO kokomi.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                    f"INSERT INTO {MAIN_DB}.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
                     [account_id, region_id, name]
                 )
                 await cur.execute(
-                    "INSERT INTO kokomi.user_info (account_id) VALUES (%s);",
+                    f"INSERT INTO {MAIN_DB}.user_info (account_id) VALUES (%s);",
                     [account_id]
                 )
                 await cur.execute(
-                    "INSERT INTO kokomi.user_ships (account_id) VALUES (%s);",
+                    f"INSERT INTO {MAIN_DB}.user_ships (account_id) VALUES (%s);",
                     [account_id]
                 )
                 await cur.execute(
-                    "INSERT INTO kokomi.user_clan (account_id) VALUES (%s);",
+                    f"INSERT INTO {MAIN_DB}.user_clan (account_id) VALUES (%s);",
                     [account_id]
                 )
                 data = {
@@ -431,9 +434,9 @@ class UserModel:
             await cur.execute(
                 "SELECT b.region_id, b.account_id, i.is_active, i.active_level, UNIX_TIMESTAMP(i.updated_at) AS info_update_time, "
                 "s.battles_count, s.hash_value, UNIX_TIMESTAMP(s.updated_at) AS update_time "
-                "FROM kokomi.user_basic AS b "
-                "LEFT JOIN kokomi.user_info AS i ON i.account_id = b.account_id "
-                "LEFT JOIN kokomi.user_ships AS s ON s.account_id = b.account_id "
+                f"FROM {MAIN_DB}.user_basic AS b "
+                f"LEFT JOIN {MAIN_DB}.user_info AS i ON i.account_id = b.account_id "
+                f"LEFT JOIN {MAIN_DB}.user_ships AS s ON s.account_id = b.account_id "
                 "WHERE b.id BETWEEN %s AND %s;", 
                 [offset+1, offset+limit]
             )

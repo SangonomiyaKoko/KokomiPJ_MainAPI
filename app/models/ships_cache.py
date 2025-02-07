@@ -5,6 +5,9 @@ from app.db import MysqlConnection
 from app.log import ExceptionLogger
 from app.response import JSONResponse, ResponseDict
 
+from .db_name import CACHE_DB
+
+
 class ShipsCacheModel:
     @ExceptionLogger.handle_database_exception_async
     async def check_existing_ship(ship_id_list: set) -> ResponseDict:
@@ -24,7 +27,7 @@ class ShipsCacheModel:
             cur: Cursor = await conn.cursor()
 
             await cur.execute(
-                "SELECT ship_id FROM ships.existing_ships"
+                f"SELECT ship_id FROM {CACHE_DB}.existing_ships"
             )
             not_exists_set = set()
             exists_list = []
@@ -36,7 +39,7 @@ class ShipsCacheModel:
                     not_exists_set.add(ship_id)
             for ship_id in not_exists_set:
                 await cur.execute(
-                    '''CREATE TABLE IF NOT EXISTS ships.ship_%s (
+                    f'''CREATE TABLE IF NOT EXISTS {CACHE_DB}.ship_%s (
                         id               INT          AUTO_INCREMENT,
                         account_id       BIGINT       NOT NULL,
                         region_id        TINYINT      NOT NULL,
@@ -63,7 +66,7 @@ class ShipsCacheModel:
                     [ship_id]
                 )
                 await cur.execute(
-                    "INSERT INTO ships.existing_ships ( ship_id ) VALUE ( %s )",
+                    f"INSERT INTO {CACHE_DB}.existing_ships ( ship_id ) VALUE ( %s )",
                     [ship_id]
                 )
             

@@ -5,6 +5,7 @@ from app.db import MysqlConnection
 from app.log import ExceptionLogger
 from app.response import JSONResponse, ResponseDict
 
+from .db_name import MAIN_DB
 
 
 class RootModel:
@@ -109,8 +110,8 @@ class RootModel:
             data = {}
             await cur.execute(
                 "SELECT r.region_str, COALESCE(COUNT(u.region_id), 0) AS count "
-                "FROM kokomi.region AS r "
-                "LEFT JOIN kokomi.user_basic AS u ON r.region_id = u.region_id "
+                f"FROM {MAIN_DB}.region AS r "
+                f"LEFT JOIN {MAIN_DB}.user_basic AS u ON r.region_id = u.region_id "
                 "WHERE r.region_id BETWEEN 1 AND 5 "
                 "GROUP BY r.region_id, r.region_str;"
             )
@@ -138,8 +139,8 @@ class RootModel:
             data = {}
             await cur.execute(
                 "SELECT r.region_str, COALESCE(COUNT(u.region_id), 0) AS count "
-                "FROM kokomi.region AS r "
-                "LEFT JOIN kokomi.clan_basic AS u ON r.region_id = u.region_id "
+                f"FROM {MAIN_DB}.region AS r "
+                f"LEFT JOIN {MAIN_DB}.clan_basic AS u ON r.region_id = u.region_id "
                 "WHERE r.region_id BETWEEN 1 AND 5 "
                 "GROUP BY r.region_id, r.region_str;"
             )
@@ -167,8 +168,8 @@ class RootModel:
             data = {}
             await cur.execute(
                 "SELECT r.region_str, COALESCE(COUNT(u.region_id), 0) AS count "
-                "FROM kokomi.region AS r "
-                "LEFT JOIN kokomi.recent AS u ON r.region_id = u.region_id "
+                f"FROM {MAIN_DB}.region AS r "
+                f"LEFT JOIN {MAIN_DB}.recent AS u ON r.region_id = u.region_id "
                 "WHERE r.region_id BETWEEN 1 AND 5 "
                 "GROUP BY r.region_id, r.region_str;"
             )

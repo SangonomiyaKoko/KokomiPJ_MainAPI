@@ -5,6 +5,8 @@ from app.db import MysqlConnection
 from app.log import ExceptionLogger
 from app.response import JSONResponse, ResponseDict
 
+from .db_name import MAIN_DB
+
 
 class RecentsUserModel:
     @ExceptionLogger.handle_database_exception_async
@@ -16,7 +18,7 @@ class RecentsUserModel:
 
             data = []
             await cur.execute(
-                "SELECT account_id FROM kokomi.recents WHERE region_id = %s;",
+                f"SELECT account_id FROM {MAIN_DB}.recents WHERE region_id = %s;",
                 [region_id]
             )
             users = await cur.fetchall()

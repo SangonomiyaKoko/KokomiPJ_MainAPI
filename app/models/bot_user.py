@@ -6,6 +6,9 @@ from app.log import ExceptionLogger
 from app.utils import UtilityFunctions
 from app.response import JSONResponse, ResponseDict
 
+from .db_name import MAIN_DB, BOT_DB
+
+
 class BotUserModel:
     @ExceptionLogger.handle_database_exception_async
     async def get_user_bind(platform: str, user_id: str) -> ResponseDict:
@@ -26,7 +29,7 @@ class BotUserModel:
             cursor: Cursor = await connection.cursor()
 
             await cursor.execute(
-                "SELECT region_id, account_id FROM kokomi.bot_user_basic "
+                f"SELECT region_id, account_id FROM {BOT_DB}.user_basic "
                 "WHERE platform = %s AND user_id = %s;",
                 [platform, user_id]
             )
@@ -66,20 +69,20 @@ class BotUserModel:
             cursor: Cursor = await connection.cursor()
 
             await cursor.execute(
-                "SELECT region_id, account_id FROM kokomi_bot.user_basic "
+                f"SELECT region_id, account_id FROM {BOT_DB}.user_basic "
                 "WHERE platform = %s AND user_id = %s;",
                 [user_data['platform'], user_data['user_id']]
             )
             user = await cursor.fetchone()
             if user:
                 await cursor.execute(
-                    "UPDATE kokomi_bot.user_basic SET region_id = %s, account_id = %s "
+                    f"UPDATE {BOT_DB}.user_basic SET region_id = %s, account_id = %s "
                     "WHERE platform = %s AND user_id = %s;",
                     [user_data['region_id'],user_data['account_id'],user_data['platform'], user_data['user_id']]
                 )
             else:
                 await cursor.execute(
-                    "INSERT INTO kokomi_bot.user_basic (platform, user_id, region_id, account_id) "
+                    f"INSERT INTO {BOT_DB}.user_basic (platform, user_id, region_id, account_id) "
                     "VALUES (%s, %s, %s, %s);",
                     [user_data['platform'], user_data['user_id'],user_data['region_id'],user_data['account_id']]
                 )
@@ -99,14 +102,14 @@ class BotUserModel:
             await connection.begin()
             cursor: Cursor = await connection.cursor()
 
-            await cursor.execute('''
+            await cursor.execute(f'''
                 SELECT 
                     basic.username, userclan.clan_id, UNIX_TIMESTAMP(userclan.updated_at) AS user_update_time, 
                     clan.tag, clan.league, UNIX_TIMESTAMP(clan.updated_at) AS clan_update_time
-                FROM kokomi.user_basic AS basic 
-                LEFT JOIN kokomi.user_clan AS userclan
+                FROM {MAIN_DB}.user_basic AS basic 
+                LEFT JOIN {MAIN_DB}.user_clan AS userclan
                     ON userclan.account_id = basic.account_id 
-                LEFT JOIN kokomi.clan_basic AS clan
+                LEFT JOIN {MAIN_DB}.clan_basic AS clan
                     ON clan.region_id = basic.region_id AND clan.clan_id = userclan.clan_id
                 WHERE basic.region_id = %s AND basic.account_id = %s;''',
                 [region_id, account_id]
@@ -139,19 +142,19 @@ class BotUserModel:
             else:
                 name = UtilityFunctions.get_user_default_name(account_id)
                 await cursor.execute(
-                    "INSERT INTO kokomi.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                    f"INSERT INTO {MAIN_DB}.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
                     [account_id, region_id, name]
                 )
                 await cursor.execute(
-                    "INSERT INTO kokomi.user_info (account_id) VALUES (%s);",
+                    f"INSERT INTO {MAIN_DB}.user_info (account_id) VALUES (%s);",
                     [account_id]
                 )
                 await cursor.execute(
-                    "INSERT INTO kokomi.user_ships (account_id) VALUES (%s);",
+                    f"INSERT INTO {MAIN_DB}.user_ships (account_id) VALUES (%s);",
                     [account_id]
                 )
                 await cursor.execute(
-                    "INSERT INTO kokomi.user_clan (account_id) VALUES (%s);",
+                    f"INSERT INTO {MAIN_DB}.user_clan (account_id) VALUES (%s);",
                     [account_id]
                 )
                 data['user']['name'] = name
@@ -192,7 +195,7 @@ class BotUserModel:
                 'league': None
             }
             await cur.execute(
-                "SELECT tag, league FROM kokomi.clan_basic "
+                f"SELECT tag, league FROM {MAIN_DB}.clan_basic "
                 "WHERE region_id = %s and clan_id = %s;", 
                 [region_id, clan_id]
             )
@@ -201,19 +204,19 @@ class BotUserModel:
                 # 用户不存在，插入新用户
                 tag = UtilityFunctions.get_clan_default_name()
                 await cur.execute(
-                    "INSERT INTO kokomi.clan_basic (clan_id, region_id, tag) VALUES (%s, %s, %s);",
+                    f"INSERT INTO {MAIN_DB}.clan_basic (clan_id, region_id, tag) VALUES (%s, %s, %s);",
                     [clan_id, region_id, tag]
                 )
                 await cur.execute(
-                    "INSERT INTO kokomi.clan_info (clan_id) VALUES (%s);",
+                    f"INSERT INTO {MAIN_DB}.clan_info (clan_id) VALUES (%s);",
                     [clan_id]
                 )
                 await cur.execute(
-                    "INSERT INTO kokomi.clan_users (clan_id) VALUES (%s);",
+                    f"INSERT INTO {MAIN_DB}.clan_users (clan_id) VALUES (%s);",
                     [clan_id]
                 )
                 await cur.execute(
-                    "INSERT INTO kokomi.clan_season (clan_id) VALUES (%s);",
+                    f"INSERT INTO {MAIN_DB}.clan_season (clan_id) VALUES (%s);",
                     [clan_id]
                 )
                 data['tag'] = tag
