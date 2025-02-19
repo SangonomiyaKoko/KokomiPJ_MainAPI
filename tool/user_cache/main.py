@@ -5,9 +5,9 @@ import time
 import asyncio
 from log import log as logger
 
-from config import REGION_LIST
 from network import Network
 from update import Update
+from db import DatabaseConnection
 
 
 class ContinuousUserCacheUpdater:
@@ -32,9 +32,8 @@ class ContinuousUserCacheUpdater:
                     for user in users_result['data']:
                         account_id = user['user_basic']['account_id']
                         region_id = user['user_basic']['region_id']
-                        if region_id in REGION_LIST:
-                            logger.info(f'{region_id} - {account_id} | ------------------[ {offset + i} / {max_id} ]')
-                            await Update.main(user)
+                        logger.info(f'{region_id} - {account_id} | ------------------[ {offset + i} / {max_id} ]')
+                        await Update.main(user)
                         i += 1
                 else:
                     logger.error(f"获取CacheUsers时发生错误，Error: {users_result.get('message')}")
@@ -67,12 +66,14 @@ async def main():
 
 if __name__ == "__main__":
     logger.info('开始运行UserCache更新进程')
+    DatabaseConnection.init_pool()
     # 开始不间断更新
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
         logger.info('收到进程关闭信号')
     # 退出并释放资源
+    DatabaseConnection.close_pool()
     wait_second = 3
     while wait_second > 0:
         logger.info(f'进程将在 {wait_second} s后关闭')

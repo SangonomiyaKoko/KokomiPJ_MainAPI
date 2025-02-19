@@ -62,32 +62,6 @@ async def updateShipName(region: RegionList) -> ResponseDict:
     await record_api_call(result['status'])
     return result
 
-@router.get("/game/user/basic/", summary="请求获取用户的基本数据")
-async def getUserBasic(
-    region: RegionList,
-    account_id: int
-) -> ResponseDict:
-    """用户基础数据
-
-    -
-
-    参数:
-    - None
-
-    返回:
-    - ResponseDict
-    """
-    if not ServiceStatus.is_service_available():
-        return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(region.name)
-    if not region_id:
-        return JSONResponse.API_1010_IllegalRegion
-    if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
-        return JSONResponse.API_1003_IllegalAccoutIDorRegionID
-    result = await GameUser.get_user_basic(account_id,region_id)
-    await record_api_call(result['status'])
-    return result
-
 @router.get("/game/users/cache/", summary="获取用户的数据库中数据")
 async def getUserCache(offset: Optional[int] = None, limit: Optional[int] = None) -> ResponseDict:
     """批量获取用户的Cache数据
@@ -125,32 +99,6 @@ async def updateUserCache(user_data: UserUpdateModel) -> ResponseDict:
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
     result = await GameUser.update_user_data(user_data.model_dump())
-    await record_api_call(result['status'])
-    return result
-
-@router.get("/game/clan/basic/", summary="请求获取工会的基本数据")
-async def getClanBasic(
-    region: RegionList,
-    clan_id: int
-) -> ResponseDict:
-    """工会基础数据
-
-    -
-
-    参数:
-    - None
-
-    返回:
-    - ResponseDict
-    """
-    if not ServiceStatus.is_service_available():
-        return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(region.name)
-    if not region_id:
-        return JSONResponse.API_1010_IllegalRegion
-    if UtilityFunctions.check_cid_and_rid(clan_id,region_id) == False:
-        return JSONResponse.API_1004_IllegalClanIDorRegionID
-    result = await GameClan.get_clan_basic(clan_id,region_id)
     await record_api_call(result['status'])
     return result
 

@@ -4,7 +4,6 @@ from app.log import ExceptionLogger
 from app.response import ResponseDict, JSONResponse
 from app.network import BasicAPI
 from app.models import GameModel
-from app.middlewares.celery import celery_app
 
 class GameBasic:
     @ExceptionLogger.handle_program_exception_async

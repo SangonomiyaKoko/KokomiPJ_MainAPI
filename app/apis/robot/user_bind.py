@@ -25,22 +25,14 @@ class BotUser:
             # 返回数据的格式
             data = None
             redis = RedisConnection.get_connection()
-            key = f"bind_cache:{platform}:{user_id}"
-            cache = await redis.get(name=key)
-            if not cache:
-                result = await BotUserModel.get_user_bind(platform, user_id)
-                if result.get('code',None) != 1000:
-                    return result
-                else:
-                    data = result['data']
-                    if data:
-                        await redis.set(name=key, value=json.dumps(result['data']),ex=24*60*60)
+            key = f"app_bot:bind_cache:{platform}:{user_id}"
+            result = await BotUserModel.get_user_bind(platform, user_id)
+            if result.get('code',None) != 1000:
+                return result
             else:
-                cache = eval(cache)
-                data = {
-                    'region_id': cache['region_id'],
-                    'account_id': cache['account_id']
-                }
+                data = result['data']
+                if data:
+                    await redis.set(name=key, value=json.dumps(result['data']),ex=24*60*60)
             # 返回结果
             return JSONResponse.get_success_response(data)
         except Exception as e:
@@ -65,7 +57,7 @@ class BotUser:
             # 返回数据的格式
             data = None
             redis = RedisConnection.get_connection()
-            key = f"bind_cache:{user_data['platform']}:{user_data['user_id']}"
+            key = f"app_bot:bind_cache:{user_data['platform']}:{user_data['user_id']}"
             await redis.delete(key)
             result = await BotUserModel.post_user_bind(user_data)
             if result.get('code',None) != 1000:
@@ -85,7 +77,6 @@ class BotUser:
     @ExceptionLogger.handle_program_exception_async
     async def get_user_basic(account_id: int, region_id: int):
         try:
-            
             # 返回数据的格式
             data = {
                 'region_id': region_id,
@@ -100,29 +91,39 @@ class BotUser:
                 'ac': ac_value,
                 'ac2': ac2_value
             }
-            # 获取用户的名称和工会数据，首先是从Redis中读取，读取不大才是从数据库读取
+            # 获取用户的名称和工会数据，读取数据库数据并更新redis数据
             redis = RedisConnection.get_connection()
-            # 基于当前时间生成固定窗口
-            key = f"user_cache:{region_id}:{account_id}"
-            user_cache = await redis.get(key)
-            if user_cache:
-                user_cache = eval(user_cache)
-                data['user'] = user_cache['user']
-                data['clan'] = user_cache['clan']
+            user_data = await BotUserModel.get_user_data(account_id, region_id)
+            if user_data.get('code') != 1000:
+                return user_data
+            cache_user_key = f'db_cache:user_basic:{region_id}:{account_id}'
+            cache_user_data = {
+                'id': account_id,
+                'name': None,
+                'cid': None
+            }
+            cache_clan_key = f'db_cache:clan_basic:{region_id}:'
+            cache_clan_data = {
+                'id': None,
+                'tag': None,
+                'league': None
+            }
+            user_data = user_data['data']
+            data['user'] = user_data['user']
+            cache_user_data['name'] = user_data['user']['name']
+            if user_data['expired']:
+                data['clan'] = None
+                cache_user_data['cid'] = None
             else:
-                user_data = await BotUserModel.get_user_data(account_id, region_id)
-                if user_data.get('code') != 1000:
-                    return user_data
-                user_data = user_data['data']
-                data['user'] = user_data['user']
-                if user_data['expired']:
-                    data['clan'] = None
-                else:
-                    data['clan'] = user_data['clan']
-                if not user_data['expired']:
-                    # 数据有效，写入数据库
-                    del user_data['expired']
-                    await redis.set(name=key, value=json.dumps(user_data), ex=24*60*60)
+                data['clan'] = user_data['clan']
+                cache_user_data['cid'] = user_data['clan']['id']
+                cache_clan_data['id'] = user_data['clan']['id']
+                cache_clan_data['tag'] = user_data['clan']['tag']
+                cache_clan_data['league'] = user_data['clan']['league']
+            await redis.set(name=cache_user_key, value=json.dumps(cache_clan_data), ex=24*60*60)
+            if not user_data['expired'] and not cache_clan_data['id']:
+                cache_clan_key += cache_clan_data['id']
+                await redis.set(name=cache_clan_data, value=json.dumps(cache_clan_data), ex=24*60*60)
             return JSONResponse.get_success_response(data)
         except Exception as e:
             raise e

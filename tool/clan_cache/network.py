@@ -4,7 +4,6 @@ from typing import Optional
 from datetime import datetime
 
 from log import log as logger
-from config import API_URL
 
 CLAN_API_URL_LIST = {
     1: 'https://clans.worldofwarships.asia',
@@ -13,6 +12,7 @@ CLAN_API_URL_LIST = {
     4: 'https://clans.korabli.su',
     5: 'https://clans.wowsgame.cn'
 }
+
 REGION_LIST = {
     1: 'asia',
     2: 'eu',
@@ -134,20 +134,20 @@ class Network:
             except httpx.ReadError:
                 return {'status': 'ok','code': 2005,'message': 'NetworkError','data': None}
 
-    @classmethod
-    async def update_clan_data(self, clan_data: dict):
-        platform_api_url = API_URL
-        url = f'{platform_api_url}/p/game/clan/update/'
-        result = await self.fetch_data(url, method='put', data=clan_data)
-        if result.get('code', None) == 2004:
-            logger.debug(f"0 | ├── 接口请求失败，休眠 5 s")
-            await asyncio.sleep(5)
-            result = await self.fetch_data(url, method='put', data=clan_data)
-        elif result.get('code', None) == 8000:
-            logger.debug(f"0 | ├── 服务器维护中，休眠 60 s")
-            await asyncio.sleep(60)
-            result = await self.fetch_data(url, method='put', data=clan_data)
-        return result
+    # @classmethod
+    # async def update_clan_data(self, clan_data: dict):
+    #     platform_api_url = API_URL
+    #     url = f'{platform_api_url}/p/game/clan/update/'
+    #     result = await self.fetch_data(url, method='put', data=clan_data)
+    #     if result.get('code', None) == 2004:
+    #         logger.debug(f"0 | ├── 接口请求失败，休眠 5 s")
+    #         await asyncio.sleep(5)
+    #         result = await self.fetch_data(url, method='put', data=clan_data)
+    #     elif result.get('code', None) == 8000:
+    #         logger.debug(f"0 | ├── 服务器维护中，休眠 60 s")
+    #         await asyncio.sleep(60)
+    #         result = await self.fetch_data(url, method='put', data=clan_data)
+    #     return result
 
     @classmethod
     async def get_clan_rank_data(self, region_id: int):

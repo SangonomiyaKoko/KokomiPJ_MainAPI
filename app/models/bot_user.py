@@ -97,6 +97,13 @@ class BotUserModel:
 
     @ExceptionLogger.handle_database_exception_async
     async def get_user_data(account_id: int, region_id: int) -> ResponseDict:
+        '''获取数据库中用户的基本信息
+
+        主要是bot或者排行榜通过uid来获取用户的基本信息，包括名称，工会以及颜色
+
+        返回的数据中expired为True表示数据库中的用户工会信息已经过期或者无该用户数据
+        
+        '''
         try:
             connection: Connection = await MysqlConnection.get_connection()
             await connection.begin()

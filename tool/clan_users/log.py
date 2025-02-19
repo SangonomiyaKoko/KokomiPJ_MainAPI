@@ -4,8 +4,10 @@ from logging.handlers import RotatingFileHandler
 
 import colorlog
 
-from config import CLIENT_NAME, LOG_PATH, LOG_LEVEL
+from config import settings
 
+CLIENT_NAME = 'ClanUsers'
+LOG_LEVEL = 'debug'
 
 # 日志格式
 # 09-10 20:25:98 [INFO] name | message
@@ -46,8 +48,8 @@ class HandleLog:
     """
 
     def __init__(self):
-        self.__all_log_path = os.path.join(LOG_PATH, f'{CLIENT_NAME}-log' + "-all" + ".log")  # 收集所有日志信息文件
-        self.__error_log_path = os.path.join(LOG_PATH, f'{CLIENT_NAME}-log' + "-error" + ".log")  # 收集错误日志信息文件
+        self.__all_log_path = os.path.join(settings.LOG_PATH, f'{CLIENT_NAME}-log' + "-all" + ".log")  # 收集所有日志信息文件
+        self.__error_log_path = os.path.join(settings.LOG_PATH, f'{CLIENT_NAME}-log' + "-error" + ".log")  # 收集错误日志信息文件
         self.__logger = logging.getLogger(CLIENT_NAME)  # 创建日志记录器
         self.__logger.setLevel(set_log_level)  # 设置日志记录器记录级别
 

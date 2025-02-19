@@ -338,7 +338,7 @@ class ClanModel:
     
     @ExceptionLogger.handle_database_exception_async
     async def update_clan_basic(clan_data: dict) -> ResponseDict:
-        '''更新user_info表
+        '''更新clan_info表
 
         更新工会的info数据
 

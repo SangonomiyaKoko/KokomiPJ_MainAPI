@@ -3,7 +3,6 @@ import asyncio
 from typing import Optional
 
 from log import log as logger
-from config import API_URL
 
 VORTEX_API_URL_LIST = {
     1: 'http://vortex.worldofwarships.asia',
@@ -48,41 +47,41 @@ class Network:
             except httpx.ReadError:
                 return {'status': 'ok','code': 2005,'message': 'NetworkError','data': None}
     
-    @classmethod
-    async def get_cache_users(self, offset: int = None, limit: int = None):
-        "获取用户缓存的数量，用于确定offset边界"
-        platform_api_url = API_URL
-        if offset != None and limit != None:
-            url = f'{platform_api_url}/p/game/users/cache/?offset={offset}&limit={limit}'
-        elif offset == None and limit == None:
-            url = f'{platform_api_url}/p/game/users/cache/'
-        else:
-            raise ValueError('Invaild Params')
-        result = await self.fetch_data(url)
-        if result.get('code', None) == 2004:
-            logger.debug(f"接口请求失败，休眠 5 s")
-            await asyncio.sleep(5)
-            result = await self.fetch_data(url)
-        elif result.get('code', None) == 8000:
-            logger.debug(f"服务器维护中，休眠 60 s")
-            await asyncio.sleep(60)
-            result = await self.fetch_data(url)
-        return result
+    # @classmethod
+    # async def get_cache_users(self, offset: int = None, limit: int = None):
+    #     "获取用户缓存的数量，用于确定offset边界"
+    #     platform_api_url = API_URL
+    #     if offset != None and limit != None:
+    #         url = f'{platform_api_url}/p/game/users/cache/?offset={offset}&limit={limit}'
+    #     elif offset == None and limit == None:
+    #         url = f'{platform_api_url}/p/game/users/cache/'
+    #     else:
+    #         raise ValueError('Invaild Params')
+    #     result = await self.fetch_data(url)
+    #     if result.get('code', None) == 2004:
+    #         logger.debug(f"接口请求失败，休眠 5 s")
+    #         await asyncio.sleep(5)
+    #         result = await self.fetch_data(url)
+    #     elif result.get('code', None) == 8000:
+    #         logger.debug(f"服务器维护中，休眠 60 s")
+    #         await asyncio.sleep(60)
+    #         result = await self.fetch_data(url)
+    #     return result
     
-    @classmethod 
-    async def update_user_data(self, data: dict):
-        platform_api_url = API_URL
-        url = f'{platform_api_url}/p/game/user/update/'
-        result = await self.fetch_data(url, method='put', data=data)
-        if result.get('code', None) == 2004:
-            logger.debug(f"0 - 0000000000 | ├── 接口请求失败，休眠 5 s")
-            await asyncio.sleep(5)
-            result = await self.fetch_data(url, method='put', data=data)
-        elif result.get('code', None) == 8000:
-            logger.debug(f"0 - 0000000000 | ├── 服务器维护中，休眠 60 s")
-            await asyncio.sleep(60)
-            result = await self.fetch_data(url, method='put', data=data)
-        return result
+    # @classmethod 
+    # async def update_user_data(self, data: dict):
+    #     platform_api_url = API_URL
+    #     url = f'{platform_api_url}/p/game/user/update/'
+    #     result = await self.fetch_data(url, method='put', data=data)
+    #     if result.get('code', None) == 2004:
+    #         logger.debug(f"0 - 0000000000 | ├── 接口请求失败，休眠 5 s")
+    #         await asyncio.sleep(5)
+    #         result = await self.fetch_data(url, method='put', data=data)
+    #     elif result.get('code', None) == 8000:
+    #         logger.debug(f"0 - 0000000000 | ├── 服务器维护中，休眠 60 s")
+    #         await asyncio.sleep(60)
+    #         result = await self.fetch_data(url, method='put', data=data)
+    #     return result
 
     @classmethod
     async def get_basic_data(

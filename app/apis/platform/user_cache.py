@@ -3,7 +3,6 @@ import gc
 from app.log import ExceptionLogger
 from app.response import ResponseDict, JSONResponse
 from app.models import UserModel, ShipsCacheModel
-from app.middlewares.celery import celery_app
 
 
 class UserCache:

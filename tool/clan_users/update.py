@@ -4,6 +4,8 @@ import traceback
 
 from log import log as logger
 from network import Network
+from utils import HashUtils
+from model import check_and_insert_missing_users, update_clan_users, update_users_clan, update_clan_basic_and_info
 
 class Update:
     @classmethod
@@ -25,7 +27,7 @@ class Update:
     async def service_master(self, clan_id: int, region_id: int, clan_data: dict):
         current_timestamp = int(time.time())
         if clan_data['clan_info']['update_time'] and clan_data['clan_users']['update_time'] and (
-            current_timestamp - clan_data['clan_users']['update_time'] <= 2*24*60*60
+            current_timestamp - clan_data['clan_users']['update_time'] <= 24*60*60
         ):
             logger.debug(f'{region_id} - {clan_id} | ├── 未到达更新时间，跳过更新')
             return
@@ -37,23 +39,12 @@ class Update:
                     'region_id': region_id,
                     'is_active': 0
                 }
-                await self.update_user_data(clan_id,region_id,clan_basic,None)
                 logger.debug(f"{region_id} - {clan_id} | ├── 工会不存在，更新数据")
+                self.update_clan_info(clan_id, region_id, clan_basic)
                 return
             elif result.get('code', None) != 1000:
                 return
-            clan_users = {
-                'clan_id': clan_id,
-                'region_id': region_id,
-                'hash_value': None,
-                'user_list': None,
-                'clan_users': None
-            }
-            new_hash_value = hashlib.sha256(str(result['data']['clan_users']['user_list']).encode('utf-8')).hexdigest()
-            clan_users['hash_value'] = new_hash_value
-            clan_users['user_list'] = result['data']['clan_users']['user_list']
-            clan_users['clan_users'] = result['data']['clan_users']['clan_users']
-            await self.update_user_data(clan_id,region_id,None,clan_users)
+            self.update_clan_users(clan_id, region_id, result['data']['clan_users']['clan_users'])
             return
         else:
             result = await Network.get_cache_data(clan_id, region_id)
@@ -63,39 +54,45 @@ class Update:
                     'region_id': region_id,
                     'is_active': 0
                 }
-                await self.update_user_data(clan_id,region_id,clan_basic,None)
                 logger.debug(f"{region_id} - {clan_id} | ├── 工会不存在，更新数据")
+                self.update_clan_info(clan_id, region_id, clan_basic)
                 return
             elif result.get('code', None) != 1000:
                 return
-            clan_users = {
-                'clan_id': clan_id,
-                'region_id': region_id,
-                'hash_value': None,
-                'user_list': None,
-                'clan_users': None
-            }
-            new_hash_value = hashlib.sha256(str(result['data']['clan_users']['user_list']).encode('utf-8')).hexdigest()
-            clan_users['hash_value'] = new_hash_value
-            clan_users['user_list'] = result['data']['clan_users']['user_list']
-            clan_users['clan_users'] = result['data']['clan_users']['clan_users']
-            await self.update_user_data(clan_id,region_id,result['data']['clan_basic'],clan_users)
+            self.update_clan_info(clan_id, region_id, result['data']['clan_basic'])
+            self.update_clan_users(clan_id, region_id, result['data']['clan_users']['clan_users'])
             return
+    
+    def update_clan_users(clan_id: int, region_id: int, clan_users: list):
+        # 首先检查传入的用户是否都在数据库中存在
+        result = check_and_insert_missing_users(clan_users)
+        if result.get('code', None) != 1000:
+            logger.error(f"{region_id} - {clan_id} | ├── 数据库更新失败，Error: {result.get('code')} {result.get('message')}")
+            return
+        # 批量更新用户达到user_clan表
+        user_data = []
+        for user in clan_users:
+            user_data.append(user[0])
+        if len(user_data) != 0:
+            result = update_users_clan(clan_id, user_data)
+            if result.get('code', None) != 1000:
+                logger.error(f"{region_id} - {clan_id} | ├── 数据库更新失败，Error: {result.get('code')} {result.get('message')}")
+                return
+        # 最后更新工会内所有用户的数据
+        user_data.sort()
+        hash_value = HashUtils.get_clan_users_hash(user_data)
+        result = update_clan_users(clan_id, hash_value, user_data)
+        if result.get('code', None) != 1000:
+            logger.error(f"{region_id} - {clan_id} | ├── 数据库更新失败，Error: {result.get('code')} {result.get('message')}")
+            return
+        logger.debug(f"{region_id} - {clan_id} | ├── 工会User数据更新完成")
+        return
 
-    async def update_user_data(
-        clan_id: int, 
-        region_id: int, 
-        clan_basic: dict = None,
-        clan_users: dict = None
-    ) -> None:
-        if clan_basic and clan_users:
-            update_result = await Network.update_user_data({'clan_basic': clan_basic, 'clan_users': clan_users})
-        else:
-            if clan_basic:
-                update_result = await Network.update_user_data({'clan_basic': clan_basic})
-            if clan_users:
-                update_result = await Network.update_user_data({'clan_users': clan_users})
-        if update_result.get('code',None) != 1000:
-            logger.error(f"{region_id} - {clan_id} | ├── 更新数据上传失败，Error: {update_result.get('message')}")
-        else:
-            logger.debug(f'{region_id} - {clan_id} | ├── 更新数据上传成功')
+    def update_clan_info(clan_id: int, region_id: int, clan_data: dict):
+        # 更新clan_basic和clan_info表的信息
+        result = update_clan_basic_and_info(clan_data)
+        if result.get('code', None) != 1000:
+            logger.error(f"{region_id} - {clan_id} | ├── 数据库更新失败，Error: {result.get('code')} {result.get('message')}")
+            return
+        logger.debug(f"{region_id} - {clan_id} | ├── 工会info数据更新完成")
+        return

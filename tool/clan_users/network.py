@@ -4,7 +4,8 @@ from typing import Optional
 from datetime import datetime
 
 from log import log as logger
-from config import API_URL
+
+# API_URL = 'http://127.0.0.1:8000'
 
 CLAN_API_URL_LIST = {
     1: 'https://clans.worldofwarships.asia',
@@ -13,6 +14,7 @@ CLAN_API_URL_LIST = {
     4: 'https://clans.korabli.su',
     5: 'https://clans.wowsgame.cn'
 }
+
 REGION_LIST = {
     1: 'asia',
     2: 'eu',
@@ -56,41 +58,41 @@ class Network:
             except httpx.ReadError:
                 return {'status': 'ok','code': 2005,'message': 'NetworkError','data': None}
     
-    @classmethod
-    async def get_cache_clans(self, offset: int = None, limit: int = None):
-        "获取用户缓存的数量，用于确定offset边界"
-        platform_api_url = API_URL
-        if offset != None and limit != None:
-            url = f'{platform_api_url}/p/game/clans/cache/?offset={offset}&limit={limit}'
-        elif offset == None and limit == None:
-            url = f'{platform_api_url}/p/game/clans/cache/'
-        else:
-            raise ValueError('Invaild Params')
-        result = await self.fetch_data(url)
-        if result.get('code', None) == 2004:
-            logger.debug(f"接口请求失败，休眠 5 s")
-            await asyncio.sleep(5)
-            result = await self.fetch_data(url)
-        elif result.get('code', None) == 8000:
-            logger.debug(f"服务器维护中，休眠 60 s")
-            await asyncio.sleep(60)
-            result = await self.fetch_data(url)
-        return result
+    # @classmethod
+    # async def get_cache_clans(self, offset: int = None, limit: int = None):
+    #     "获取用户缓存的数量，用于确定offset边界"
+    #     platform_api_url = API_URL
+    #     if offset != None and limit != None:
+    #         url = f'{platform_api_url}/p/game/clans/cache/?offset={offset}&limit={limit}'
+    #     elif offset == None and limit == None:
+    #         url = f'{platform_api_url}/p/game/clans/cache/'
+    #     else:
+    #         raise ValueError('Invaild Params')
+    #     result = await self.fetch_data(url)
+    #     if result.get('code', None) == 2004:
+    #         logger.debug(f"接口请求失败，休眠 5 s")
+    #         await asyncio.sleep(5)
+    #         result = await self.fetch_data(url)
+    #     elif result.get('code', None) == 8000:
+    #         logger.debug(f"服务器维护中，休眠 60 s")
+    #         await asyncio.sleep(60)
+    #         result = await self.fetch_data(url)
+    #     return result
     
-    @classmethod 
-    async def update_user_data(self, data: dict):
-        platform_api_url = API_URL
-        url = f'{platform_api_url}/p/game/clan/update/'
-        result = await self.fetch_data(url, method='put', data=data)
-        if result.get('code', None) == 2004:
-            logger.debug(f"0 - 0000000000 | ├── 接口请求失败，休眠 5 s")
-            await asyncio.sleep(5)
-            result = await self.fetch_data(url, method='put', data=data)
-        elif result.get('code', None) == 8000:
-            logger.debug(f"0 - 0000000000 | ├── 服务器维护中，休眠 60 s")
-            await asyncio.sleep(60)
-            result = await self.fetch_data(url, method='put', data=data)
-        return result
+    # @classmethod 
+    # async def update_user_data(self, data: dict):
+    #     platform_api_url = API_URL
+    #     url = f'{platform_api_url}/p/game/clan/update/'
+    #     result = await self.fetch_data(url, method='put', data=data)
+    #     if result.get('code', None) == 2004:
+    #         logger.debug(f"0 - 0000000000 | ├── 接口请求失败，休眠 5 s")
+    #         await asyncio.sleep(5)
+    #         result = await self.fetch_data(url, method='put', data=data)
+    #     elif result.get('code', None) == 8000:
+    #         logger.debug(f"0 - 0000000000 | ├── 服务器维护中，休眠 60 s")
+    #         await asyncio.sleep(60)
+    #         result = await self.fetch_data(url, method='put', data=data)
+    #     return result
 
     @classmethod
     async def get_basic_data(
@@ -162,21 +164,11 @@ class Network:
         result = {
             'clan_id': clan_id,
             'region_id': region_id,
-            'clan_users': [],
-            'user_list': []
+            'clan_users': []
         }
         for user_data in response['data']['items']:
-            account_id = user_data['id']
-            nickname = user_data['name']
-            data = {
-                'account_id': account_id,
-                'region_id': region_id,
-                'nickname': nickname
-            }
-            result['user_list'].append(account_id)
+            data = [user_data['id'], region_id, user_data['name']]
             result['clan_users'].append(data)
-        sorted_list = sorted(result['user_list'])
-        result['user_list'] = sorted_list
         return result
     
     def __clan_info_data_processing(clan_id: int, region_id: int, response: dict):

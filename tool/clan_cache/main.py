@@ -5,7 +5,7 @@ import asyncio
 
 from log import log as logger
 from update import Update
-
+from db import DatabaseConnection
 
 
 class ContinuousUserCacheUpdater:
@@ -46,12 +46,14 @@ async def main():
 
 if __name__ == "__main__":
     logger.info('开始运行ClanCache更新进程')
+    DatabaseConnection.init_pool()
     # 开始不间断更新
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
         logger.info('收到进程关闭信号')
     # 退出并释放资源
+    DatabaseConnection.close_pool()
     wait_second = 3
     while wait_second > 0:
         logger.info(f'进程将在 {wait_second} s后关闭')
