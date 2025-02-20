@@ -5,10 +5,9 @@ import time
 import asyncio
 from log import log as logger
 
-from network import Network
 from update import Update
 from db import DatabaseConnection
-
+from model import get_user_max_number, get_user_cache_batch, get_user_token
 
 class ContinuousUserCacheUpdater:
     def __init__(self):
@@ -18,7 +17,10 @@ class ContinuousUserCacheUpdater:
         start_time = int(time.time())
         # 更新用户
         limit = 1000
-        request_result = await Network.get_cache_users()
+        token_result = get_user_token()
+        if token_result['code'] != 1000:
+            logger.error(f"获取UserToken时发生错误，Error: {request_result.get('message')}")
+        request_result = get_user_max_number()
         if request_result['code'] != 1000:
             logger.error(f"获取MaxUserID时发生错误，Error: {request_result.get('message')}")
         else:
@@ -26,12 +28,14 @@ class ContinuousUserCacheUpdater:
             max_offset = (int(max_id / limit) + 1) * limit
             offset = 0
             while offset <= max_offset:
-                users_result = await Network.get_cache_users(offset, limit)
+                users_result = get_user_cache_batch(offset, limit)
                 if users_result['code'] == 1000:
                     i = 1
                     for user in users_result['data']:
                         account_id = user['user_basic']['account_id']
                         region_id = user['user_basic']['region_id']
+                        if (str(region_id)+str(account_id)) in token_result['data']:
+                            user['user_basic']['ac_value'] = token_result['data'][str(region_id)+str(account_id)]
                         logger.info(f'{region_id} - {account_id} | ------------------[ {offset + i} / {max_id} ]')
                         await Update.main(user)
                         i += 1
