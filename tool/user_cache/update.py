@@ -4,7 +4,14 @@ import traceback
 
 from log import log as logger
 from network import Network
-from model import check_user_basic, check_user_info, get_user_cache, check_existing_ship, update_user_ship, update_user_ships
+from model import (
+    check_user_basic, 
+    check_user_info, 
+    get_user_cache, 
+    check_existing_ship, 
+    update_user_ship, 
+    update_user_ships
+)
 
 class Update:
     @classmethod
@@ -110,6 +117,10 @@ class Update:
             user_info['last_battle_time'] = user_basic_data['basic']['last_battle_time']
             user_info['active_level'] = self.get_active_level(user_info)
         if user_data['user_ships']['battles_count'] == user_info['total_battles']:
+            user_cache['battles_count'] = user_info['total_battles']
+            self.update_user_basic(account_id, region_id, user_basic)
+            self.update_user_info(account_id, region_id, user_info)
+            self.update_user_cache(account_id, region_id, user_cache)
             logger.debug(f'{region_id} - {account_id} | ├── 未有更新数据，跳过更新')
             return
         user_ships_data = await Network.get_cache_data(account_id,region_id,ac_value)
@@ -134,26 +145,6 @@ class Update:
             self.update_user_info(account_id, region_id, user_info)
             self.update_user_cache(account_id, region_id, user_cache)
             return
-    
-    # async def update_user_data(
-    #     account_id: int, 
-    #     region_id: int, 
-    #     user_basic: dict = None, 
-    #     user_info: dict = None,
-    #     user_cache: dict = None
-    # ) -> None:
-    #     data = {}
-    #     if user_basic:
-    #         data['user_basic'] = user_basic
-    #     if user_info:
-    #         data['user_info'] = user_info
-    #     if user_cache:
-    #         data['user_cache'] = user_cache
-    #     update_result = await Network.update_user_data(data)
-    #     if update_result.get('code',None) != 1000:
-    #         logger.error(f"{region_id} - {account_id} | ├── 更新数据上传失败，Error: {update_result.get('code')} {update_result.get('message')}")
-    #     else:
-    #         logger.debug(f'{region_id} - {account_id} | ├── 更新数据上传成功')
 
     def update_user_basic(account_id: int, region_id: int, user_data: dict):
         # 更新user_basic表的信息
@@ -182,7 +173,7 @@ class Update:
         delete_ship_list = []
         replace_ship_dict = {}
         ship_data = None
-        if user_data['hash_value'] and user_data['ships_data']:
+        if 'hash_value' in user_data:
             for ship_id, ship_battles in user_data['ships_data'].items():
                 if (
                     int(ship_id) not in user_cache_result['data']['ships_data'] or 
@@ -190,15 +181,10 @@ class Update:
                 ):
                     replace_ship_dict[int(ship_id)] = user_data['details_data'][ship_id]
                     ship_id_set.add(int(ship_id))
-            for ship_id, _ in user_cache_result['data']['ships_data'].items():
-                if str(ship_id) not in user_data['ships_data']:
-                    delete_ship_list.append(ship_id)
-                    ship_id_set.add(int(ship_id))
             data = {
                 'account_id': account_id,
                 'region_id': region_id,
-                'delete_ship_list': delete_ship_list,
-                'replace_ship_dict': replace_ship_dict
+                'ship_dict': replace_ship_dict
             }
             check_ship_id_result = check_existing_ship(ship_id_set)
             if check_ship_id_result.get('code', None) != 1000:
@@ -207,17 +193,17 @@ class Update:
                 ship_data = data
             del user_data['details_data']
         if user_data:
-            result = update_user_ship(ship_data)
-            if result.get('code', None) != 1000:
-                logger.error(f"{region_id} - {account_id} | ├── 数据库更新失败，Error: {result.get('code')} {result.get('message')}")
-                return
-            logger.debug(f"{region_id} - {account_id} | ├── 用户cache数据更新完成")
-        if ship_data:
             result = update_user_ships(user_data)
             if result.get('code', None) != 1000:
                 logger.error(f"{region_id} - {account_id} | ├── 数据库更新失败，Error: {result.get('code')} {result.get('message')}")
                 return
             logger.debug(f"{region_id} - {account_id} | ├── 用户ships数据更新完成")
+        if ship_data:
+            result = update_user_ship(ship_data)
+            if result.get('code', None) != 1000:
+                logger.error(f"{region_id} - {account_id} | ├── 数据库更新失败，Error: {result.get('code')} {result.get('message')}")
+                return
+            logger.debug(f"{region_id} - {account_id} | ├── 用户cache数据更新完成")
         return
 
     def seconds_to_time(seconds: int) -> str:

@@ -38,6 +38,7 @@ class ContinuousUserCacheUpdater:
                             user['user_basic']['ac_value'] = token_result['data'][str(region_id)+str(account_id)]
                         logger.info(f'{region_id} - {account_id} | ------------------[ {offset + i} / {max_id} ]')
                         await Update.main(user)
+                        await asyncio.sleep(1)
                         i += 1
                 else:
                     logger.error(f"获取CacheUsers时发生错误，Error: {users_result.get('message')}")

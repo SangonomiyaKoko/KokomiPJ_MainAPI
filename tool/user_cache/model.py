@@ -12,7 +12,7 @@ BOT_DB = settings.DB_NAME_BOT
 CACHE_DB = settings.DB_NAME_SHIP
 
 
-async def get_user_max_number():
+def get_user_max_number():
     '''获取数据库中id的最大值
 
     获取id的最大值，用于数据库遍历更新时确定边界
@@ -395,14 +395,15 @@ def update_user_ship(user_data: dict):
         
         account_id = user_data['account_id']
         region_id = user_data['region_id']
-        delete_ship_list = user_data['delete_ship_list']
-        replace_ship_dict = user_data['replace_ship_dict']
-        for del_ship_id in delete_ship_list:
-            cur.execute(
-                f"DELETE FROM {CACHE_DB}.ship_%s "
-                "WHERE region_id = %s AND account_id = %s;",
-                [int(del_ship_id), region_id, account_id]
-            )
+        # delete_ship_list = user_data['delete_ship_list']
+        # replace_ship_dict = user_data['replace_ship_dict']
+        # for del_ship_id in delete_ship_list:
+        #     cur.execute(
+        #         f"DELETE FROM {CACHE_DB}.ship_%s "
+        #         "WHERE region_id = %s AND account_id = %s;",
+        #         [int(del_ship_id), region_id, account_id]
+        #     )
+        replace_ship_dict = user_data['ship_dict']
         for update_ship_id, ship_data in replace_ship_dict.items():
             cur.execute(
                 f"UPDATE {CACHE_DB}.ship_%s SET battles_count = %s, battle_type_1 = %s, battle_type_2 = %s, battle_type_3 = %s, wins = %s, "
@@ -446,7 +447,7 @@ def update_user_ships(user_data: dict):
         cur = conn.cursor(pymysql.cursors.DictCursor)
         
         account_id = user_data['account_id']
-        if user_data['hash_value']:
+        if 'hash_value' in user_data:
             cur.execute(
                 f"UPDATE {MAIN_DB}.user_ships "
                 "SET battles_count = %s, hash_value = %s, ships_data = %s, updated_at = CURRENT_TIMESTAMP "

@@ -98,6 +98,7 @@ class Network:
         responses = []
         async with asyncio.Semaphore(len(urls)):
             for url in urls:
+                logger.debug(f'GET {url}')
                 tasks.append(self.fetch_data(url))
             responses = await asyncio.gather(*tasks)
             return responses
@@ -118,6 +119,7 @@ class Network:
         responses = []
         async with asyncio.Semaphore(len(urls)):
             for url in urls:
+                logger.debug(f'GET {url}')
                 tasks.append(self.fetch_data(url))
             responses = await asyncio.gather(*tasks)
         error = None
