@@ -19,6 +19,11 @@ from app.routers import (
 )
 
 
+# async def my_task():
+#     while True:
+#         print("定时任务执行")
+#         await asyncio.sleep(10)  # 每 10 秒执行一次任务
+
 # 应用程序的生命周期
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -28,6 +33,7 @@ async def lifespan(app: FastAPI):
     await RedisConnection.test_redis()
     # 初始化mysql并测试mysql连接
     await MysqlConnection.test_mysql()
+    # task = asyncio.create_task(my_task())  # 启动定时任务
 
     # 启动 lifespan
     yield
@@ -35,6 +41,7 @@ async def lifespan(app: FastAPI):
     # 应用关闭时释放连接
     await RedisConnection.close_redis()
     await MysqlConnection.close_mysql()
+    # task.cancel()  # 关闭 FastAPI 时取消任务
 
 app = FastAPI(lifespan=lifespan)
 
@@ -69,7 +76,7 @@ async def request_rate_limiter(request: Request, call_next):
                 status_code=429,
                 content={"detail": "Too many requests"}
             )
-    response = await call_next(request)
+    response = await call_next(request) 
     return response
 
 @app.get("/", summary='Root', tags=['Default'])
