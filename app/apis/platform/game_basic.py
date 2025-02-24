@@ -21,11 +21,11 @@ class GameBasic:
                     'region_id': region_id,
                     'version': result['data']['version']
                 }
-                celery_app.send_task(
-                    name="check_game_version",
-                    args=[data]
-                )
-                return result
+                result = await GameModel.update_game_version(region_id, result['data']['version'])
+                if result['code'] != 1000:
+                    return result
+                else:
+                    return JSONResponse.get_success_response(data)
             else:
                 result = await GameModel.get_game_version(region_id)
                 return result

@@ -2,11 +2,15 @@
 # -*- coding: utf-8 -*-
 import asyncio.selector_events
 import time
+import json
 import asyncio
 from log import log as logger
 
 from update import Update
+from network import Network
 from db import DatabaseConnection
+from model import update_game_version, get_game_version, get_ship_list
+
 
 class ContinuousUserCacheUpdater:
     def __init__(self):
@@ -14,8 +18,54 @@ class ContinuousUserCacheUpdater:
 
     async def update_user(self):
         start_time = int(time.time())
-        # 更新用户
-        await Update.main(3543086896)
+        # 更新游戏版本
+        # for region_id in [1, 2, 3, 4, 5]:
+        #     result = await Network.get_game_version(region_id)
+        #     if result['code'] != 1000:
+        #         logger.error(f'{region_id} | 获取服务器最新版本失败')
+        #     if result['data']['version']:
+        #         result = update_game_version(region_id, result['data']['version'])
+
+        # result = get_game_version()
+        result = {
+            'status': 'ok', 
+            'code': 1000, 
+            'message': 'Success', 
+            'data': {
+                1: ['14.1', 1740219510], 
+                2: ['14.1', 1740219511], 
+                3: ['14.1', 1740219511], 
+                4: ['25.2', 1740219512], 
+                5: ['14.1', 1740219512]
+            }
+        }
+        ship_data = {}
+        json_file_path1 = r'F:\Kokomi_PJ_MainAPI\app\json\ship_name_lesta.json'
+        json_file_path2 = r'F:\Kokomi_PJ_MainAPI\app\json\ship_name_wg.json'
+        temp = open(json_file_path1, "r", encoding="utf-8")
+        data = json.load(temp)
+        temp.close()
+        for k, v in data.items():
+            ship_data[int(k)] = v['tier']
+        temp = open(json_file_path2, "r", encoding="utf-8")
+        data = json.load(temp)
+        temp.close()
+        for k, v in data.items():
+            ship_data[int(k)] = v['tier']
+        ship_id_data = get_ship_list()
+        if result['code'] != 1000:
+            logger.error(f'读取服务器版本失败')
+        elif result['code'] != 1000:
+            logger.error(f'读取服务器船只列表失败')
+        else:
+            user_cache = {}
+            clan_cache = {}
+            i = 0
+            for ship_id in ship_id_data['data']:
+                i += 1
+                logger.info(f"{ship_id} 缓存数据 用户: {len(user_cache)} 工会: {len(clan_cache)}")
+                await Update.main(ship_id, result['data'], user_cache, clan_cache, ship_data)
+                logger.info(f"{ship_id} 数据更新完成   [{i}/{len(ship_id_data['data'])}]")
         end_time = int(time.time())
         # 避免测试时候的循环bug
         if end_time - start_time <= 4*60*60-10:

@@ -7,7 +7,7 @@ from app.middlewares import record_api_call
 
 router = APIRouter()
 
-@router.get("/service/status", summary="获取当前服务状态")
+@router.get("/service/status/", summary="获取当前服务状态")
 async def getServiceStatus() -> ResponseDict:
     """获取当前服务的状态
     
@@ -30,7 +30,7 @@ async def getServiceStatus() -> ResponseDict:
         }
     return JSONResponse.get_success_response(data)
 
-@router.post("/service/status", summary="修改当前服务状态")
+@router.post("/service/status/", summary="修改当前服务状态")
 async def setServiceStatus(set: bool = False) -> ResponseDict:
     """修改服务器当前的状态
     
@@ -42,7 +42,7 @@ async def setServiceStatus(set: bool = False) -> ResponseDict:
         ServiceStatus.service_set_unavailable()
     return JSONResponse.API_1000_Success
 
-@router.get("/users/overview", summary="获取数据库中用户数量")
+@router.get("/users/overview/", summary="获取数据库中用户数量")
 async def getUsersOverview() -> ResponseDict:
     """获取数据库中用户的overview
 
@@ -58,7 +58,7 @@ async def getUsersOverview() -> ResponseDict:
     await record_api_call(result['status'])
     return result
 
-@router.get("/clans/overview", summary="获取数据库中工会的数量")
+@router.get("/clans/overview/", summary="获取数据库中工会的数量")
 async def getClansOverview() -> ResponseDict:
     """获取数据库中工会的overview
 
@@ -74,7 +74,7 @@ async def getClansOverview() -> ResponseDict:
     await record_api_call(result['status'])
     return result
 
-@router.get("/recent/overview", summary="获取数据库中recent功能的数量")
+@router.get("/recent/overview/", summary="获取数据库中recent功能的数量")
 async def getRecentOverview() -> ResponseDict:
     """获取数据库中启用recent用户的overview
 
@@ -90,7 +90,7 @@ async def getRecentOverview() -> ResponseDict:
     await record_api_call(result['status'])
     return result
 
-@router.get("/mysql/trx", summary="检查是否有未提交事务")
+@router.get("/mysql/trx/", summary="检查是否有未提交事务")
 async def getTrx() -> ResponseDict:
     """获取数据库当前未提交事务的数量
 
@@ -106,7 +106,7 @@ async def getTrx() -> ResponseDict:
     await record_api_call(result['status'])
     return result
 
-@router.get("/mysql/processlist", summary="查看数据库连接数量")
+@router.get("/mysql/processlist/", summary="查看数据库连接数量")
 async def getProcessList() -> ResponseDict:
     """获取数据库连接量
 

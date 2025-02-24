@@ -60,16 +60,16 @@ class BaseUrl:
         返回：
             url: str
         '''
-        if config.USE_PROXY:
-            proxy_url_len = len(proxy_list.get(region_id))
-            if proxy_url_len >= 2:
-                random_num = random.randint(0,proxy_url_len-1)
-            else:
-                random_num = 0
-            proxy_url = f'http://{proxy_list.get(region_id)[random_num]}/proxy?url={VORTEX_API_URL_LIST.get(region_id)}'
-            return proxy_url
-        else:
-            return VORTEX_API_URL_LIST.get(region_id)
+        # if config.USE_PROXY:
+        #     proxy_url_len = len(proxy_list.get(region_id))
+        #     if proxy_url_len >= 2:
+        #         random_num = random.randint(0,proxy_url_len-1)
+        #     else:
+        #         random_num = 0
+        #     proxy_url = f'http://{proxy_list.get(region_id)[random_num]}/proxy?url={VORTEX_API_URL_LIST.get(region_id)}'
+        #     return proxy_url
+        # else:
+        return VORTEX_API_URL_LIST.get(region_id)
         
     def get_official_base_url(region_id: int):
         '''获取official api接口的url
@@ -101,14 +101,14 @@ class BaseUrl:
         返回：
             url: str
         '''
-        if config.USE_PROXY:
-            proxy_url_len = len(proxy_list.get(region_id))
-            if proxy_url_len >= 2:
-                random_num = random.randint(0,proxy_url_len-1)
-            else:
-                random_num = 0
-            proxy_url = f'http://{proxy_list.get(region_id)[random_num]}/proxy?url={CLAN_API_URL_LIST.get(region_id)}'
-            return proxy_url
-        else:
-            return CLAN_API_URL_LIST.get(region_id)
+        # if config.USE_PROXY:
+        #     proxy_url_len = len(proxy_list.get(region_id))
+        #     if proxy_url_len >= 2:
+        #         random_num = random.randint(0,proxy_url_len-1)
+        #     else:
+        #         random_num = 0
+        #     proxy_url = f'http://{proxy_list.get(region_id)[random_num]}/proxy?url={CLAN_API_URL_LIST.get(region_id)}'
+        #     return proxy_url
+        # else:
+        return CLAN_API_URL_LIST.get(region_id)
         

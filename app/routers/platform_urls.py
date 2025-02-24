@@ -62,82 +62,82 @@ async def updateShipName(region: RegionList) -> ResponseDict:
     await record_api_call(result['status'])
     return result
 
-@router.get("/game/users/cache/", summary="获取用户的数据库中数据")
-async def getUserCache(offset: Optional[int] = None, limit: Optional[int] = None) -> ResponseDict:
-    """批量获取用户的Cache数据
+# @router.get("/game/users/cache/", summary="获取用户的数据库中数据")
+# async def getUserCache(offset: Optional[int] = None, limit: Optional[int] = None) -> ResponseDict:
+#     """批量获取用户的Cache数据
 
-    从offset开始获取最大limit的数据
+#     从offset开始获取最大limit的数据
 
-    参数:
-    - offset: 偏移量
-    - limit: 最多返回值数量
+#     参数:
+#     - offset: 偏移量
+#     - limit: 最多返回值数量
 
-    返回:
-    - ResponseDict
-    """
-    if not ServiceStatus.is_service_available():
-        return JSONResponse.API_8000_ServiceUnavailable
-    if offset == None:
-        result = await UserCache.get_user_max_number()
-    else:
-        result = await UserCache.get_user_cache_data_batch(offset, limit)
-    await record_api_call(result['status'])
-    return result
+#     返回:
+#     - ResponseDict
+#     """
+#     if not ServiceStatus.is_service_available():
+#         return JSONResponse.API_8000_ServiceUnavailable
+#     if offset == None:
+#         result = await UserCache.get_user_max_number()
+#     else:
+#         result = await UserCache.get_user_cache_data_batch(offset, limit)
+#     await record_api_call(result['status'])
+#     return result
 
-@router.put("/game/user/update/", summary="更新用户的数据库数据")
-async def updateUserCache(user_data: UserUpdateModel) -> ResponseDict:
-    """更新用户的数据
+# @router.put("/game/user/update/", summary="更新用户的数据库数据")
+# async def updateUserCache(user_data: UserUpdateModel) -> ResponseDict:
+#     """更新用户的数据
 
-    通过传入的数据更新数据库
+#     通过传入的数据更新数据库
 
-    参数:
-    - UserUpdateModel
+#     参数:
+#     - UserUpdateModel
     
-    返回:
-    - ResponseDict
-    """
-    if not ServiceStatus.is_service_available():
-        return JSONResponse.API_8000_ServiceUnavailable
-    result = await GameUser.update_user_data(user_data.model_dump())
-    await record_api_call(result['status'])
-    return result
+#     返回:
+#     - ResponseDict
+#     """
+#     if not ServiceStatus.is_service_available():
+#         return JSONResponse.API_8000_ServiceUnavailable
+#     result = await GameUser.update_user_data(user_data.model_dump())
+#     await record_api_call(result['status'])
+#     return result
 
-@router.get("/game/clans/cache/", summary="获取工会的数据库中数据")
-async def getClanCache(offset: Optional[int] = None, limit: Optional[int] = None) -> ResponseDict:
-    """批量获取工会的Cache数据
+# @router.get("/game/clans/cache/", summary="获取工会的数据库中数据")
+# async def getClanCache(offset: Optional[int] = None, limit: Optional[int] = None) -> ResponseDict:
+#     """批量获取工会的Cache数据
 
-    从offset开始获取最大limit的数据
+#     从offset开始获取最大limit的数据
 
-    参数:
-    - offset: 偏移量
-    - limit: 最多返回值数量
+#     参数:
+#     - offset: 偏移量
+#     - limit: 最多返回值数量
 
-    返回:
-    - ResponseDict
-    """
-    if not ServiceStatus.is_service_available():
-        return JSONResponse.API_8000_ServiceUnavailable
-    if offset == None:
-        result = await ClanCache.get_clan_max_number()
-    else:
-        result = await ClanCache.get_clan_cache_data_batch(offset, limit)
-    await record_api_call(result['status'])
-    return result
+#     返回:
+#     - ResponseDict
+#     """
+#     if not ServiceStatus.is_service_available():
+#         return JSONResponse.API_8000_ServiceUnavailable
+#     if offset == None:
+#         result = await ClanCache.get_clan_max_number()
+#     else:
+#         result = await ClanCache.get_clan_cache_data_batch(offset, limit)
+#     await record_api_call(result['status'])
+#     return result
 
-@router.put("/game/clan/update/", summary="更新工会的数据库数据")
-async def updateUserCache(clan_data: ClanUpdateModel) -> ResponseDict:
-    """更新工会的数据
+# @router.put("/game/clan/update/", summary="更新工会的数据库数据")
+# async def updateUserCache(clan_data: ClanUpdateModel) -> ResponseDict:
+#     """更新工会的数据
 
-    通过传入的数据更新数据库
+#     通过传入的数据更新数据库
 
-    参数:
-    - ClanUsersModel
+#     参数:
+#     - ClanUsersModel
     
-    返回:
-    - ResponseDict
-    """
-    if not ServiceStatus.is_service_available():
-        return JSONResponse.API_8000_ServiceUnavailable
-    result = await GameClan.update_clan_data(clan_data.model_dump())
-    await record_api_call(result['status'])
-    return result
+#     返回:
+#     - ResponseDict
+#     """
+#     if not ServiceStatus.is_service_available():
+#         return JSONResponse.API_8000_ServiceUnavailable
+#     result = await GameClan.update_clan_data(clan_data.model_dump())
+#     await record_api_call(result['status'])
+#     return result

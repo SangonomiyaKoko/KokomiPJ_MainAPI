@@ -15,7 +15,7 @@ router = APIRouter()
 
 SUPPORTED_VERSIONS = ["1.0", "2.0"]
 
-@router.post("/auth/register", summary="用户注册接口")
+@router.post("/auth/register/", summary="用户注册接口")
 async def userRegister(request: Request, UserRegisterData: APPUserRegisterModel) -> ResponseDict:
     """用户注册功能
     
@@ -39,7 +39,7 @@ async def userRegister(request: Request, UserRegisterData: APPUserRegisterModel)
     await record_api_call(result['status'])
     return result
 
-@router.post("/auth/login", summary="用户登录接口")
+@router.post("/auth/login/", summary="用户登录接口")
 async def userLogin(request: Request, UserLoginData: APPUserLoginModel) -> ResponseDict:
     """用户登录功能
     
@@ -70,7 +70,7 @@ async def userLogin(request: Request, UserLoginData: APPUserLoginModel) -> Respo
     await record_api_call(result['status'])
     return response
 
-@router.post("/auth/logout", description="用户登出接口")
+@router.post("/auth/logout/", description="用户登出接口")
 async def userLogout(request: Request, UserLogoutData: APPUserLogoutModel) -> ResponseDict:
     """用户登出功能
     

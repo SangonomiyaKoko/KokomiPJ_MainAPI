@@ -4,6 +4,8 @@ from pydantic_settings import BaseSettings
 
 class LoadConfig(BaseSettings):
     LOG_PATH: str
+    CACHE_PATH: str
+    LEADER_PATH: str
 
     MYSQL_HOST: str
     MYSQL_PORT: int

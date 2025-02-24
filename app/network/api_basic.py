@@ -78,7 +78,7 @@ class BasicAPI:
             return JSONResponse.API_1000_Success
         if result['data'] == []:
             return JSONResponse.API_1000_Success
-        version = result['data'][0]['data']['version'][:7]
+        version = result['data'][0]['data']['version']
         return JSONResponse.get_success_response({'version': version})
 
     @classmethod

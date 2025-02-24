@@ -85,7 +85,7 @@ class BotUser:
                 'token': {}
             }
             # 获取用户相关的access token
-            ac_value = UserAccessToken.get_ac_value_by_id(account_id, region_id)
+            ac_value = await UserAccessToken.get_ac_value_by_id(account_id, region_id)
             ac2_value = UserAccessToken2.get_ac_value_by_id(account_id, region_id)
             data['token'] = {
                 'ac': ac_value,
