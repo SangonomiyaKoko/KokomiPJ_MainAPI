@@ -19,7 +19,7 @@ class UserAccessToken:
     
     @ExceptionLogger.handle_database_exception_async
     async def get_ac_value_by_type(token_type: int = 1) -> ResponseDict:
-        '''获取某个type下所有用户的ac数据
+        '''获取某个token type下所有用户的ac数据
 
         获取此数据主要是因为提供token1的用户一般比较少，所以直接读取全部数据比带条件的方便
 
@@ -65,7 +65,7 @@ class UserAccessToken:
     async def get_ac_value_by_rid(region_id: int, token_type: int = 1) -> ResponseDict:
         '''获取某个服务器下所有用户的ac数据
 
-        主要用于用户更新服务
+        主要用于recent功能用户更新服务
 
         参数:
             - region_id
@@ -118,7 +118,7 @@ class UserAccessToken:
             await conn.begin()
             cur: Cursor = await conn.cursor()
 
-            data = {}
+            data = None
             await cur.execute(
                 "SELECT token_value, expired_at "
                 f"FROM {MAIN_DB}.user_token WHERE region_id = %s AND account_id = %s AND token_type = %s;",
@@ -126,7 +126,9 @@ class UserAccessToken:
             )
             user = await cur.fetchone()
             if user:
-                data['token_value'] = user[0]
+                data = {
+                    'token_value': user[0]
+                }
 
             await conn.commit()
             return JSONResponse.get_success_response(data)

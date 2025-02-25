@@ -96,34 +96,12 @@ class BotUser:
             user_data = await BotUserModel.get_user_data(account_id, region_id)
             if user_data.get('code') != 1000:
                 return user_data
-            cache_user_key = f'db_cache:user_basic:{region_id}:{account_id}'
-            cache_user_data = {
-                'id': account_id,
-                'name': None,
-                'cid': None
-            }
-            cache_clan_key = f'db_cache:clan_basic:{region_id}:'
-            cache_clan_data = {
-                'id': None,
-                'tag': None,
-                'league': None
-            }
             user_data = user_data['data']
             data['user'] = user_data['user']
-            cache_user_data['name'] = user_data['user']['name']
             if user_data['expired']:
                 data['clan'] = None
-                cache_user_data['cid'] = None
             else:
                 data['clan'] = user_data['clan']
-                cache_user_data['cid'] = user_data['clan']['id']
-                cache_clan_data['id'] = user_data['clan']['id']
-                cache_clan_data['tag'] = user_data['clan']['tag']
-                cache_clan_data['league'] = user_data['clan']['league']
-            await redis.set(name=cache_user_key, value=json.dumps(cache_clan_data), ex=24*60*60)
-            if not user_data['expired'] and not cache_clan_data['id']:
-                cache_clan_key += cache_clan_data['id']
-                await redis.set(name=cache_clan_data, value=json.dumps(cache_clan_data), ex=24*60*60)
             return JSONResponse.get_success_response(data)
         except Exception as e:
             raise e
