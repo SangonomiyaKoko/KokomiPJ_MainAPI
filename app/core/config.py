@@ -6,6 +6,7 @@ class LoadConfig(BaseSettings):
     LOG_PATH: str
     CACHE_PATH: str
     LEADER_PATH: str
+    JSON_PATH: str
 
     MYSQL_HOST: str
     MYSQL_PORT: int

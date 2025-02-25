@@ -23,7 +23,7 @@ async def schedule():
     while True:
         api_logger.info("API日志数据上传")
         # 这里实现具体任务
-        await asyncio.sleep(10)  # 每 10 秒执行一次任务
+        await asyncio.sleep(60)  # 每 60 秒执行一次任务
 
 # 应用程序的生命周期
 @asynccontextmanager
@@ -130,7 +130,13 @@ app.include_router(
     prefix='/api/v1/wows/leaderboard',
     tags=['Rank Interface']
 )
+
+
 # 重写shutdown函数，避免某些协程bug
+'''
+关于此处的问题，可以通过asyncio_atexit注册一个关闭事件解决
+具体原因请查看python协程时间循环的原理
+'''
 async def _shutdown(self, any = None):
     await origin_shutdown(self)
     wait_second = 3

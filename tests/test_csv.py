@@ -6,8 +6,8 @@ from tabulate import tabulate
 st = time.time()
 
 # 假设 CSV 文件名为 'data.csv'
-file_path = r'F:\Kokomi_PJ_MainAPI\temp\leader\3709777872.csv'
-ship_name = '8 CA AL柴郡'
+file_path = r'F:\Kokomi_PJ_MainAPI\temp\leader\4179572720.csv'
+ship_name = 'X BB 佛蒙特'
 # 需要展示的数据字段
 fields_to_display = ['region', 'user_name', 'clan_tag', 'battles_count', 'battle_type', 'rating', 'rating_info', 'win_rate', 'avg_dmg', 'avg_frags', 'max_dmg', 'max_exp']
 
@@ -15,7 +15,7 @@ fields_to_display = ['region', 'user_name', 'clan_tag', 'battles_count', 'battle
 df = pd.read_csv(file_path, usecols=fields_to_display)
 
 # 对数据进行排序（假设按 'rating' 排序，降序）
-df_sorted = df.sort_values(by='rating', ascending=False).head(50)
+df_sorted = df.sort_values(by='rating', ascending=False).head(30)
 
 # 创建新的列 `display_name`，将 `user_name` 和 `clan_tag` 合并
 df_sorted['display_name'] = df_sorted.apply(
