@@ -356,6 +356,120 @@ class UserModel:
             await cur.close()
             await MysqlConnection.release_connection(conn)
 
+    @ExceptionLogger.handle_database_exception_async
+    async def get_user_ships(account_id: int, region_id: int) -> ResponseDict:
+        '''获取用户详细数据
+
+        参数：
+            account_id: 用户id
+
+        返回：
+            ResponseDict
+        '''
+        try:
+            conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
+            cur: Cursor = await conn.cursor()
+
+            row = await cur.execute(
+                "SELECT b.region_id, b.account_id, s.battles_count, s.hash_value, UNIX_TIMESTAMP(s.updated_at) AS update_time "
+                f"FROM {MAIN_DB}.user_basic AS b LEFT JOIN {MAIN_DB}.user_ships AS s ON s.account_id = b.account_id "
+                "WHERE b.region_id = %s AND b.account_id = %s;", 
+                [region_id, account_id]
+            )
+            data = None
+            if row:
+                data = {
+                    'battles_count': row[2],
+                    'hash_value': row[3],
+                    'update_time': row[4]
+                }
+            else:
+                # 用户不存在
+                name = UtilityFunctions.get_user_default_name(account_id)
+                await cur.execute(
+                    f"INSERT INTO {MAIN_DB}.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                    [account_id, region_id, name]
+                )
+                await cur.execute(
+                    f"INSERT INTO {MAIN_DB}.user_info (account_id) VALUES (%s);",
+                    [account_id]
+                )
+                await cur.execute(
+                    f"INSERT INTO {MAIN_DB}.user_ships (account_id) VALUES (%s);",
+                    [account_id]
+                )
+                await cur.execute(
+                    f"INSERT INTO {MAIN_DB}.user_clan (account_id) VALUES (%s);",
+                    [account_id]
+                )
+
+            await conn.commit()
+            return JSONResponse.get_success_response(data)
+        except Exception as e:
+            await conn.rollback()
+            raise e
+        finally:
+            await cur.close()
+            await MysqlConnection.release_connection(conn)
+
+    @ExceptionLogger.handle_database_exception_async
+    async def get_user_cache(account_id: int, region_id: int) -> ResponseDict:
+        '''获取用户详细数据
+
+        参数：
+            account_id: 用户id
+
+        返回：
+            ResponseDict
+        '''
+        try:
+            conn: Connection = await MysqlConnection.get_connection()
+            await conn.begin()
+            cur: Cursor = await conn.cursor()
+
+            row = await cur.execute(
+                "SELECT battles_count, hash_value, ships_data, UNIX_TIMESTAMP(updated_at) AS update_time "
+                f"FROM {MAIN_DB}.user_ships WHERE account_id = %s;", 
+                [account_id]
+            )
+            data = None
+            if row:
+                data = {
+                    'battles_count': row[0],
+                    'hash_value': row[1],
+                    'ships_data': BinaryParserUtils.from_user_binary_data_to_dict(row[2]),
+                    'update_time': row[3]
+                }
+            else:
+                # 用户不存在
+                name = UtilityFunctions.get_user_default_name(account_id)
+                await cur.execute(
+                    f"INSERT INTO {MAIN_DB}.user_basic (account_id, region_id, username) VALUES (%s, %s, %s);",
+                    [account_id, region_id, name]
+                )
+                await cur.execute(
+                    f"INSERT INTO {MAIN_DB}.user_info (account_id) VALUES (%s);",
+                    [account_id]
+                )
+                await cur.execute(
+                    f"INSERT INTO {MAIN_DB}.user_ships (account_id) VALUES (%s);",
+                    [account_id]
+                )
+                await cur.execute(
+                    f"INSERT INTO {MAIN_DB}.user_clan (account_id) VALUES (%s);",
+                    [account_id]
+                )
+
+            await conn.commit()
+            return JSONResponse.get_success_response(data)
+        except Exception as e:
+            await conn.rollback()
+            raise e
+        finally:
+            await cur.close()
+            await MysqlConnection.release_connection(conn)
+
     # @ExceptionLogger.handle_database_exception_async
     # async def get_user_cache_data(account_id: int, region_id: int) -> ResponseDict:
     #     '''获取用户的缓存数据'''

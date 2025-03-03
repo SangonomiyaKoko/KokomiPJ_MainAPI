@@ -140,7 +140,44 @@ class BasicAPI:
                 tasks.append(self.fetch_data(url))
             responses = await asyncio.gather(*tasks)
             return responses
-        
+
+    @classmethod
+    async def get_user_cache(
+        self,
+        account_id: int,
+        region_id: int,
+        ac_value: str = None
+    ) -> list:
+        '''获取用户基础信息
+
+        参数：
+            account_id： 用户id
+            region_id； 用户服务器id
+            ac_value: 是否使用ac查询数据
+
+        返回：
+            用户基础数据
+        '''
+        api_url = BaseUrl.get_vortex_base_url(region_id)
+        urls = [
+            f'{api_url}/api/accounts/{account_id}/ships/' + (f'?ac={ac_value}' if ac_value else ''),
+            f'{api_url}/api/accounts/{account_id}/ships/pvp/' + (f'?ac={ac_value}' if ac_value else '')
+        ]
+        tasks = []
+        responses = []
+        async with asyncio.Semaphore(len(urls)):
+            for url in urls:
+                tasks.append(self.fetch_data(url))
+            responses = await asyncio.gather(*tasks)
+        error = None
+        for response in responses:
+            if response.get('code', None) != 1000:
+                error = response
+        if not error:
+            result = self.__ships_data_processing(account_id,responses)
+            return JSONResponse.get_success_response(result)
+        else:
+            return error
 
     @classmethod
     async def get_clan_basic(
@@ -168,3 +205,41 @@ class BasicAPI:
                 tasks.append(self.fetch_data(url))
             responses = await asyncio.gather(*tasks)
             return responses
+        
+    def __ships_data_processing(account_id: int,responses: dict):
+        result = {
+            'basic': {},
+            'details': {}
+        }
+        ships_data = responses[0]
+        for ship_id, ship_data in ships_data['data'][str(account_id)]['statistics'].items():
+            if ship_data != {} and ship_data['pvp'] != {} and ship_data['pvp']['battles_count'] > 0:
+                result['basic'][int(ship_id)] = ship_data['pvp']['battles_count']
+                result['details'][int(ship_id)] = [
+                    ship_data['pvp']['battles_count'],
+                    0 if ship_data['pvp_solo'] == {} else ship_data['pvp_solo']['battles_count'],
+                    0 if ship_data['pvp_div2'] == {} else ship_data['pvp_div2']['battles_count'],
+                    0 if ship_data['pvp_div3'] == {} else ship_data['pvp_div3']['battles_count'],
+                ]
+        pvp_data = responses[1]['data'][str(account_id)]['statistics']
+        for ship_id in result['basic'].keys():
+            ship_data = pvp_data[str(ship_id)]['pvp']
+            if ship_data == {}:
+                del result['basic'][ship_id]
+                del result['details'][ship_id]
+            basic_data = result['details'][ship_id]
+            extra_data = [
+                ship_data['wins'],
+                ship_data['damage_dealt'],
+                ship_data['frags'],
+                ship_data['original_exp'],
+                ship_data['survived'],
+                ship_data['scouting_damage'],
+                ship_data['art_agro'],
+                ship_data['planes_killed'],
+                ship_data['max_exp'],
+                ship_data['max_damage_dealt'],
+                ship_data['max_frags']
+            ]
+            result['details'][ship_id] = basic_data + extra_data
+        return result

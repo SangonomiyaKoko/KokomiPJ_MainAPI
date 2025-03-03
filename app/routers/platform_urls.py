@@ -62,6 +62,30 @@ async def updateShipName(region: RegionList) -> ResponseDict:
     await record_api_call(result['status'])
     return result
 
+@router.get("/update/user-cache/{region}/{account_id}/", summary="更新用户的cache数据")
+async def getUserFeatureData(region: RegionList,account_id: int) -> ResponseDict:
+    """更新用户的cache数据
+
+    用于排行榜数据的更新
+
+    参数:
+    - region: 服务器
+    - account_id: 用户id
+
+    返回:
+    - ResponseDict
+    """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
+    region_id = UtilityFunctions.get_region_id(region.name)
+    if not region_id:
+        return JSONResponse.API_1010_IllegalRegion
+    if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
+        return JSONResponse.API_1003_IllegalAccoutIDorRegionID
+    result = UserCache.update_user_cache(region_id, account_id)
+    await record_api_call(result['status'])
+    return result  
+
 # @router.get("/game/users/cache/", summary="获取用户的数据库中数据")
 # async def getUserCache(offset: Optional[int] = None, limit: Optional[int] = None) -> ResponseDict:
 #     """批量获取用户的Cache数据
