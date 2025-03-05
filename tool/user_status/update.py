@@ -204,17 +204,17 @@ class Update:
                 'region_id': str(user['region_id']),
                 'clan_id': user_info[1],
                 'user_name': user_info[0],
-                'clan_tag': clan_info[0] if clan_info else None,
+                'clan_tag': str(clan_info[1]) + '|' + clan_info[0] if clan_info else None,
                 # 场次
                 'battles_count': str(user['battles_count']),
-                'battle_type': str(round(user['battle_type_1']/battles_count*100,2)),
+                'battle_type': str(self.get_content_class(4, user['battle_type_1']/battles_count*100)) + '|' + str(round(user['battle_type_1']/battles_count*100,2)),
                 # 评分
-                'rating': str(int(region_rating[0])),
+                'rating': str(self.get_content_class(3, region_rating[0])) + '|' + str(int(region_rating[0])),
                 'rating_info': rating_info,
                 # 基本数据
-                'win_rate': str(round(user['wins']/battles_count*100, 2)),
-                'avg_dmg': str(int(user['damage_dealt']/battles_count)),
-                'avg_frags': str(round(user['frags']/battles_count, 2)),
+                'win_rate': str(self.get_content_class(0, user['wins']/battles_count*100)) + '|' + str(round(user['wins']/battles_count*100, 2)),
+                'avg_dmg': str(self.get_content_class(1, region_rating[1])) + '|' + str(int(user['damage_dealt']/battles_count)),
+                'avg_frags': str(self.get_content_class(2, region_rating[2])) + '|' + str(round(user['frags']/battles_count, 2)),
                 'avg_exp': str(int(user['exp']/battles_count)),
                 # 最高记录
                 'max_dmg': str(user['max_damage_dealt']),
@@ -253,19 +253,20 @@ class Update:
     
     def update_json(file_path: str, ship_id: int, ship_data: dict):
         if os.path.exists(file_path):
-            temp = open(file_path, "r", encoding="utf-8")
-            data = json.load(temp)
-            temp.close()
+            data = None
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            except (json.JSONDecodeError, FileNotFoundError):
+                data = {}  # 解析失败或文件不存在时返回默认值
             data[str(ship_id)] = ship_data
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(json.dumps(data, ensure_ascii=False))
-            f.close()
         else:
             data = {}
             data[str(ship_id)] = ship_data
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(json.dumps(data, ensure_ascii=False))
-            f.close()
         
     def get_rating_by_data(
         ship_data: list,
@@ -303,20 +304,21 @@ class Update:
         personal_rating = 700 * n_dmg + 300 * n_frags + 150 * n_wins
         return [
             round(personal_rating, 6),
-            round((actual_dmg / expected_dmg) * battles_count, 6),
-            round((actual_frags / expected_frags) * battles_count, 6)
+            round(actual_dmg / expected_dmg, 6),
+            round(actual_frags / expected_frags, 6)
         ]
         
     def get_content_class(
         index: int, 
         value: int | float
     ) -> int:
-        '''index [wr, dmg, frag, pr]'''
+        '''index [wr, dmg, frag, pr, sr]'''
         index_list = [
             [45, 49, 51, 52.5, 55, 60, 70],
             [0.8, 0.95, 1.0, 1.1, 1.2, 1.4, 1.7],
             [0.2, 0.3, 0.6, 1.0, 1.3, 1.5, 2],
-            [750, 1100, 1350, 1550, 1750, 2100, 2450]
+            [750, 1100, 1350, 1550, 1750, 2100, 2450],
+            [10, 30, 40, 50, 60, 70, 80]
         ]
         if value == -2:
             return 0

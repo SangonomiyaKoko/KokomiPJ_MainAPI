@@ -3,7 +3,6 @@
 import time
 import asyncio
 from log import log as logger
-from config import CLIENT_TYPE, SALVE_REGION
 from network import Network
 from update import Update
 

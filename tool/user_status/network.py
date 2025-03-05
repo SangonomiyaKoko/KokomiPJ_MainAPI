@@ -52,14 +52,14 @@ class Network:
         url = f'{api_url}/api/v2/graphql/glossary/version/'
         data = [{"query":"query Version {\n  version\n}"}]
         result = await self.fetch_data(url, method='post', data=data)
+        data = {'version': None}
         if result['code'] != 1000 and result['code'] not in [2000,2001,2002,2003,2004,2005]:
             return result
         elif result['code'] != 1000:
-            return {'status': 'ok','code': 1000,'message': 'Success','data': None}
+            return {'status': 'ok','code': 1000,'message': 'Success','data': data}
         if result['data'] == []:
-            return {'status': 'ok','code': 1000,'message': 'Success','data': None}
+            return {'status': 'ok','code': 1000,'message': 'Success','data': data}
         version = result['data'][0]['data']['version']
-        data = {'version': version}
         logger.debug(f'{region_id} | 服务器版本: {version}')
         return {'status': 'ok','code': 1000,'message': 'Success','data': data}
           

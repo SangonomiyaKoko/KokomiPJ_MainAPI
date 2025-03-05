@@ -5,8 +5,8 @@ import traceback
 from log import log as logger
 from database import Recent_DB
 from network import Network
-from config import REGION_UTC_LIST, CLIENT_TYPE
 
+REGION_UTC_LIST = {1:8, 2:1, 3:-7, 4:3, 5:8}
 
 class Update:
     @classmethod
