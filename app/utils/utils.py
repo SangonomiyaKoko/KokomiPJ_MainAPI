@@ -164,6 +164,9 @@ class UtilityFunctions:
             
     def get_region_id(region: str) -> int:
         "从region获取region_id"
+        # 排行榜的特殊处理
+        if region == 'all':
+            return 0
         for r, rid in GameData.REGION_LIST.items():
             if r == region:
                 return rid

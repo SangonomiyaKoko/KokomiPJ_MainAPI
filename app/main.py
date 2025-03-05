@@ -128,7 +128,7 @@ app.include_router(
 app.include_router(
     rank_router,
     prefix='/api/v1/wows/leaderboard',
-    tags=['Rank Interface']
+    tags=['Leaderboard Interface']
 )
 
 

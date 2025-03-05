@@ -1,6 +1,7 @@
 import gc
 
 from app.log import ExceptionLogger
+from app.middlewares import RedisConnection
 from app.response import ResponseDict, JSONResponse
 from app.network import BasicAPI
 from app.models import UserModel, UserAccessToken, ShipsCacheModel
@@ -10,14 +11,14 @@ class UserCache:
     @ExceptionLogger.handle_program_exception_async
     async def update_user_cache(region_id: int, account_id: int) -> ResponseDict:
         try:
+            redis = RedisConnection.get_connection()
             user_data = await UserModel.get_user_cache(region_id, account_id)
             if user_data['code'] != 1000:
                 return user_data
-            token_data = await UserAccessToken.get_ac_value_by_id(account_id, region_id)
-            if token_data['code'] != 1000:
-                return token_data
-            if token_data['data']:
-                ac_value = token_data['data']['token_value']
+            token_key = f"token_cache_1:{region_id}:{account_id}"
+            token_cache = await redis.get(token_key)
+            if token_cache:
+                ac_value = token_cache
             else:
                 ac_value = None
             # 需要更新，则请求数据用户数据
@@ -108,6 +109,13 @@ class UserCache:
                     user_cache['ship_dict'] = None
                 del user_data['details_data']
             update_result = await ShipsCacheModel.update_user_ships(user_cache)
+            if update_result.get('code', None) != 1000:
+                return update_result
+            # 设置lock，防止频繁更新
+            lock_key = f"updated_user:{region_id}:{account_id}"
+            lock_result = await redis.set(lock_key, '1', ex=600, nx=True)
+            if not lock_result:
+                return JSONResponse.API_1021_UserUpdateLockFailed
             return update_result
         except Exception as e:
             raise e

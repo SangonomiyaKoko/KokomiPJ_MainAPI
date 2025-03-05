@@ -1,18 +1,24 @@
 from fastapi import APIRouter, Query
-from app.apis.rank.rank import Rank
+
+from app.utils import UtilityFunctions
+from app.core import ServiceStatus
 from app.middlewares import record_api_call
 from app.response import JSONResponse, ResponseDict
+from app.apis.rank import Leaderboard
+
 router = APIRouter()
 
-@router.get("/leaderboard/", summary="获取排行榜数据")
+@router.get("/page/{ship_id}/{region_id}/", summary="获取排行榜单页数据")
 async def get_leaderboard(
-    region: int = Query(..., description="区域id global使用0"),
-    ship_id: int = Query(..., description="船只 ID"),
-    page: int = Query(1, ge=1, description="页码，最小值为 1")
+    ship_id: int,
+    region_id: int = 0,
+    page: int = 1,
+    page_zise: int = 100
 ) -> ResponseDict :
-    data = await Rank.rank(region, ship_id, page)
-    result = JSONResponse.get_success_response(data)
-    if not result:
-        return []
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
+    if region_id not in [0, 1, 2, 3, 4, 5]:
+        return JSONResponse.API_1010_IllegalRegion
+    result = await Leaderboard.get_paginated_data(ship_id, region_id, page, page_zise)
     await record_api_call(result['status'])
     return result
