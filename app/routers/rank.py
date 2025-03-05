@@ -7,9 +7,9 @@ import asyncio
 
 router = APIRouter()
 
-@router.get("/{region_id}/{ship_id}/{page}")
-async def get_rank(region_id: int, ship_id: int, page: int):
-    return JSONResponse.API_1000_Success
+# @router.get("/{region_id}/{ship_id}/{page}")
+# async def get_rank(region_id: int, ship_id: int, page: int):
+#     return JSONResponse.API_1000_Success
 #     '''获取排行榜数据'''
 #     redis = RedisConnection.get_connection(3)
 #     key = f"region:{region_id}:ship:{ship_id}"
