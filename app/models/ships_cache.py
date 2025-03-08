@@ -113,14 +113,14 @@ class ShipsCacheModel:
                 )
                 replace_ship_dict = user_data['ship_dict']
                 for update_ship_id, ship_data in replace_ship_dict.items():
-                    cur.execute(
+                    await cur.execute(
                         f"UPDATE {CACHE_DB}.ship_%s SET battles_count = %s, battle_type_1 = %s, battle_type_2 = %s, battle_type_3 = %s, wins = %s, "
                         "damage_dealt = %s, frags = %s, exp = %s, survived = %s, scouting_damage = %s, art_agro = %s, "
                         "planes_killed = %s, max_exp = %s, max_damage_dealt = %s, max_frags = %s "
                         "WHERE region_id = %s AND account_id = %s;",
                         [int(update_ship_id)] + ship_data + [region_id, account_id]
                     )
-                    cur.execute(
+                    await cur.execute(
                         f"INSERT INTO {CACHE_DB}.ship_%s (account_id, region_id, battles_count, battle_type_1, battle_type_2, "
                         "battle_type_3, wins, damage_dealt, frags, exp, survived, scouting_damage, art_agro, planes_killed, "
                         "max_exp, max_damage_dealt, max_frags) "

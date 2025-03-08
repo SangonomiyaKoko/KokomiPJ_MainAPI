@@ -8,7 +8,7 @@ from app.apis.rank import Leaderboard, UserCache
 
 router = APIRouter()
 
-@router.get("/page/{ship_id}/{region_id}/", summary="获取排行榜单页数据")
+@router.get("/page/{region_id}/{ship_id}/", summary="获取排行榜单页数据")
 async def get_leaderboard(
     ship_id: int,
     region_id: int = 0,
@@ -23,7 +23,7 @@ async def get_leaderboard(
     await record_api_call(result['status'])
     return result
 
-@router.get("/user/{ship_id}/{region_id}/{account_id}/", summary="获取用户的单表排名")
+@router.get("/user/{region_id}/{ship_id}/{account_id}/", summary="获取用户的单表排名")
 async def get_user_rank(
     ship_id: int,
     account_id: int,
@@ -56,6 +56,6 @@ async def getUserFeatureData(region_id: int, account_id: int) -> ResponseDict:
         return JSONResponse.API_1010_IllegalRegion
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
         return JSONResponse.API_1003_IllegalAccoutIDorRegionID
-    result = UserCache.update_user_cache(region_id, account_id)
+    result = await UserCache.update_user_cache(region_id, account_id)
     await record_api_call(result['status'])
     return result 

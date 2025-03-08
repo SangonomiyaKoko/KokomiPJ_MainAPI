@@ -48,8 +48,8 @@ async def enableFeature(enable_data: RecentEnableModel) -> ResponseDict:
     """
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(enable_data.region)
-    if not region_id:
+    region_id = enable_data.region_id
+    if region_id not in [1, 2, 3, 4, 5]:
         return JSONResponse.API_1010_IllegalRegion
     if UtilityFunctions.check_aid_and_rid(enable_data.account_id, region_id) == False:
         return JSONResponse.API_1003_IllegalAccoutIDorRegionID
