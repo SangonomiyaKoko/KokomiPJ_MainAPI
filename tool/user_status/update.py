@@ -80,6 +80,7 @@ class Update:
         status_result = {
             0: {}, 1: {}, 2: {}, 3: {}, 4: {}, 5: {}
         }
+        overall_result = {}
         leader_list = []    # 符合排行榜场次的用户
         update_keys = [
             'battles_count', 'wins', 'damage_dealt',
@@ -123,11 +124,34 @@ class Update:
                 status_result[region_id][update_keys[0]] = total_result[region_id][update_keys[0]]
                 for key in update_keys[1:]:
                     status_result[region_id][key] = round(total_result[region_id][key]/total_result[region_id][update_keys[0]],6)
+        for key in update_keys[1:]:
+            sum_times = 0
+            sum_value = 0
+            for region_id in [1, 2, 3, 4, 5]:
+                if status_result[region_id] != {} and status_result[region_id]['battles_count'] != 0:
+                    sum_value += status_result[region_id][key]
+                    sum_times += 1
+            if sum_times:
+                overall_result['key'] = round(sum_value/sum_times,6)
         for region_id in [0, 1, 2, 3, 4, 5]:
-            result = {
-                'total': total_result[region_id],
-                'status': status_result[region_id]
-            }
+            if region_id != 0:
+                result = {
+                    'total': total_result[region_id],
+                    'status': status_result[region_id]
+                }
+            else:
+                result = {
+                    'total': total_result[region_id],
+                    'status': status_result[region_id],
+                    'overview': overall_result,
+                    'region': {
+                        '1': status_result[1],
+                        '2': status_result[2],
+                        '3': status_result[3],
+                        '4': status_result[4],
+                        '5': status_result[5]
+                    }
+                }
             if result['total'] == {}:
                 continue
             if region_id == 0:
