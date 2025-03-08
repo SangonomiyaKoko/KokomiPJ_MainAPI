@@ -1,19 +1,21 @@
 import os
-import time
 import sqlite3
 from sqlite3 import Connection
-from datetime import datetime, timezone, timedelta
 
 import brotli
 
-from config import MASTER_DB_PATH, REGION_UTC_LIST
-from network import Network
+from config import settings
+
 
 
 class Recent_DB:
     def get_recent_db_path(account_id: int,region_id: int) -> str:
         "获取db文件path"
-        return os.path.join(MASTER_DB_PATH, f'{region_id}', f'{account_id}.db')
+        if settings.API_TYPE == 'master':
+            MASTER_DB_PATH = settings.SQLITE_PATH
+            return os.path.join(MASTER_DB_PATH, f'{region_id}', f'{account_id}.db')
+        else:
+            raise ValueError('Invaild api type')
 
     def get_db_connection(db_path: str) -> Connection:
         "获取数据库连接"

@@ -7,6 +7,8 @@ class LoadConfig(BaseSettings):
 
     LOG_PATH: str
 
+    SQLITE_PATH: str
+
     MYSQL_HOST: str
     MYSQL_PORT: int
     MYSQL_USERNAME: str

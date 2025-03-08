@@ -2,11 +2,15 @@
 # -*- coding: utf-8 -*-
 import time
 import asyncio
+
 from log import log as logger
+from config import settings
 from network import Network
 from update import Update
+from model import get_user_token
 
 
+CLIENT_TYPE = settings.API_TYPE
 
 class ContinuousUserUpdater:
     def __init__(self):
@@ -15,7 +19,10 @@ class ContinuousUserUpdater:
     async def update_user(self):
         start_time = int(time.time())
         # 更新用户
-        for region_id in SALVE_REGION:
+        for region_id in [1, 2, 3, 4, 5]:
+            token_result = get_user_token(region_id)
+            if token_result['code'] != 1000:
+                logger.error(f"获取UserToken时发生错误，Error: {request_result.get('message')}")
             request_result = await Network.get_recent_users_by_rid(region_id)
             if request_result['code'] != 1000:
                 logger.error(f"获取RecentUser时发生错误，Error: {request_result.get('message')}")
@@ -60,8 +67,8 @@ if __name__ == "__main__":
         logger.debug(f'当前角色: Master-主服务')
     else:
         logger.debug(f'当前角色: Salve-从服务')
-    if CLIENT_TYPE != 'master':
-        logger.debug(f'Slave支持的列表: {str(SALVE_REGION)}')
+    # if CLIENT_TYPE != 'master':
+    #     logger.debug(f'Slave支持的列表: {str(SALVE_REGION)}')
     # 开始不间断更新
     try:
         asyncio.run(main())

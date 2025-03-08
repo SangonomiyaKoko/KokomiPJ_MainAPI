@@ -3,9 +3,13 @@ import time
 import traceback
 
 from log import log as logger
+from config import settings
+from task import celery_app
 from database import Recent_DB
 from network import Network
+from model import get_user_recent, delete_user_recent, update_user_recent
 
+CLIENT_TYPE = settings.API_TYPE
 REGION_UTC_LIST = {1:8, 2:1, 3:-7, 4:3, 5:8}
 
 class Update:
@@ -46,18 +50,19 @@ class Update:
             logger.debug(f'{region_id} - {account_id} | ├── 距离上次更新 {update_interval_time}')
         if (current_timestamp - user_update_time) > update_interval_seconds:
             logger.debug(f'{region_id} - {account_id} | ├── 到达更新时间，开始更新任务')
-            user_basic = {
-                'account_id': account_id,
+            update_data = {
                 'region_id': region_id,
-                'nickname': f'User_{account_id}'
+                'account_id': account_id,
+                'basic': None,
+                'info': None,
+                'clan': None
             }
-            # 用于更新user_info表的数据
+            user_name = {
+                'nickname': None
+            }
             user_info = {
-                'account_id': account_id,
-                'region_id': region_id,
-                'is_active': 1,
-                'active_level': 0,
-                'is_public': 1,
+                'is_active': True,
+                'is_public': True,
                 'total_battles': 0,
                 'last_battle_time': 0
             }
@@ -70,21 +75,30 @@ class Update:
             if basic_data[0]['code'] == 1001:
                 # 用户数据不存在
                 user_info['is_active'] = 0
-                await self.update_user_data(account_id,region_id,None,user_info,None)
-                request_result = await Network.del_user_recent(account_id,region_id)
-                if request_result.get('code', None) != 1000:
-                    logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {request_result.get('message')}")
-                else:
-                    logger.info(f'{region_id} - {account_id} | ├── 删除用户，因为未有数据')
+                update_data['info'] = user_info
+                celery_app.send_task(
+                    name="update_user_data",
+                    args=[update_data],
+                    queue='task_queue'
+                )
+                # request_result = await Network.del_user_recent(account_id,region_id)
+                # if request_result.get('code', None) != 1000:
+                #     logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {request_result.get('message')}")
+                # else:
+                #     logger.info(f'{region_id} - {account_id} | ├── 删除用户，因为未有数据')
                 return
             else:
-                user_basic['nickname'] = basic_data[0]['data'][str(account_id)]['name']
-                # await self.update_user_basic_data(account_id,region_id,user_basic)
+                user_name['nickname'] = basic_data[0]['data'][str(account_id)]['name']
+                update_data['basic'] = user_name
                 if 'hidden_profile' in basic_data[0]['data'][str(account_id)]:
                     # 隐藏战绩
                     user_info['is_public'] = 0
-                    user_info['active_level'] = self.get_active_level(user_info)
-                    await self.update_user_data(account_id,region_id,user_basic,user_info,None)
+                    update_data['info'] = user_info
+                    celery_app.send_task(
+                        name="update_user_data",
+                        args=[update_data],
+                        queue='task_queue'
+                    )
                     return
                 user_basic_data = basic_data[0]['data'][str(account_id)]['statistics']
                 if (
@@ -93,33 +107,54 @@ class Update:
                 ):
                     # 用户没有数据
                     user_info['is_active'] = 0
-                    await self.update_user_data(account_id,region_id,user_basic,user_info,None)
+                    update_data['info'] = user_info
+                    celery_app.send_task(
+                        name="update_user_data",
+                        args=[update_data],
+                        queue='task_queue'
+                    )
                     return
                 if user_basic_data['basic']['leveling_points'] == 0:
                     # 用户没有数据
                     user_info['total_battles'] = 0
                     user_info['last_battle_time'] = 0
-                    user_info['active_level'] = self.get_active_level(user_info)
-                    await self.update_user_data(account_id,region_id,user_basic,user_info,None)
+                    update_data['info'] = user_info
+                    celery_app.send_task(
+                        name="update_user_data",
+                        args=[update_data],
+                        queue='task_queue'
+                    )
                     return
                 # 获取user_info的数据并更新数据库
                 user_info['total_battles'] = user_basic_data['basic']['leveling_points']
                 user_info['last_battle_time'] = user_basic_data['basic']['last_battle_time']
-                user_info['active_level'] = self.get_active_level(user_info)
-                await self.update_user_data(account_id,region_id,user_basic,user_info,None)
+                update_data['info'] = user_info
+                celery_app.send_task(
+                    name="update_user_data",
+                    args=[update_data],
+                    queue='task_queue'
+                )
                 return
         else:
             logger.debug(f'{region_id} - {account_id} | ├── 未到达更新时间，跳过更新')
 
     async def service_master(self, account_id: int, region_id: int, ac_value: str) -> None:
+        "更新需要更新用户的recent数据"
+        """更新逻辑
+        1. 获取用户的info和recent数据
+        2. 检查info数据，确定是否需要被抛弃
+        3. 读取用户的recent数据，是否是新用户或者数据是否需要删除
+        """
         # 从数据库中获取user_recent和user_info数据
-        result = await Network.get_user_recent(account_id,region_id)
+        result = get_user_recent(account_id,region_id)
         if result.get('code', None) != 1000:
-            logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {result.get('message')}")
+            logger.error(f"{region_id} - {account_id} | ├── 获取用户的recent数据，Error: {result.get('message')}")
             return
-        user_recent_result = result['data']['user_recent']
-        user_info_result = result['data']['user_info']
+        user_recent_result = result['data']['recent']
+        user_info_result = result['data']['info']
         # 检查是否被丢弃
+        if user_recent_result['recent_class']:
+            return
         if (
             user_recent_result['recent_class'] == 0 or 
             (
@@ -148,18 +183,13 @@ class Update:
             else:
                 new_recent_class = 60
             if user_recent_result['recent_class'] > new_recent_class:
-                user_recent = {
-                    'account_id': account_id,
-                    'region_id': region_id,
-                    'recent_class': new_recent_class
-                }
-                await self.update_user_data(account_id,region_id,None,None,user_recent)
+                update_user_recent(account_id,region_id,recent_class=new_recent_class)
                 return
         new_user = False
         if user_info_result['update_time'] == None:
             new_user = True
         recent_db_path = Recent_DB.get_recent_db_path(account_id,region_id)
-        if os.path.exists(recent_db_path) == False:
+        if os.path.exists(recent_db_path) == False or os.path.getsize(recent_db_path) == 0:
             Recent_DB.create_user_db(recent_db_path)
             new_user = True
         # 用于搜索recent数据库的主键
@@ -207,7 +237,7 @@ class Update:
         elif not date_1_data and not date_2_data:
             new_user = True
         
-        user_update_time = user_info_result['update_time']
+        user_update_time = user_info_result['last_update_time']
         user_active_level = user_info_result['active_level']
         update_interval_seconds = self.get_update_interval_time(region_id,user_active_level)
         current_timestamp = int(time.time())
@@ -225,19 +255,19 @@ class Update:
             else:
                 logger.debug(f'{region_id} - {account_id} | ├── 用户不需要更新')
                 return
-        # 更新用户数据库
-        user_basic = {
-            'account_id': account_id,
+        update_data = {
             'region_id': region_id,
-            'nickname': f'User_{account_id}'
+            'account_id': account_id,
+            'basic': None,
+            'info': None,
+            'clan': None
         }
-        # 用于更新user_info表的数据
+        user_name = {
+            'nickname': None
+        }
         user_info = {
-            'account_id': account_id,
-            'region_id': region_id,
-            'is_active': 1,
-            'active_level': 0,
-            'is_public': 1,
+            'is_active': True,
+            'is_public': True,
             'total_battles': 0,
             'last_battle_time': 0
         }
@@ -253,19 +283,30 @@ class Update:
         if basic_data[0]['code'] == 1001:
             # 用户数据不存在
             user_info['is_active'] = 0
-            await self.update_user_data(account_id,region_id,None,user_info,None)
+            update_data['info'] = user_info
+            celery_app.send_task(
+                name="update_user_data",
+                args=[update_data],
+                queue='task_queue'
+            )
             request_result = await Network.del_user_recent(account_id,region_id)
             if request_result.get('code', None) != 1000:
                 logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {request_result.get('message')}")
             else:
                 await self.delete_user_recent(account_id, region_id)
             return
-        user_basic['nickname'] = basic_data[0]['data'][str(account_id)]['name']
+        user_name['nickname'] = basic_data[0]['data'][str(account_id)]['name']
+        update_data['basic'] = user_name
         # await self.update_user_basic_data(account_id,region_id,user_basic)
         if 'hidden_profile' in basic_data[0]['data'][str(account_id)]:
             # 隐藏战绩
             user_info['is_public'] = 0
-            user_info['active_level'] = self.get_active_level(user_info)
+            update_data['info'] = user_info
+            celery_app.send_task(
+                name="update_user_data",
+                args=[update_data],
+                queue='task_queue'
+            )
             Recent_DB.insert_database(
                 db_path=recent_db_path,
                 date=date_1,
@@ -278,12 +319,7 @@ class Update:
                 ship_info_data=None
             )
             logger.debug(f'{region_id} - {account_id} | ├── Recent数据写入成功')
-            user_recent = {
-                'account_id': account_id,
-                'region_id': region_id,
-                'last_update_time': current_timestamp
-            }
-            await self.update_user_data(account_id,region_id,user_basic,user_info,user_recent)
+            update_user_recent(region_id, account_id, last_update_time=current_timestamp)
             return
         user_basic_data = basic_data[0]['data'][str(account_id)]['statistics']
         if (
@@ -292,22 +328,35 @@ class Update:
         ):
             # 用户没有数据
             user_info['is_active'] = 0
-            await self.update_user_data(account_id,region_id,user_basic,user_info,None)
+            update_data['info'] = user_info
+            celery_app.send_task(
+                name="update_user_data",
+                args=[update_data],
+                queue='task_queue'
+            )
             await self.delete_user_recent(account_id, region_id)
             return
         if user_basic_data['basic']['leveling_points'] == 0:
             # 用户没有数据
             user_info['total_battles'] = 0
             user_info['last_battle_time'] = 0
-            user_info['active_level'] = self.get_active_level(user_info)
-            await self.update_user_data(account_id,region_id,user_basic,user_info,None)
+            update_data['info'] = user_info
+            celery_app.send_task(
+                name="update_user_data",
+                args=[update_data],
+                queue='task_queue'
+            )
             await self.delete_user_recent(account_id, region_id)
             return
         # 获取user_info的数据并更新数据库
         user_info['total_battles'] = user_basic_data['basic']['leveling_points']
         user_info['last_battle_time'] = user_basic_data['basic']['last_battle_time']
-        user_info['active_level'] = self.get_active_level(user_info)
-        await self.update_user_data(account_id,region_id,user_basic,user_info,None)
+        update_data['info'] = user_info
+        celery_app.send_task(
+            name="update_user_data",
+            args=[update_data],
+            queue='task_queue'
+        )
         if not new_user:
             user_db_info = Recent_DB.get_user_info_by_date(recent_db_path,date_1)
             if not user_db_info and user_info['total_battles'] == user_db_info[3]:
@@ -355,12 +404,7 @@ class Update:
                 ship_info_data=details_data['ships']
             )
             logger.debug(f'{region_id} - {account_id} | ├── Recent数据写入成功')
-        user_recent = {
-            'account_id': account_id,
-            'region_id': region_id,
-            'last_update_time': current_timestamp
-        }
-        await self.update_user_data(account_id,region_id,None,None,user_recent)
+        update_user_recent(region_id, account_id, last_update_time=current_timestamp)
         return
     
     async def update_user_data(
@@ -385,7 +429,7 @@ class Update:
 
     async def delete_user_recent(account_id: int, region_id: int):
         "删除用户的recent功能"
-        request_result = await Network.del_user_recent(account_id,region_id)
+        request_result = delete_user_recent(account_id,region_id)
         if request_result.get('code', None) != 1000:
             logger.error(f"{region_id} - {account_id} | ├── 删除用户请求失败，Error: {request_result.get('code')} {request_result.get('message')}")
         else:
@@ -396,31 +440,6 @@ class Update:
         minutes = (seconds % 3600) // 60
         secs = seconds % 60
         return f"{hours:02}:{minutes:02}:{secs:02}"
-
-    def get_active_level(user_info: dict) -> int:
-        "获取用户数据对应的active_level"
-        is_public = user_info['is_public']
-        total_battles = user_info['total_battles']
-        last_battle_time = user_info['last_battle_time']
-        if not is_public:
-            return 0
-        if total_battles == 0 or last_battle_time == 0:
-            return 1
-        current_timestamp = int(time.time())
-        time_differences = [
-            (1 * 24 * 60 * 60, 2),
-            (3 * 24 * 60 * 60, 3),
-            (7 * 24 * 60 * 60, 4),
-            (30 * 24 * 60 * 60, 5),
-            (90 * 24 * 60 * 60, 6),
-            (180 * 24 * 60 * 60, 7),
-            (360 * 24 * 60 * 60, 8),
-        ]
-        time_since_last_battle = current_timestamp - last_battle_time
-        for time_limit, return_value in time_differences:
-            if time_since_last_battle <= time_limit:
-                return return_value
-        return 9
 
     def get_update_interval_time(region_id: int, active_level: int) -> int:
         "获取active_level对应的更新时间间隔"
