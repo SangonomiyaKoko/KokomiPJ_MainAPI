@@ -22,3 +22,17 @@ async def get_leaderboard(
     result = await Leaderboard.get_paginated_data(ship_id, region_id, page, page_zise)
     await record_api_call(result['status'])
     return result
+
+@router.get("/user/{ship_id}/{region_id}/{account_id}/", summary="获取用户的单表排名")
+async def get_user_rank(
+    ship_id: int,
+    account_id: int,
+    region_id: int = 0
+) -> ResponseDict :
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
+    if region_id not in [0, 1, 2, 3, 4, 5]:
+        return JSONResponse.API_1010_IllegalRegion
+    result = await Leaderboard.get_user_data_by_sid(region_id, ship_id, account_id)
+    await record_api_call(result['status'])
+    return result
