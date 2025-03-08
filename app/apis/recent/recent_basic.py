@@ -8,31 +8,11 @@ from app.utils import UtilityFunctions, TimeFormat
 
 
 class RecentBasic:
-    @ExceptionLogger.handle_program_exception_async
-    async def get_recent(region_id: int) -> ResponseDict:
-        try:
-            data = {
-                'users': None,
-                'access': {}
-            }
-            result = await RecentUserModel.get_recent_user_by_rid(region_id)
-            if result.get('code', None) != 1000:
-                return result
-            data['users'] = result['data']
-            ac_value = UserAccessToken.get_ac_value_by_rid(region_id)
-            for ac_aid in ac_value.keys():
-                if ac_aid in result['data']:
-                    data['access'][ac_aid] = ac_value[ac_aid]
-            return JSONResponse.get_success_response(data)            
-        except Exception as e:
-            raise e
-        finally:
-            gc.collect()
-
     @classmethod
     @ExceptionLogger.handle_program_exception_async
     async def add_recent(self, account_id: int,region_id: int, recent_class: int) -> ResponseDict:
         try:
+            # 用户是否符合要求在worker api中效验，此处不效验
             # check_result = await self.__check_user_status(account_id,region_id)
             # if check_result.get('code',None) != 1000:
             #     return check_result
@@ -55,15 +35,6 @@ class RecentBasic:
         finally:
             gc.collect()
 
-    @ExceptionLogger.handle_program_exception_async
-    async def get_user_recent(account_id: int, region_id: int) -> ResponseDict:
-        try:
-            result = await RecentUserModel.get_user_recent_data(account_id,region_id)
-            return result
-        except Exception as e:
-            raise e
-        finally:
-            gc.collect()
 
     # async def __check_user_status(account_id: int,region_id: int) -> ResponseDict:
     #     '''检查用户数据是否符合开启recent的条件
