@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from .schemas import RegionList, RecentEnableModel
+from .schemas import RecentEnableModel
 from app.utils import UtilityFunctions
 from app.core import ServiceStatus
 from app.response import JSONResponse, ResponseDict
@@ -10,8 +10,8 @@ from app.middlewares import record_api_call
 
 router = APIRouter()
 
-@router.get("/features/user/{region}/{account_id}/overview/", summary="判断用户是否启用的recent更新")
-async def get_recent_data_overview(region: RegionList,account_id: int) -> ResponseDict:
+@router.get("/features/user/{region_id}/{account_id}/", summary="判断用户是否启用的recent更新")
+async def get_recent_data_overview(region_id: int,account_id: int) -> ResponseDict:
     """判断用户是否启用的recent更新
 
     检查用户是否启用并返回True或者False
@@ -25,8 +25,7 @@ async def get_recent_data_overview(region: RegionList,account_id: int) -> Respon
     """
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(region.name)
-    if not region_id:
+    if region_id not in [1, 2, 3, 4, 5]:
         return JSONResponse.API_1010_IllegalRegion
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
         return JSONResponse.API_1003_IllegalAccoutIDorRegionID
@@ -58,8 +57,8 @@ async def enableFeature(enable_data: RecentEnableModel) -> ResponseDict:
     await record_api_call(result['status'])
     return result
 
-@router.delete("/features/user/{region}/{account_id}/", summary="删除用户的recent功能")
-async def disableFeature(region: RegionList,account_id: int) -> ResponseDict: 
+@router.delete("/features/user/{region_id}/{account_id}/", summary="删除用户的recent功能")
+async def disableFeature(region_id: int, account_id: int) -> ResponseDict: 
     """删除用户的recent功能
 
     删除用户recent功能
@@ -72,8 +71,7 @@ async def disableFeature(region: RegionList,account_id: int) -> ResponseDict:
     """
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
-    region_id = UtilityFunctions.get_region_id(region.name)
-    if not region_id:
+    if region_id not in [1, 2, 3, 4, 5]:
         return JSONResponse.API_1010_IllegalRegion
     if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
         return JSONResponse.API_1003_IllegalAccoutIDorRegionID

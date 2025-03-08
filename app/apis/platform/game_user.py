@@ -5,7 +5,7 @@ from app.response import ResponseDict, JSONResponse
 from app.models import UserModel, ClanModel, UserAccessToken
 from app.network import BasicAPI
 from app.utils import UtilityFunctions
-from .user_cache import UserCache
+from ..rank.user_cache import UserCache
 
 class GameUser:
     ...
