@@ -7,7 +7,7 @@ from config import settings
 from task import celery_app
 from database import Recent_DB
 from network import Network
-from model import get_user_recent, delete_user_recent, update_user_recent
+from model import get_user_recent, delete_user_recent, update_user_recent, get_user_info
 
 CLIENT_TYPE = settings.API_TYPE
 REGION_UTC_LIST = {1:8, 2:1, 3:-7, 4:3, 5:8}
@@ -37,12 +37,23 @@ class Update:
             logger.debug(f'{region_id} - {account_id} | └── 本次更新完成, 耗时: {round(cost_time,2)} s')
     
     async def service_slave(self, account_id: int, region_id: int, ac_value: str) -> None:
-        result = await Network.get_user_info_data(account_id, region_id)
+        result = get_user_info(account_id, region_id)
         if result.get('code', None) != 1000:
-            logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {result.get('message')}")
+            logger.error(f"{region_id} - {account_id} | ├── 获取用户info数据失败，Error: {result.get('message')}")
             return
-        user_active_level = result['data']['active_level']
-        user_update_time = result['data']['update_time']
+        if not result['data']:
+            logger.warning(f"{region_id} - {account_id} | ├── 获取用户的recent数据为空")
+            return
+        # 判断用户是否活跃，不活跃删除数据
+        if (
+            result['data']['info']['update_time'] and
+            result['data']['info']['active_level'] == 0
+        ):
+            await self.delete_user_recent(account_id, region_id)
+            return
+        # 获取用户活跃等级对应的更新时间间隔，并判断用户是否需要更新
+        user_active_level = result['data']['info']['active_level']
+        user_update_time = result['data']['info']['update_time']
         update_interval_seconds = self.get_update_interval_time(region_id,user_active_level)
         current_timestamp = int(time.time())
         if user_update_time:
@@ -81,11 +92,7 @@ class Update:
                     args=[update_data],
                     queue='task_queue'
                 )
-                # request_result = await Network.del_user_recent(account_id,region_id)
-                # if request_result.get('code', None) != 1000:
-                #     logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {request_result.get('message')}")
-                # else:
-                #     logger.info(f'{region_id} - {account_id} | ├── 删除用户，因为未有数据')
+                await self.delete_user_recent(account_id, region_id)
                 return
             else:
                 user_name['nickname'] = basic_data[0]['data'][str(account_id)]['name']
@@ -148,19 +155,19 @@ class Update:
         # 从数据库中获取user_recent和user_info数据
         result = get_user_recent(account_id,region_id)
         if result.get('code', None) != 1000:
-            logger.error(f"{region_id} - {account_id} | ├── 获取用户的recent数据，Error: {result.get('message')}")
+            logger.error(f"{region_id} - {account_id} | ├── 获取用户的recent数据失败，Error: {result.get('message')}")
+            return
+        if not result['data']:
+            logger.warning(f"{region_id} - {account_id} | ├── 获取用户的recent数据为空")
             return
         user_recent_result = result['data']['recent']
         user_info_result = result['data']['info']
         # 检查是否被丢弃
-        if user_recent_result['recent_class']:
+        if not user_recent_result['recent_class']:
             return
         if (
-            user_recent_result['recent_class'] == 0 or 
-            (
-                user_info_result['update_time'] and
-                user_info_result['is_active'] == 0
-            )
+            user_info_result['update_time'] and
+            user_info_result['is_active'] == 0
         ):
             await self.delete_user_recent(account_id, region_id)
             return
@@ -179,13 +186,18 @@ class Update:
             return
         if query_interval_seconds > 90*24*60*60:
             if query_interval_seconds > 180*24*60*60:
-                new_recent_class = 30
-            else:
                 new_recent_class = 60
+            else:
+                new_recent_class = 180
             if user_recent_result['recent_class'] > new_recent_class:
-                update_user_recent(account_id,region_id,recent_class=new_recent_class)
+                update_result = update_user_recent(account_id,region_id,recent_class=new_recent_class)
+                if update_result.get('code', None) != 1000:
+                    logger.error(f"{region_id} - {account_id} | ├── 更新用户recent表失败，Error: {update_result.get('message')}")
+                    return
+                else:
+                    logger.debug(f"{region_id} - {account_id} | ├── 更新用户recent表成功")
                 return
-        new_user = False
+        new_user = False  # 用于指示是否为新用户
         if user_info_result['update_time'] == None:
             new_user = True
         recent_db_path = Recent_DB.get_recent_db_path(account_id,region_id)
@@ -199,8 +211,7 @@ class Update:
         date_3 = time.strftime("%Y%m%d", time.gmtime(current_timestamp + time_zone * 3600 - user_recent_result['recent_class']*24*60*60))
 
         # 从数据库中读取数据
-        user_db_path = Recent_DB.get_recent_db_path(account_id,region_id)
-        user_info_data = Recent_DB.get_user_info(user_db_path)
+        user_info_data = Recent_DB.get_user_info(recent_db_path)
         if user_info_data == None or user_info_data == []:
             new_user = True
         else:
@@ -219,7 +230,7 @@ class Update:
                     if int(user_info[0]) >= int(date_3) and user_info[1] in del_table_set:
                             del_table_set.discard(user_info[1])
                 # 删除date和table
-                del_date_number = Recent_DB.delete_date_and_table(user_db_path, list(del_date_set), list(del_table_set))
+                del_date_number = Recent_DB.delete_date_and_table(recent_db_path, list(del_date_set), list(del_table_set))
                 logger.debug(f'{region_id} - {account_id} | ├── 删除 {del_date_number} 天数据')
         # 判断是否是同一天，反之copy昨天的数据
         # 主要是确保每天都有数据，即使没有更新
@@ -237,7 +248,8 @@ class Update:
         elif not date_1_data and not date_2_data:
             new_user = True
         
-        user_update_time = user_info_result['last_update_time']
+        # 根据info数据中的活跃等级判断用户更新时间间隔
+        user_update_time = user_info_result['update_time']
         user_active_level = user_info_result['active_level']
         update_interval_seconds = self.get_update_interval_time(region_id,user_active_level)
         current_timestamp = int(time.time())
@@ -289,15 +301,10 @@ class Update:
                 args=[update_data],
                 queue='task_queue'
             )
-            request_result = await Network.del_user_recent(account_id,region_id)
-            if request_result.get('code', None) != 1000:
-                logger.error(f"{region_id} - {account_id} | ├── 网络请求失败，Error: {request_result.get('message')}")
-            else:
-                await self.delete_user_recent(account_id, region_id)
+            await self.delete_user_recent(account_id, region_id)
             return
         user_name['nickname'] = basic_data[0]['data'][str(account_id)]['name']
         update_data['basic'] = user_name
-        # await self.update_user_basic_data(account_id,region_id,user_basic)
         if 'hidden_profile' in basic_data[0]['data'][str(account_id)]:
             # 隐藏战绩
             user_info['is_public'] = 0
@@ -319,7 +326,12 @@ class Update:
                 ship_info_data=None
             )
             logger.debug(f'{region_id} - {account_id} | ├── Recent数据写入成功')
-            update_user_recent(region_id, account_id, last_update_time=current_timestamp)
+            update_result = update_user_recent(region_id, account_id, last_update_time=current_timestamp)
+            if update_result.get('code', None) != 1000:
+                logger.error(f"{region_id} - {account_id} | ├── 更新用户recent表失败，Error: {update_result.get('message')}")
+                return
+            else:
+                logger.debug(f"{region_id} - {account_id} | ├── 更新用户recent表成功")
             return
         user_basic_data = basic_data[0]['data'][str(account_id)]['statistics']
         if (
@@ -404,28 +416,13 @@ class Update:
                 ship_info_data=details_data['ships']
             )
             logger.debug(f'{region_id} - {account_id} | ├── Recent数据写入成功')
-        update_user_recent(region_id, account_id, last_update_time=current_timestamp)
-        return
-    
-    async def update_user_data(
-        account_id: int, 
-        region_id: int, 
-        user_basic: dict = None, 
-        user_info: dict = None,
-        user_recent: dict = None
-    ) -> None:
-        data = {}
-        if user_basic:
-            data['user_basic'] = user_basic
-        if user_info:
-            data['user_info'] = user_info
-        if user_recent:
-            data['user_recent'] = user_recent
-        update_result = await Network.update_user_data(data)
-        if update_result.get('code',None) != 1000:
-            logger.error(f"{region_id} - {account_id} | ├── 更新数据上传失败，Error: {user_recent.get('code')} {update_result.get('message')}")
+        update_result = update_user_recent(region_id, account_id, last_update_time=current_timestamp)
+        if update_result.get('code', None) != 1000:
+            logger.error(f"{region_id} - {account_id} | ├── 更新用户recent表失败，Error: {update_result.get('message')}")
+            return
         else:
-            logger.debug(f'{region_id} - {account_id} | ├── 更新数据上传成功')
+            logger.debug(f"{region_id} - {account_id} | ├── 更新用户recent表成功")
+        return
 
     async def delete_user_recent(account_id: int, region_id: int):
         "删除用户的recent功能"

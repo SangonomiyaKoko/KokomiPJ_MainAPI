@@ -82,12 +82,9 @@ class Leaderboard:
         df_page = df_page[cols]
         df_page = df_page.astype(str)
         page_data = df_page.to_dict(orient='records')
-        last_modified = os.path.getmtime(csv_file)
-        current_time = TimeFormat.get_current_timestamp()
-        time_diff = current_time - last_modified
-        minutes = int(time_diff // 60)
+        last_modified = int(os.path.getmtime(csv_file))
         cache_data = {
-            'update_time': f"{minutes}m",
+            'update_time': last_modified,
             'page_data': page_data
         }
         if len(page_data) != 0:

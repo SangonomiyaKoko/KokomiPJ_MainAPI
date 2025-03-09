@@ -17,6 +17,10 @@ class LoadConfig(BaseSettings):
     DB_NAME_MAIN: str
     DB_NAME_BOT: str
     DB_NAME_SHIP: str
+    
+    RABBITMQ_HOST: str
+    RABBITMQ_USERNAME: str
+    RABBITMQ_PASSWORD: str
 
     class Config:
         env_file = ".env"

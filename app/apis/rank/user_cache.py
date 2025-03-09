@@ -135,10 +135,10 @@ class UserCache:
             if update_result.get('code', None) != 1000:
                 return update_result
             # 设置lock，防止频繁更新
-            lock_key = f"updated_user:{region_id}:{account_id}"
-            lock_result = await redis.set(lock_key, '1', ex=600, nx=True)
-            if not lock_result:
-                return JSONResponse.API_1021_UserUpdateLockFailed
+            # lock_key = f"updated_user:{region_id}:{account_id}"
+            # lock_result = await redis.set(lock_key, '1', ex=600, nx=True)
+            # if not lock_result:
+            #     return JSONResponse.API_1021_UserUpdateLockFailed
             data = {
                 'updated': len(replace_ship_dict)
             }

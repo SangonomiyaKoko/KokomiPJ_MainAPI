@@ -5,9 +5,9 @@ import asyncio
 
 from log import log as logger
 from config import settings
-from network import Network
+from db import DatabaseConnection
 from update import Update
-from model import get_user_token
+from model import get_user_token, get_recent_users
 
 
 CLIENT_TYPE = settings.API_TYPE
@@ -23,13 +23,15 @@ class ContinuousUserUpdater:
             token_result = get_user_token(region_id)
             if token_result['code'] != 1000:
                 logger.error(f"获取UserToken时发生错误，Error: {request_result.get('message')}")
-            request_result = await Network.get_recent_users_by_rid(region_id)
+            logger.debug(token_result)
+            request_result = get_recent_users(region_id)
             if request_result['code'] != 1000:
                 logger.error(f"获取RecentUser时发生错误，Error: {request_result.get('message')}")
                 continue
-            for account_id in request_result['data']['users']:
-                if str(account_id) in request_result['data']['access']:
-                    ac_value = request_result['data']['access'][str(account_id)]
+            logger.debug(request_result)
+            for account_id in request_result['data']:
+                if str(region_id) + str(account_id) in request_result['data']:
+                    ac_value = request_result['data'][str(region_id) + str(account_id)]
                 else:
                     ac_value = None
                 logger.info(f'{region_id} - {account_id} | ---------------------------------')
@@ -62,6 +64,7 @@ async def main():
 
 if __name__ == "__main__":
     logger.info('开始运行Recent更新进程')
+    DatabaseConnection.init_pool()
     # 启动配置
     if CLIENT_TYPE == 'master':
         logger.debug(f'当前角色: Master-主服务')
@@ -74,6 +77,7 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         logger.info('收到进程关闭信号')
+    DatabaseConnection.close_pool()
     # 退出并释放资源
     wait_second = 3
     while wait_second > 0:

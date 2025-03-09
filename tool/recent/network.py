@@ -5,7 +5,6 @@ from typing import Optional
 from dataclasses import dataclass
 
 from log import log as logger
-from config import CLIENT_TYPE, SALVE_API_URL, MASTER_API_URL
 
 VORTEX_API_URL_LIST = {
     1: 'http://vortex.worldofwarships.asia',
@@ -104,99 +103,6 @@ class Network:
             except httpx.ReadError:
                 return {'status': 'ok','code': 2005,'message': 'NetworkError','data': None}
 
-    @classmethod   
-    async def get_recent_users_by_rid(self, region_id: int):
-        if CLIENT_TYPE == 'slave':
-            platform_api_url = SALVE_API_URL
-        else:
-            platform_api_url = MASTER_API_URL
-        region = REGION_LIST.get(region_id)
-        url = f'{platform_api_url}/r1/features/users/{region}/'
-        result = await self.fetch_data(url)
-        if result.get('code', None) == 2004:
-            logger.debug(f"接口请求失败，休眠 5 s")
-            await asyncio.sleep(5)
-            result = await self.fetch_data(url)
-        elif result.get('code', None) == 8000:
-            logger.debug(f"服务器维护中，休眠 60 s")
-            await asyncio.sleep(60)
-            result = await self.fetch_data(url)
-        return result
-    
-    @classmethod
-    async def get_user_recent(self,account_id: int,region_id: int):
-        if CLIENT_TYPE == 'slave':
-            platform_api_url = SALVE_API_URL
-        else:
-            platform_api_url = MASTER_API_URL
-        region = REGION_LIST.get(region_id)
-        url = f'{platform_api_url}/r1/features/user/{region}/{account_id}/'
-        result = await self.fetch_data(url)
-        if result.get('code', None) == 2004:
-            logger.debug(f"接口请求失败，休眠 5 s")
-            await asyncio.sleep(5)
-            result = await self.fetch_data(url)
-        elif result.get('code', None) == 8000:
-            logger.debug(f"服务器维护中，休眠 60 s")
-            await asyncio.sleep(60)
-            result = await self.fetch_data(url)
-        return result
-    
-    @classmethod
-    async def del_user_recent(self, account_id: int, region_id: int):
-        if CLIENT_TYPE == 'slave':
-            platform_api_url = SALVE_API_URL
-        else:
-            platform_api_url = MASTER_API_URL
-        region = REGION_LIST.get(region_id)
-        url = f'{platform_api_url}/r1/features/user/{region}/{account_id}/'
-        result = await self.fetch_data(url,method='delete')
-        if result.get('code', None) == 2004:
-            logger.debug(f"接口请求失败，休眠 5 s")
-            await asyncio.sleep(5)
-            result = await self.fetch_data(url,method='delete')
-        elif result.get('code', None) == 8000:
-            logger.debug(f"服务器维护中，休眠 60 s")
-            await asyncio.sleep(60)
-            result = await self.fetch_data(url,method='delete')
-        return result
-
-    @classmethod 
-    async def get_user_info_data(self, account_id: int, region_id: int):
-        if CLIENT_TYPE == 'slave':
-            platform_api_url = SALVE_API_URL
-        else:
-            platform_api_url = MASTER_API_URL
-        region = REGION_LIST.get(region_id)
-        url = f'{platform_api_url}/r1/features/user/{region}/{account_id}/info/'
-        result = await self.fetch_data(url)
-        if result.get('code', None) == 2004:
-            logger.debug(f"接口请求失败，休眠 5 s")
-            await asyncio.sleep(5)
-            result = await self.fetch_data(url)
-        elif result.get('code', None) == 8000:
-            logger.debug(f"服务器维护中，休眠 60 s")
-            await asyncio.sleep(60)
-            result = await self.fetch_data(url)
-        return result
-    
-    @classmethod
-    async def update_user_data(self,data:dict):
-        if CLIENT_TYPE == 'slave':
-            platform_api_url = SALVE_API_URL
-        else:
-            platform_api_url = MASTER_API_URL
-        url = f'{platform_api_url}/p/game/user/update/'
-        result = await self.fetch_data(url, method='put', data=data)
-        if result.get('code', None) == 2004:
-            logger.debug(f"接口请求失败，休眠 5 s")
-            await asyncio.sleep(5)
-            result = await self.fetch_data(url, method='put', data=data)
-        elif result.get('code', None) == 8000:
-            logger.debug(f"服务器维护中，休眠 60 s")
-            await asyncio.sleep(60)
-            result = await self.fetch_data(url, method='put', data=data)
-        return result
 
     @classmethod
     async def get_basic_data(
