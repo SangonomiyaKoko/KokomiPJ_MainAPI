@@ -100,6 +100,7 @@ class Leaderboard:
         csv_file = os.path.join(config.LEADER_PATH, f'{ship_id}.csv')
         if os.path.exists(csv_file) is False:
             return JSONResponse.API_1000_Success
+        last_modified = int(os.path.getmtime(csv_file))
         df = pd.read_csv(csv_file, encoding='utf-8')
         if region_id != 0:
             # 筛选后，index 还是原始 DataFrame 的索引，需要reset index
@@ -170,6 +171,7 @@ class Leaderboard:
         cache_data = {
             'rank_data': rank_data,
             'user_data': user_data,
+            'update_time': last_modified,
             'page_data': page_data
         }
         return JSONResponse.get_success_response(cache_data)

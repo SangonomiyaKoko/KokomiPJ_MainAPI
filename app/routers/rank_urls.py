@@ -14,7 +14,7 @@ async def get_leaderboard(
     region_id: int = 0,
     page: int = 1,
     page_zise: int = 100
-) -> ResponseDict :
+) -> ResponseDict:
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
     if region_id not in [0, 1, 2, 3, 4, 5]:
@@ -28,7 +28,7 @@ async def get_user_rank(
     ship_id: int,
     account_id: int,
     region_id: int = 0
-) -> ResponseDict :
+) -> ResponseDict:
     if not ServiceStatus.is_service_available():
         return JSONResponse.API_8000_ServiceUnavailable
     if region_id not in [0, 1, 2, 3, 4, 5]:
