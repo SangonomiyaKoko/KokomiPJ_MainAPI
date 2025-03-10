@@ -132,7 +132,7 @@ class Update:
                     sum_value += status_result[region_id][key]
                     sum_times += 1
             if sum_times:
-                overall_result['key'] = round(sum_value/sum_times,6)
+                overall_result[key] = round(sum_value/sum_times,6)
         for region_id in [0, 1, 2, 3, 4, 5]:
             if region_id != 0:
                 result = {
@@ -204,23 +204,27 @@ class Update:
             basic_rating = self.get_rating_by_data(
                 ship_data = user_ship_data,
                 server_data = [
-                    status_result[0]['wins'], 
-                    status_result[0]['damage_dealt'], 
-                    status_result[0]['frags']
-                ] if status_result[0]['battles_count'] >= 1000 else {}
+                    overall_result['wins'], 
+                    overall_result['damage_dealt'], 
+                    overall_result['frags']
+                ]
             )
-            region_rating = self.get_rating_by_data(
+            if status_result[user['region_id']]['battles_count'] < 1000:
+                continue
+            region_rating = self.get_rating_by_data2(
                 ship_data = user_ship_data,
                 server_data = [
                     status_result[user['region_id']]['wins'], 
                     status_result[user['region_id']]['damage_dealt'], 
                     status_result[user['region_id']]['frags']
-                ] if status_result[user['region_id']]['battles_count'] >= 1000 else {}
+                ],
+                battle_type = user['battle_type_1']/battles_count
             )
+            win_diff = region_rating[3]
             if region_rating[0] == -1:
                 continue
-            sort_dict[user['account_id']] = region_rating[0]
-            rating_diff = int(region_rating[0]) - int(basic_rating[0])
+            sort_dict[user['account_id']] = region_rating[0] - win_diff
+            rating_diff = int(region_rating[0] - win_diff) - int(basic_rating[0])
             rating_info = str(int(basic_rating[0])) + (' + ' + str(rating_diff) if rating_diff >= 0 else ' - ' + str(abs(rating_diff)))
             temp = {
                 # 用户信息
@@ -233,7 +237,7 @@ class Update:
                 'battles_count': str(user['battles_count']),
                 'battle_type': str(self.get_content_class(4, user['battle_type_1']/battles_count*100)) + '|' + str(round(user['battle_type_1']/battles_count*100,2)),
                 # 评分
-                'rating': str(self.get_content_class(3, region_rating[0])) + '|' + str(int(region_rating[0])),
+                'rating': str(self.get_content_class(3, region_rating[0] - win_diff)) + '|' + str(int(region_rating[0] - win_diff)),
                 'rating_info': rating_info,
                 # 基本数据
                 'win_rate': str(self.get_content_class(0, user['wins']/battles_count*100)) + '|' + str(round(user['wins']/battles_count*100, 2)),
@@ -330,6 +334,50 @@ class Update:
             round(personal_rating, 6),
             round(actual_dmg / expected_dmg, 6),
             round(actual_frags / expected_frags, 6)
+        ]
+    
+    def get_rating_by_data2(
+        ship_data: list,
+        server_data: list,
+        battle_type: float
+    ):
+        '''计算pr
+
+        ship_data [battles_count, actual_wins, actual_dmg, actual_frags]
+        server_data [expected_wins, expected_dmg, expected_frags]
+        '''
+        battles_count = ship_data[0]
+        if battles_count <= 0:
+            return [0,-1,-1,-1]
+        # 获取服务器数据
+        if server_data == {} or server_data is None:
+            return [0,-1,-1,-1]
+        # 用户数据
+        actual_wins = ship_data[1] / battles_count * 100
+        actual_dmg = ship_data[2] / battles_count
+        actual_frags = ship_data[3] / battles_count
+        # 服务器数据
+        expected_wins = server_data[0]*100
+        expected_dmg = server_data[1]
+        expected_frags = server_data[2]
+        # 计算PR
+        # Step 1 - ratios:
+        r_wins = actual_wins / expected_wins
+        r_dmg = actual_dmg / expected_dmg
+        r_frags = actual_frags / expected_frags
+        # Step 2 - normalization:
+        n_wins = max(0, (r_wins - 0.7) / (1 - 0.7))
+        n_dmg = max(0, (r_dmg - 0.4) / (1 - 0.4))
+        n_frags = max(0, (r_frags - 0.1) / (1 - 0.1))
+        # Step 3 - PR value:
+        personal_rating = 700 * n_dmg + 300 * n_frags + 150 * n_wins
+        # 单野修正
+        win_diff = int(150 * n_wins * 0.2 * (1 - battle_type))
+        return [
+            round(personal_rating, 6),
+            round(actual_dmg / expected_dmg, 6),
+            round(actual_frags / expected_frags, 6),
+            win_diff
         ]
         
     def get_content_class(

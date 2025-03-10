@@ -67,7 +67,7 @@ class ContinuousUserCacheUpdater:
                 logger.info(f"{ship_id} 缓存数据 用户: {len(user_cache)} 工会: {len(clan_cache)}")
                 await Update.main(ship_id, result['data'], user_cache, clan_cache, ship_data)
                 logger.info(f"{ship_id} 数据更新完成   [{i}/{len(ship_id_data['data'])}]")
-                await asyncio.sleep(1)
+                # await asyncio.sleep(1)
         end_time = int(time.time())
         # 避免测试时候的循环bug
         if end_time - start_time <= 4*60*60-10:
