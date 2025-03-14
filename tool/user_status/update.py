@@ -372,7 +372,7 @@ class Update:
         # Step 3 - PR value:
         personal_rating = 700 * n_dmg + 300 * n_frags + 150 * n_wins
         # 单野修正
-        win_diff = int(150 * n_wins * 0.2 * (1 - battle_type))
+        win_diff = int(150 * n_wins * 0.15 * (1 - battle_type))
         return [
             round(personal_rating, 6),
             round(actual_dmg / expected_dmg, 6),

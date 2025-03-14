@@ -6,6 +6,7 @@ import json
 import asyncio
 from log import log as logger
 
+from config import settings
 from update import Update
 from network import Network
 from db import DatabaseConnection
@@ -19,29 +20,17 @@ class ContinuousUserCacheUpdater:
     async def update_user(self):
         start_time = int(time.time())
         # 更新游戏版本
-        # for region_id in [1, 2, 3, 4, 5]:
-        #     result = await Network.get_game_version(region_id)
-        #     if result['code'] != 1000:
-        #         logger.error(f'{region_id} | 获取服务器最新版本失败')
-        #     if result['data']['version']:
-        #         result = update_game_version(region_id, result['data']['version'])
+        for region_id in [1, 2, 3, 4, 5]:
+            result = await Network.get_game_version(region_id)
+            if result['code'] != 1000:
+                logger.error(f'{region_id} | 获取服务器最新版本失败')
+            if result['data']['version']:
+                result = update_game_version(region_id, result['data']['version'])
 
-        # result = get_game_version()
-        result = {
-            'status': 'ok', 
-            'code': 1000, 
-            'message': 'Success', 
-            'data': {
-                1: ['14.1', 1740219510], 
-                2: ['14.1', 1740219511], 
-                3: ['14.1', 1740219511], 
-                4: ['25.2', 1740219512], 
-                5: ['14.1', 1740219512]
-            }
-        }
+        result = get_game_version()
         ship_data = {}
-        json_file_path1 = r'F:\Kokomi_PJ_MainAPI\temp\json\ship_name_lesta.json'
-        json_file_path2 = r'F:\Kokomi_PJ_MainAPI\temp\json\ship_name_wg.json'
+        json_file_path1 = settings.JSON_PATH + '/ship_name_lesta.json'
+        json_file_path2 = settings.JSON_PATH + '/ship_name_wg.json'
         
         temp = open(json_file_path1, "r", encoding="utf-8")
         data = json.load(temp)
@@ -66,12 +55,14 @@ class ContinuousUserCacheUpdater:
                 i += 1
                 logger.info(f"{ship_id} 缓存数据 用户: {len(user_cache)} 工会: {len(clan_cache)}")
                 await Update.main(ship_id, result['data'], user_cache, clan_cache, ship_data)
-                logger.info(f"{ship_id} 数据更新完成   [{i}/{len(ship_id_data['data'])}]")
+                logger.info(f"{ship_id} 数据更新完成   [{i}/{len(ship_id_data['data'])}]")  
                 # await asyncio.sleep(1)
+            user_cache.clear()
+            clan_cache.clear()
         end_time = int(time.time())
         # 避免测试时候的循环bug
-        if end_time - start_time <= 4*60*60-10:
-            sleep_time = 4*60*60 - (end_time - start_time)
+        if end_time - start_time <= 30*60-10:
+            sleep_time = 30*60 - (end_time - start_time)
             logger.info(f'更新线程休眠 {round(sleep_time,2)} s')
             await asyncio.sleep(sleep_time)
 

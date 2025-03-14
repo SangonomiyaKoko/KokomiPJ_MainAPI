@@ -26,7 +26,7 @@ class ContinuousUserCacheUpdater:
         else:
             max_id = request_result['data']['max_id']
             max_offset = (int(max_id / limit) + 1) * limit
-            offset = 0
+            offset = 1500000
             while offset <= max_offset:
                 users_result = get_user_cache_batch(offset, limit)
                 if users_result['code'] == 1000:
@@ -43,6 +43,23 @@ class ContinuousUserCacheUpdater:
                 else:
                     logger.error(f"获取CacheUsers时发生错误，Error: {users_result.get('message')}")
                 offset += limit
+            # offset = 1500000
+            # while offset > 0:
+            #     users_result = get_user_cache_batch(offset, limit)
+            #     if users_result['code'] == 1000:
+            #         i = 1
+            #         for user in users_result['data']:
+            #             account_id = user['user_basic']['account_id']
+            #             region_id = user['user_basic']['region_id']
+            #             if (str(region_id)+str(account_id)) in token_result['data']:
+            #                 user['user_basic']['ac_value'] = token_result['data'][str(region_id)+str(account_id)]
+            #             logger.info(f'{region_id} - {account_id} | ------------------[ {offset + i} / {max_id} ]')
+            #             await Update.main(user)
+            #             # await asyncio.sleep(1)
+            #             i += 1
+            #     else:
+            #         logger.error(f"获取CacheUsers时发生错误，Error: {users_result.get('message')}")
+            #     offset -= limit
         end_time = int(time.time())
         # 避免测试时候的循环bug
         if end_time - start_time <= 4*60*60-10:
