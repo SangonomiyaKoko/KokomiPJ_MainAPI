@@ -66,8 +66,7 @@ class BotUser:
                 data = result['data']
                 await redis.set(
                     name=key, 
-                    value=json.dumps({'account_id': user_data['account_id'], 'region_id': user_data['region_id']}), 
-                    ex=24*60*60
+                    value=json.dumps({'account_id': user_data['account_id'], 'region_id': user_data['region_id']})
                 )
             # 返回结果
             return JSONResponse.get_success_response(data)
