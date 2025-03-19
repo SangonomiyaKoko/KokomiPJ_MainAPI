@@ -7,7 +7,7 @@ import colorlog
 from config import settings
 
 CLIENT_NAME = 'ClanCache'
-LOG_LEVEL = 'debug'
+LOG_LEVEL = 'info'
 
 # 日志格式
 # 09-10 20:25:98 [INFO] name | message
