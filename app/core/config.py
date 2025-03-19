@@ -3,6 +3,7 @@
 from pydantic_settings import BaseSettings
 
 class LoadConfig(BaseSettings):
+    PLATFORM: str
     API_TYPE: str
 
     LOG_PATH: str

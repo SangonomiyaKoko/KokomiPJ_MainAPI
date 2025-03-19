@@ -65,6 +65,8 @@ class Update:
     
     def update_clan_users(clan_id: int, region_id: int, clan_users: list):
         # 首先检查传入的用户是否都在数据库中存在
+        if len(clan_users) < 1:
+            return
         result = check_and_insert_missing_users(clan_users)
         if result.get('code', None) != 1000:
             logger.error(f"{region_id} - {clan_id} | ├── 数据库更新失败，Error: {result.get('code')} {result.get('message')}")

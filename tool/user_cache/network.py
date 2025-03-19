@@ -140,7 +140,7 @@ class Network:
         }
         ships_data = responses[0]
         for ship_id, ship_data in ships_data['data'][str(account_id)]['statistics'].items():
-            if ship_data != {} and ship_data['pvp'] != {} and ship_data['pvp']['battles_count'] > 0:
+            if ship_data != {} and 'pvp' in ship_data and ship_data['pvp'] != {} and ship_data['pvp']['battles_count'] > 0:
                 result['basic'][int(ship_id)] = ship_data['pvp']['battles_count']
                 result['details'][int(ship_id)] = [
                     ship_data['pvp']['battles_count'],
