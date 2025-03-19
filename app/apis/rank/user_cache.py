@@ -1,7 +1,7 @@
 import gc
 
 from app.log import ExceptionLogger
-from app.middlewares import RedisConnection, celery_app
+from app.middlewares import RedisConnection, CeleryProducer
 from app.response import ResponseDict, JSONResponse
 from app.network import BasicAPI
 from app.models import UserModel, ShipsCacheModel
@@ -49,7 +49,7 @@ class UserCache:
                 # 用户数据不存在
                 user_info['is_active'] = 0
                 update_data['info'] = user_info
-                celery_app.send_task(
+                CeleryProducer.send_task(
                     name="update_user_data",
                     args=[update_data],
                     queue='task_queue'
@@ -61,7 +61,7 @@ class UserCache:
                 # 隐藏战绩
                 user_info['is_public'] = False
                 update_data['info'] = user_info
-                celery_app.send_task(
+                CeleryProducer.send_task(
                     name="update_user_data",
                     args=[update_data],
                     queue='task_queue'
@@ -75,7 +75,7 @@ class UserCache:
                 # 用户没有数据
                 user_info['is_active'] = False
                 update_data['info'] = user_info
-                celery_app.send_task(
+                CeleryProducer.send_task(
                     name="update_user_data",
                     args=[update_data],
                     queue='task_queue'
@@ -86,7 +86,7 @@ class UserCache:
                 user_info['total_battles'] = 0
                 user_info['last_battle_time'] = 0
                 update_data['info'] = user_info
-                celery_app.send_task(
+                CeleryProducer.send_task(
                     name="update_user_data",
                     args=[update_data],
                     queue='task_queue'
@@ -95,7 +95,7 @@ class UserCache:
             user_info['total_battles'] = user_basic_data['basic']['leveling_points']
             user_info['last_battle_time'] = user_basic_data['basic']['last_battle_time']
             update_data['info'] = user_info
-            celery_app.send_task(
+            CeleryProducer.send_task(
                 name="update_user_data",
                 args=[update_data],
                 queue='task_queue'
