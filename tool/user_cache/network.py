@@ -5,11 +5,11 @@ from typing import Optional
 from log import log as logger
 
 VORTEX_API_URL_LIST = {
-    1: 'http://vortex.worldofwarships.asia',
-    2: 'http://vortex.worldofwarships.eu',
-    3: 'http://vortex.worldofwarships.com',
-    4: 'http://vortex.korabli.su',
-    5: 'http://vortex.wowsgame.cn'
+    1: 'https://vortex.worldofwarships.asia',
+    2: 'https://vortex.worldofwarships.eu',
+    3: 'https://vortex.worldofwarships.com',
+    4: 'https://vortex.korabli.su',
+    5: 'https://vortex.wowsgame.cn'
 }
 
 class Network:

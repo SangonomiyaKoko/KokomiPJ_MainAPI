@@ -96,6 +96,44 @@ class BotUserModel:
             await MysqlConnection.release_connection(connection)
 
     @ExceptionLogger.handle_database_exception_async
+    async def get_user_func(account_id: int, region_id: int) -> ResponseDict:
+        '''获取用户的绑定的信息
+
+        从数据库中读取用户的绑定的账号
+
+        参数:
+            user_data: 用户数据
+        
+        返回:
+            ResponseDict
+        '''
+        try:
+            connection: Connection = await MysqlConnection.get_connection()
+            await connection.begin()
+            cursor: Cursor = await connection.cursor()
+
+            await cursor.execute(
+                f"SELECT EXISTS ( SELECT 1 FROM {MAIN_DB}.recent WHERE account_id = %s AND region_id = %s ) AS in_recent, "
+                f"EXISTS ( SELECT 1 FROM {MAIN_DB}.recents WHERE account_id = %s AND region_id = %s ) AS in_recents;",
+                [account_id, region_id, account_id, region_id]
+            )
+            user = await cursor.fetchone()
+            data = {
+                'recent': user[0],
+                'recents': user[1]
+            }
+            
+            return JSONResponse.get_success_response(data)
+        except Exception as e:
+            await connection.rollback()
+            raise e
+        finally:
+            await cursor.close()
+            await MysqlConnection.release_connection(connection)
+
+    
+
+    @ExceptionLogger.handle_database_exception_async
     async def get_user_data(account_id: int, region_id: int) -> ResponseDict:
         '''获取数据库中用户的基本信息
 

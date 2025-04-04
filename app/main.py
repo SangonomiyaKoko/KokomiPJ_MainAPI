@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 from app.core import EnvConfig, api_logger
 from app.db import MysqlConnection
 from app.response import JSONResponse as API_JSONResponse
-from app.middlewares import RedisConnection, IPAccessListManager, rate_limit
+from app.middlewares import RedisConnection, IPAccessListManager, CeleryProducer, rate_limit
 
 from app.routers import (
     platform_router, robot_router, recent_1_router, 
@@ -21,7 +21,7 @@ from app.routers import (
 
 async def schedule():
     while True:
-        api_logger.info("API日志数据上传")
+        api_logger.info("Update log file")
         # 这里实现具体任务
         await asyncio.sleep(60)  # 每 60 秒执行一次任务
 
@@ -30,6 +30,7 @@ async def schedule():
 async def lifespan(app: FastAPI):
     # 从环境中加载配置
     EnvConfig.get_config()
+    CeleryProducer.init_celery()
     # 初始化redis并测试redis连接
     await RedisConnection.test_redis()
     # 初始化mysql并测试mysql连接

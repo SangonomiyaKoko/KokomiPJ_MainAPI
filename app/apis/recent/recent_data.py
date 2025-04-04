@@ -19,6 +19,7 @@ class RecentData:
         finally:
             gc.collect()
 
+    @ExceptionLogger.handle_program_exception_async
     async def get_data_by_date():
         ...
 

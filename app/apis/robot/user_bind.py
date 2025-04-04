@@ -59,11 +59,16 @@ class BotUser:
             redis = RedisConnection.get_connection()
             key = f"app_bot:bind_cache:{user_data['platform']}:{user_data['user_id']}"
             await redis.delete(key)
+            # 获取用户的func情况
+            result = await BotUserModel.get_user_func(user_data['account_id'], user_data['region_id'])
+            if result.get('code',None) != 1000:
+                return result
+            data = result['data']
+            # 写入bind表
             result = await BotUserModel.post_user_bind(user_data)
             if result.get('code',None) != 1000:
                 return result
             else:
-                data = result['data']
                 await redis.set(
                     name=key, 
                     value=json.dumps({'account_id': user_data['account_id'], 'region_id': user_data['region_id']})
