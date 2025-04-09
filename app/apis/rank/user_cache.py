@@ -70,7 +70,7 @@ class UserCache:
             user_basic_data = basic_data[0]['data'][str(account_id)]['statistics']
             if (
                 user_basic_data == {} or
-                user_basic_data['basic'] == {}
+                'basic' not in user_basic_data
             ):
                 # 用户没有数据
                 user_info['is_active'] = False

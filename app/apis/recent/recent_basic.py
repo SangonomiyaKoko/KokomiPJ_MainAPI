@@ -97,7 +97,7 @@ class RecentBasic:
     #     user_basic_data = basic_data[0]['data'][str(account_id)]['statistics']
     #     if (
     #         user_basic_data == {} or
-    #         user_basic_data['basic'] == {} or
+    #         'basic' not in user_basic_data
     #         user_basic_data['basic']['leveling_points'] == 0
     #     ):
     #         # 用户没有数据
