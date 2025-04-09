@@ -26,7 +26,7 @@ class ContinuousUserCacheUpdater:
         else:
             max_id = request_result['data']['max_id']
             max_offset = (int(max_id / limit) + 1) * limit
-            offset = 1500000
+            offset = 0
             while offset <= max_offset:
                 users_result = get_user_cache_batch(offset, limit)
                 if users_result['code'] == 1000:
