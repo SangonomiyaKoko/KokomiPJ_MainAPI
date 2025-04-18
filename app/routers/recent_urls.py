@@ -33,6 +33,27 @@ async def get_recent_data_overview(region_id: int,account_id: int) -> ResponseDi
     await record_api_call(result['status'])
     return result 
 
+@router.get("/features/user/{region_id}/{account_id}/info/", summary="查看用户的recent数据库信息")
+async def get_recent_data_overview(region_id: int,account_id: int) -> ResponseDict:
+    """判断用户数据库是否有问题
+
+    参数:
+    - region: 服务器
+    - account_id: 用户id
+
+    返回:
+    - ResponseDict
+    """
+    if not ServiceStatus.is_service_available():
+        return JSONResponse.API_8000_ServiceUnavailable
+    if region_id not in [1, 2, 3, 4, 5]:
+        return JSONResponse.API_1010_IllegalRegion
+    if UtilityFunctions.check_aid_and_rid(account_id, region_id) == False:
+        return JSONResponse.API_1003_IllegalAccoutIDorRegionID
+    result = await RecentBasic.get_recent_info(account_id,region_id)
+    await record_api_call(result['status'])
+    return result 
+
 
 @router.post("/features/user/", summary="启用用户的recent功能")
 async def enableFeature(enable_data: RecentEnableModel) -> ResponseDict: 

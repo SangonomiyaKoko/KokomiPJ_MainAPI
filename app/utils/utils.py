@@ -1,4 +1,5 @@
 import hashlib
+import os
 
 from app.const import GameData, ClanColor
 from .time_utils import TimeFormat
@@ -13,6 +14,11 @@ class UtilityFunctions:
     def get_clan_default_name():
         "获取工会的默认名称"
         return f'N/A'
+
+    def get_file_size_in_mb(file_path: str) -> float:
+        size_in_bytes = os.path.getsize(file_path)
+        size_in_mb = size_in_bytes / (1024 * 1024)
+        return round(size_in_mb, 2)
     
     def get_sha256_value(hash_str: str) -> str:
         "计算SHA256哈希值"

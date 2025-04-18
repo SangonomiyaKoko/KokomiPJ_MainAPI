@@ -35,6 +35,17 @@ class RecentBasic:
         finally:
             gc.collect()
 
+    @ExceptionLogger.handle_program_exception_async
+    async def get_recent_info(account_id: int,region_id: int) -> ResponseDict:
+        try:
+            # 获取用户的recent数据库信息
+            result = RecentDatabaseModel.get_user_recent_info(account_id,region_id)
+            return result
+        except Exception as e:
+            raise e
+        finally:
+            gc.collect()
+
 
     # async def __check_user_status(account_id: int,region_id: int) -> ResponseDict:
     #     '''检查用户数据是否符合开启recent的条件
